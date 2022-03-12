@@ -1,0 +1,2709 @@
+begin,end,begin_segment,end_segment,begin_line,end_line,leftContext,surface,rightContext,entityNum,entityLabel,entityGroup,DIFFICULT,SPEAKER,DIFFICULT.1,APPOSITION,NOMINAL,PRONOUN,pbegin,pbegin_ind,pbegin_pos,pend,pend_ind,pend_pos,parsed_mention,mention
+331,336,,,-1,-1," is a
+	single word: ""Thanks.""
+",A MAN,		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,True,False,185.0,7.0,42.0,189.0,7.0,46.0,A MAN,A MAN
+341,346,,,-1,-1," is a
+	single word: ""Thanks.""
+",WOMAN,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,True,False,195.0,7.0,52.0,199.0,7.0,56.0,WOMAN,WOMAN
+516,518,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,False,False,365.0,7.0,222.0,366.0,7.0,223.0,He,He
+598,600,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,False,False,446.0,7.0,303.0,447.0,7.0,304.0,He,He
+647,650,,,-1,-1," is a
+	single word: ""Thanks.""
+",her,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,494.0,7.0,351.0,496.0,7.0,353.0,her,her
+667,670,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,False,False,514.0,7.0,371.0,516.0,7.0,373.0,his,his
+680,683,,,-1,-1," is a
+	single word: ""Thanks.""
+",her,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,527.0,7.0,384.0,529.0,7.0,386.0,her,her
+693,696,,,-1,-1," is a
+	single word: ""Thanks.""
+",She,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,540.0,7.0,397.0,542.0,7.0,399.0,She,She
+729,732,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,False,False,575.0,7.0,432.0,577.0,7.0,434.0,his,his
+738,740,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,False,False,584.0,7.0,441.0,585.0,7.0,442.0,He,He
+747,750,,,-1,-1," is a
+	single word: ""Thanks.""
+",her,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,593.0,7.0,450.0,595.0,7.0,452.0,her,her
+778,781,,,-1,-1," is a
+	single word: ""Thanks.""
+",her,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,623.0,7.0,480.0,625.0,7.0,482.0,her,her
+789,791,,,-1,-1," is a
+	single word: ""Thanks.""
+",We,		      THE SHAWSHANK REDEMPTI,11,READER,False,False,False,False,False,False,False,634.0,7.0,491.0,635.0,7.0,492.0,We,We
+812,814,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,False,False,655.0,7.0,512.0,656.0,7.0,513.0,He,He
+822,825,,,-1,-1," is a
+	single word: ""Thanks.""
+",her,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,665.0,7.0,522.0,667.0,7.0,524.0,her,her
+879,882,,,-1,-1," is a
+	single word: ""Thanks.""
+",She,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,721.0,7.0,578.0,723.0,7.0,580.0,She,She
+902,905,,,-1,-1," is a
+	single word: ""Thanks.""
+",her,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,744.0,7.0,601.0,746.0,7.0,603.0,her,her
+962,965,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,False,False,803.0,7.0,660.0,805.0,7.0,662.0,him,him
+975,978,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,False,False,816.0,7.0,673.0,818.0,7.0,675.0,his,his
+1032,1035,,,-1,-1," is a
+	single word: ""Thanks.""
+",her,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,872.0,7.0,729.0,874.0,7.0,731.0,her,her
+1037,1039,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,False,False,877.0,7.0,734.0,878.0,7.0,735.0,He,He
+1048,1051,,,-1,-1," is a
+	single word: ""Thanks.""
+",her,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,888.0,7.0,745.0,890.0,7.0,747.0,her,her
+1074,1077,,,-1,-1," is a
+	single word: ""Thanks.""
+",her,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,913.0,7.0,770.0,915.0,7.0,772.0,her,her
+1098,1101,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,False,False,937.0,7.0,794.0,939.0,7.0,796.0,him,him
+1350,1352,,,-1,-1," is a
+	single word: ""Thanks.""
+",we,		      THE SHAWSHANK REDEMPTI,11,READER,False,False,False,False,False,False,False,1178.0,9.0,104.0,1179.0,9.0,105.0,we,we
+1501,1503,,,-1,-1," is a
+	single word: ""Thanks.""
+",we,		      THE SHAWSHANK REDEMPTI,11,READER,False,False,False,False,False,False,False,1325.0,9.0,251.0,1326.0,9.0,252.0,we,we
+1578,1580,,,-1,-1," is a
+	single word: ""Thanks.""
+",we,		      THE SHAWSHANK REDEMPTI,11,READER,False,False,False,False,False,False,False,1401.0,9.0,327.0,1402.0,9.0,328.0,we,we
+1710,1769,,,-1,-1," is a
+	single word: ""Thanks.""
+","ANDY DUFRESNE, mid-20's, wire rim glasses, three-piece suit",		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,True,True,False,False,1526.0,11.0,0.0,1584.0,11.0,58.0,"ANDY DUFRESNE, mid-20's, wire rim glasses, three-piece suit","ANDY DUFRESNE, mid-20's, wire rim glasses, three-piece suit"
+1913,1915,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,1726.0,11.0,200.0,1727.0,11.0,201.0,He,He
+1982,1985,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,1794.0,11.0,268.0,1796.0,11.0,270.0,his,his
+1993,1996,,,-1,-1," is a
+	single word: ""Thanks.""
+",His,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,1805.0,11.0,279.0,1807.0,11.0,281.0,His,His
+2064,2066,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,1873.0,11.0,347.0,1874.0,11.0,348.0,He,He
+2102,2104,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,1909.0,11.0,383.0,1910.0,11.0,384.0,He,He
+2206,2209,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,2012.0,11.0,486.0,2014.0,11.0,488.0,him,him
+2298,2300,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,2095.0,11.0,569.0,2096.0,11.0,570.0,He,He
+2369,2371,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,2165.0,11.0,639.0,2166.0,11.0,640.0,He,He
+2383,2386,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,2179.0,11.0,653.0,2181.0,11.0,655.0,his,his
+2471,2473,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,2263.0,11.0,737.0,2264.0,11.0,738.0,He,He
+2561,2563,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,2352.0,11.0,826.0,2353.0,11.0,827.0,He,He
+2582,2585,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,2373.0,11.0,847.0,2375.0,11.0,849.0,his,his
+2673,2676,,,-1,-1," is a
+	single word: ""Thanks.""
+",His,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,2462.0,11.0,936.0,2464.0,11.0,938.0,His,His
+2711,2713,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,2498.0,11.0,972.0,2499.0,11.0,973.0,He,He
+2790,2792,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,2576.0,11.0,1050.0,2577.0,11.0,1051.0,He,He
+2916,2919,,,-1,-1," is a
+	single word: ""Thanks.""
+",His,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,2696.0,13.0,0.0,2698.0,13.0,2.0,His,His
+3031,3033,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,2808.0,13.0,112.0,2809.0,13.0,113.0,He,He
+3066,3069,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,2843.0,13.0,147.0,2845.0,13.0,149.0,his,his
+3087,3089,,,-1,-1," is a
+	single word: ""Thanks.""
+",he,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,2864.0,13.0,168.0,2865.0,13.0,169.0,he,he
+3268,3273,,,-1,-1," is a
+	single word: ""Thanks.""
+",WOMAN,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,True,False,3036.0,14.0,0.0,3040.0,14.0,4.0,WOMAN,WOMAN
+3313,3317,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,3072.0,17.0,0.0,3075.0,17.0,3.0,Andy,Andy
+3348,3357,,,-1,-1," is a
+	single word: ""Thanks.""
+",The woman,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,True,False,3107.0,17.0,35.0,3115.0,17.0,43.0,The woman,The woman
+3401,3407,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy's,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,3159.0,17.0,87.0,3164.0,17.0,92.0,Andy's,Andy's
+3431,3433,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,3189.0,17.0,117.0,3190.0,17.0,118.0,He,He
+3441,3444,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,3198.0,17.0,126.0,3200.0,17.0,128.0,his,his
+3606,3608,,,-1,-1," is a
+	single word: ""Thanks.""
+",We,		      THE SHAWSHANK REDEMPTI,11,READER,False,False,False,False,False,False,False,3360.0,17.0,288.0,3361.0,17.0,289.0,We,We
+3664,3669,,,-1,-1," is a
+	single word: ""Thanks.""
+",WOMAN,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,True,False,3411.0,18.0,0.0,3415.0,18.0,4.0,WOMAN,WOMAN
+3707,3710,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,False,False,3444.0,19.0,28.0,3446.0,19.0,30.0,you,you
+3736,3737,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,3471.0,19.0,55.0,3471.0,19.0,55.0,I,I
+3752,3756,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,3488.0,21.0,0.0,3491.0,21.0,3.0,Andy,Andy
+3794,3796,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,3530.0,21.0,42.0,3531.0,21.0,43.0,He,He
+3838,3840,,,-1,-1," is a
+	single word: ""Thanks.""
+",he,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,3573.0,21.0,85.0,3574.0,21.0,86.0,he,he
+3916,3919,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,3650.0,21.0,162.0,3652.0,21.0,164.0,his,his
+3956,3959,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,3689.0,21.0,201.0,3691.0,21.0,203.0,his,his
+4151,4155,,,-1,-1," is a
+	single word: ""Thanks.""
+",D.A.,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,True,False,,,,,,,,D.A.
+4165,4177,,,-1,-1," is a
+	single word: ""Thanks.""
+",Mr. Dufresne,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,3874.0,25.0,0.0,3885.0,25.0,11.0,Mr. Dufresne,Mr. Dufresne
+4208,4211,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,3915.0,25.0,41.0,3917.0,25.0,43.0,you,you
+4221,4232,,,-1,-1," is a
+	single word: ""Thanks.""
+","your
+		wife",		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,True,False,3928.0,25.0,54.0,3936.0,25.0,62.0,your wife,"your
+		wife"
+4221,4225,,,-1,-1," is a
+	single word: ""Thanks.""
+",your,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,3928.0,25.0,54.0,3931.0,25.0,57.0,your,your
+4243,4246,,,-1,-1," is a
+	single word: ""Thanks.""
+",she,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,3948.0,25.0,74.0,3950.0,25.0,76.0,she,she
+4263,4276,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY DUFRESNE,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,3969.0,27.0,0.0,3981.0,27.0,12.0,ANDY DUFRESNE,ANDY DUFRESNE
+4367,4369,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4070.0,27.0,101.0,4071.0,27.0,102.0,He,He
+4407,4411,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4104.0,28.0,0.0,4107.0,28.0,3.0,ANDY,ANDY
+4434,4437,,,-1,-1," is a
+	single word: ""Thanks.""
+",She,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,4128.0,29.0,20.0,4130.0,29.0,22.0,She,She
+4443,4446,,,-1,-1," is a
+	single word: ""Thanks.""
+",she,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,4137.0,29.0,29.0,4139.0,29.0,31.0,she,she
+4458,4459,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4150.0,29.0,42.0,4150.0,29.0,42.0,I,I
+4471,4474,,,-1,-1," is a
+	single word: ""Thanks.""
+",she,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,4163.0,29.0,55.0,4165.0,29.0,57.0,she,she
+4508,4511,,,-1,-1," is a
+	single word: ""Thanks.""
+",She,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,4198.0,29.0,90.0,4200.0,29.0,92.0,She,She
+4517,4520,,,-1,-1," is a
+	single word: ""Thanks.""
+",she,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,4207.0,29.0,99.0,4209.0,29.0,101.0,she,she
+4554,4558,,,-1,-1," is a
+	single word: ""Thanks.""
+",D.A.,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,True,False,4236.0,30.0,0.0,4239.0,30.0,3.0,D.A.,D.A.
+4570,4574,,,-1,-1," is a
+	single word: ""Thanks.""
+",your,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4249.0,31.0,9.0,4252.0,31.0,12.0,your,your
+4590,4594,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4263.0,32.0,0.0,4266.0,32.0,3.0,ANDY,ANDY
+4597,4598,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4267.0,33.0,0.0,4267.0,33.0,0.0,I,I
+4608,4609,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4278.0,33.0,11.0,4278.0,33.0,11.0,I,I
+4636,4640,,,-1,-1," is a
+	single word: ""Thanks.""
+",D.A.,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,True,False,4300.0,34.0,0.0,4303.0,34.0,3.0,D.A.,D.A.
+4655,4658,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,False,False,,,,,,,,his
+4668,4669,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4304.0,35.0,0.0,4304.0,35.0,0.0,I,I
+4677,4680,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,4313.0,35.0,9.0,4315.0,35.0,11.0,you,you
+4696,4697,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4332.0,35.0,28.0,4332.0,35.0,28.0,I,I
+4704,4707,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,4338.0,35.0,34.0,4340.0,35.0,36.0,you,you
+4740,4743,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4372.0,35.0,68.0,4374.0,35.0,70.0,you,you
+4750,4762,,,-1,-1," is a
+	single word: ""Thanks.""
+",Mr. Dufresne,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4382.0,35.0,78.0,4393.0,35.0,89.0,Mr. Dufresne,Mr. Dufresne
+4796,4800,,,-1,-1," is a
+	single word: ""Thanks.""
+",your,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4426.0,35.0,122.0,4429.0,35.0,125.0,your,your
+4817,4821,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4460.0,37.0,0.0,4463.0,37.0,3.0,ANDY,ANDY
+4840,4841,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4480.0,38.0,16.0,4480.0,38.0,16.0,I,I
+4867,4868,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4505.0,38.0,41.0,4505.0,38.0,41.0,I,I
+4915,4919,,,-1,-1," is a
+	single word: ""Thanks.""
+",D.A.,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,True,False,4544.0,40.0,0.0,4547.0,40.0,3.0,D.A.,D.A.
+4942,4945,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4568.0,41.0,20.0,4570.0,41.0,22.0,you,you
+4950,4961,,,-1,-1," is a
+	single word: ""Thanks.""
+","your
+		wife",		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,True,False,4576.0,41.0,28.0,4584.0,41.0,36.0,your wife,"your
+		wife"
+4950,4954,,,-1,-1," is a
+	single word: ""Thanks.""
+",your,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4576.0,41.0,28.0,4579.0,41.0,31.0,your,your
+4975,4979,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4593.0,42.0,0.0,4596.0,42.0,3.0,ANDY,ANDY
+4982,4985,,,-1,-1," is a
+	single word: ""Thanks.""
+",She,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,4597.0,43.0,0.0,4599.0,43.0,2.0,She,She
+5023,5034,,,-1,-1," is a
+	single word: ""Thanks.""
+",Mr. Quentin,		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,False,False,4636.0,43.0,39.0,4646.0,43.0,49.0,Mr. Quentin,Mr. Quentin
+5041,5045,,,-1,-1," is a
+	single word: ""Thanks.""
+",D.A.,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,True,False,4648.0,44.0,0.0,4651.0,44.0,3.0,D.A.,D.A.
+5048,5061,,,-1,-1," is a
+	single word: ""Thanks.""
+",Glenn Quentin,		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,False,False,4652.0,45.0,0.0,4664.0,45.0,12.0,Glenn Quentin,Glenn Quentin
+5063,5112,,,-1,-1," is a
+	single word: ""Thanks.""
+","The golf pro at the
+		Falmouth Hills Country Club",		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,True,False,4667.0,45.0,15.0,4713.0,45.0,61.0,The golf pro at the Falmouth Hills Country Club,"The golf pro at the
+		Falmouth Hills Country Club"
+5114,5123,,,-1,-1," is a
+	single word: ""Thanks.""
+","The
+		man",		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,True,False,4716.0,45.0,64.0,4722.0,45.0,70.0,The man,"The
+		man"
+5124,5127,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4724.0,45.0,72.0,4726.0,45.0,74.0,you,you
+5158,5161,,,-1,-1," is a
+	single word: ""Thanks.""
+",her,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,4756.0,45.0,104.0,4758.0,45.0,106.0,her,her
+5173,5177,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,,,,,,,,Andy
+5190,5193,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4771.0,45.0,119.0,4773.0,45.0,121.0,you,you
+5201,5204,,,-1,-1," is a
+	single word: ""Thanks.""
+",her,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,4782.0,45.0,130.0,4784.0,45.0,132.0,her,her
+5211,5215,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4795.0,47.0,0.0,4798.0,47.0,3.0,ANDY,ANDY
+5218,5219,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4799.0,48.0,0.0,4799.0,48.0,0.0,I,I
+5255,5256,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4834.0,48.0,35.0,4834.0,48.0,35.0,I,I
+5277,5290,,,-1,-1," is a
+	single word: ""Thanks.""
+",Mr. Quentin's,		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,False,False,4856.0,48.0,57.0,4868.0,48.0,69.0,Mr. Quentin's,Mr. Quentin's
+5343,5344,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4918.0,48.0,119.0,4918.0,48.0,119.0,I,I
+5352,5354,,,-1,-1," is a
+	single word: ""Thanks.""
+",my,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4927.0,48.0,128.0,4928.0,48.0,129.0,my,my
+5395,5399,,,-1,-1," is a
+	single word: ""Thanks.""
+",D.A.,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,True,False,4962.0,49.0,0.0,4965.0,49.0,3.0,D.A.,D.A.
+5428,5432,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4986.0,51.0,0.0,4989.0,51.0,3.0,ANDY,ANDY
+5435,5436,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,4990.0,52.0,0.0,4990.0,52.0,0.0,I,I
+5449,5450,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5004.0,52.0,14.0,5004.0,52.0,14.0,I,I
+5474,5475,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5027.0,52.0,37.0,5027.0,52.0,37.0,I,I
+5489,5490,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5042.0,52.0,52.0,5042.0,52.0,52.0,I,I
+5518,5522,,,-1,-1," is a
+	single word: ""Thanks.""
+",D.A.,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,True,False,5065.0,53.0,0.0,5068.0,53.0,3.0,D.A.,D.A.
+5525,5528,,,-1,-1," is a
+	single word: ""Thanks.""
+",You,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5069.0,54.0,0.0,5071.0,54.0,2.0,You,You
+5544,5547,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5088.0,54.0,19.0,5090.0,54.0,21.0,you,you
+5554,5558,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5092.0,55.0,0.0,5095.0,55.0,3.0,ANDY,ANDY
+5566,5567,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5101.0,56.0,5.0,5101.0,56.0,5.0,I,I
+5608,5612,,,-1,-1," is a
+	single word: ""Thanks.""
+",D.A.,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,True,False,5134.0,58.0,0.0,5137.0,58.0,3.0,D.A.,D.A.
+5634,5637,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5157.0,59.0,19.0,5159.0,59.0,21.0,you,you
+5685,5689,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5200.0,60.0,0.0,5203.0,60.0,3.0,ANDY,ANDY
+5696,5697,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5208.0,61.0,4.0,5208.0,61.0,4.0,I,I
+5715,5716,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5227.0,61.0,23.0,5227.0,61.0,23.0,I,I
+5728,5731,,,-1,-1," is a
+	single word: ""Thanks.""
+",she,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,5238.0,61.0,34.0,5240.0,61.0,36.0,she,she
+5749,5750,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5259.0,61.0,55.0,5259.0,61.0,55.0,I,I
+5768,5771,,,-1,-1," is a
+	single word: ""Thanks.""
+",her,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,5276.0,61.0,72.0,5278.0,61.0,74.0,her,her
+5777,5780,,,-1,-1," is a
+	single word: ""Thanks.""
+",her,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,5285.0,61.0,81.0,5287.0,61.0,83.0,her,her
+5803,5807,,,-1,-1," is a
+	single word: ""Thanks.""
+",D.A.,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,True,False,5305.0,62.0,0.0,5308.0,62.0,3.0,D.A.,D.A.
+5923,5926,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5416.0,63.0,107.0,5418.0,63.0,109.0,you,you
+5944,5947,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5435.0,63.0,126.0,5437.0,63.0,128.0,you,you
+5953,5956,,,-1,-1," is a
+	single word: ""Thanks.""
+",her,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,5444.0,63.0,135.0,5446.0,63.0,137.0,her,her
+5953,5962,,,-1,-1," is a
+	single word: ""Thanks.""
+",her lover,		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,True,False,5444.0,63.0,135.0,5452.0,63.0,143.0,her lover,her lover
+5969,5973,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5454.0,64.0,0.0,5457.0,64.0,3.0,ANDY,ANDY
+5976,5977,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5458.0,65.0,0.0,5458.0,65.0,0.0,I,I
+5987,5988,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5469.0,65.0,11.0,5469.0,65.0,11.0,I,I
+6060,6061,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5538.0,65.0,80.0,5538.0,65.0,80.0,I,I
+6082,6084,,,-1,-1," is a
+	single word: ""Thanks.""
+",my,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5558.0,65.0,100.0,5559.0,65.0,101.0,my,my
+6111,6112,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5587.0,65.0,129.0,5587.0,65.0,129.0,I,I
+6120,6121,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5594.0,65.0,136.0,5594.0,65.0,136.0,I,I
+6161,6165,,,-1,-1," is a
+	single word: ""Thanks.""
+",D.A.,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,True,False,5629.0,66.0,0.0,5632.0,66.0,3.0,D.A.,D.A.
+6173,6176,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5638.0,67.0,5.0,5640.0,67.0,7.0,you,you
+6189,6190,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,False,False,5654.0,67.0,21.0,5654.0,67.0,21.0,I,I
+6229,6249,,,-1,-1," is a
+	single word: ""Thanks.""
+","the
+		cleaning woman",		      THE SHAWSHANK REDEMPTI,28,CLEANING WOMAN,False,False,False,False,False,True,False,5692.0,67.0,59.0,5709.0,67.0,76.0,the cleaning woman,"the
+		cleaning woman"
+6288,6297,,,-1,-1," is a
+	single word: ""Thanks.""
+",your wife,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,True,False,5747.0,67.0,114.0,5755.0,67.0,122.0,your wife,your wife
+6288,6292,,,-1,-1," is a
+	single word: ""Thanks.""
+",your,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5747.0,67.0,114.0,5750.0,67.0,117.0,your,your
+6302,6305,,,-1,-1," is a
+	single word: ""Thanks.""
+",her,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,5761.0,67.0,128.0,5763.0,67.0,130.0,her,her
+6302,6313,,,-1,-1," is a
+	single word: ""Thanks.""
+","her
+		lover",		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,True,False,5761.0,67.0,128.0,5769.0,67.0,136.0,her lover,"her
+		lover"
+6377,6380,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5830.0,67.0,197.0,5832.0,67.0,199.0,you,you
+6409,6423,,,-1,-1," is a
+	single word: ""Thanks.""
+","Mr.
+		Dufresne",		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5862.0,67.0,229.0,5873.0,67.0,240.0,Mr. Dufresne,"Mr.
+		Dufresne"
+6439,6441,,,-1,-1," is a
+	single word: ""Thanks.""
+",me,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,False,False,5890.0,67.0,257.0,5891.0,67.0,258.0,me,me
+6448,6452,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5893.0,68.0,0.0,5896.0,68.0,3.0,ANDY,ANDY
+6486,6490,,,-1,-1," is a
+	single word: ""Thanks.""
+",D.A.,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,True,False,5916.0,71.0,0.0,5919.0,71.0,3.0,D.A.,D.A.
+6493,6494,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,False,False,5920.0,72.0,0.0,5920.0,72.0,0.0,I,I
+6504,6516,,,-1,-1," is a
+	single word: ""Thanks.""
+",Mr. Dufresne,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5931.0,72.0,11.0,5942.0,72.0,22.0,Mr. Dufresne,Mr. Dufresne
+6518,6519,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,False,False,5945.0,72.0,25.0,5945.0,72.0,25.0,I,I
+6560,6564,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,5979.0,73.0,0.0,5982.0,73.0,3.0,ANDY,ANDY
+6586,6590,,,-1,-1," is a
+	single word: ""Thanks.""
+",D.A.,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,True,False,5996.0,75.0,0.0,5999.0,75.0,3.0,D.A.,D.A.
+6609,6613,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,6010.0,77.0,0.0,6013.0,77.0,3.0,ANDY,ANDY
+6623,6625,,,-1,-1," is a
+	single word: ""Thanks.""
+",me,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,6021.0,78.0,7.0,6022.0,78.0,8.0,me,me
+6659,6663,,,-1,-1," is a
+	single word: ""Thanks.""
+",D.A.,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,True,False,6051.0,79.0,0.0,6054.0,79.0,3.0,D.A.,D.A.
+6675,6678,,,-1,-1," is a
+	single word: ""Thanks.""
+",sir,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,True,False,6064.0,80.0,9.0,6066.0,80.0,11.0,sir,sir
+6735,6739,,,-1,-1," is a
+	single word: ""Thanks.""
+",D.A.,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,True,False,6115.0,82.0,0.0,6118.0,82.0,3.0,D.A.,D.A.
+6742,6745,,,-1,-1," is a
+	single word: ""Thanks.""
+",You,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,6119.0,83.0,0.0,6121.0,83.0,2.0,You,You
+6752,6755,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,6129.0,83.0,10.0,6131.0,83.0,12.0,you,you
+6762,6766,,,-1,-1," is a
+	single word: ""Thanks.""
+",your,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,6139.0,83.0,20.0,6142.0,83.0,23.0,your,your
+6858,6862,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,6225.0,84.0,0.0,6228.0,84.0,3.0,ANDY,ANDY
+6886,6890,,,-1,-1," is a
+	single word: ""Thanks.""
+",D.A.,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,True,False,6244.0,86.0,0.0,6247.0,86.0,3.0,D.A.,D.A.
+6893,6896,,,-1,-1," is a
+	single word: ""Thanks.""
+",You,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,6248.0,87.0,0.0,6250.0,87.0,2.0,You,You
+6904,6917,,,-1,-1," is a
+	single word: ""Thanks.""
+",Lt. Mincher's,		      THE SHAWSHANK REDEMPTI,2,LT. MINCHER,False,False,False,False,False,False,False,6259.0,87.0,11.0,6271.0,87.0,23.0,Lt. Mincher's,Lt. Mincher's
+6931,6933,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,2,LT. MINCHER,False,False,False,False,False,False,False,6284.0,87.0,36.0,6285.0,87.0,37.0,He,He
+6938,6941,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,2,LT. MINCHER,False,False,False,False,False,False,False,6291.0,87.0,43.0,6293.0,87.0,45.0,his,his
+7049,7053,,,-1,-1," is a
+	single word: ""Thanks.""
+",your,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,6396.0,87.0,148.0,6399.0,87.0,151.0,your,your
+7173,7185,,,-1,-1," is a
+	single word: ""Thanks.""
+",Mr. Dufresne,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,6514.0,87.0,266.0,6525.0,87.0,277.0,Mr. Dufresne,Mr. Dufresne
+7192,7196,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,6527.0,88.0,0.0,6530.0,88.0,3.0,ANDY,ANDY
+7230,7231,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,6537.0,89.0,6.0,6537.0,89.0,6.0,I,I
+7261,7264,,,-1,-1," is a
+	single word: ""Thanks.""
+",sir,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,True,False,6566.0,89.0,35.0,6568.0,89.0,37.0,sir,sir
+7266,7267,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,6571.0,89.0,40.0,6571.0,89.0,40.0,I,I
+7394,7402,,,-1,-1," is a
+	single word: ""Thanks.""
+",The D.A.,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,True,False,6708.0,93.0,0.0,6715.0,93.0,7.0,The D.A.,The D.A.
+7434,7437,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,False,False,6748.0,93.0,40.0,6750.0,93.0,42.0,his,his
+7462,7466,,,-1,-1," is a
+	single word: ""Thanks.""
+",D.A.,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,True,False,6770.0,94.0,0.0,6773.0,94.0,3.0,D.A.,D.A.
+7558,7569,,,-1,-1," is a
+	single word: ""Thanks.""
+",the accused,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,True,False,6859.0,95.0,85.0,6869.0,95.0,95.0,the accused,the accused
+7682,7685,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,6975.0,95.0,201.0,6977.0,95.0,203.0,his,his
+7778,7803,,,-1,-1," is a
+	single word: ""Thanks.""
+","a beautiful
+		young woman",		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,True,False,7067.0,95.0,293.0,7089.0,95.0,315.0,a beautiful young woman,"a beautiful
+		young woman"
+7808,7817,,,-1,-1," is a
+	single word: ""Thanks.""
+",her lover,		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,True,False,7095.0,95.0,321.0,7103.0,95.0,329.0,her lover,her lover
+7808,7811,,,-1,-1," is a
+	single word: ""Thanks.""
+",her,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,7095.0,95.0,321.0,7097.0,95.0,323.0,her,her
+7935,7937,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,False,False,7213.0,96.0,0.0,7214.0,96.0,1.0,He,He
+7950,7954,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,7228.0,96.0,15.0,7231.0,96.0,18.0,Andy,Andy
+7976,7988,,,-1,-1," is a
+	single word: ""Thanks.""
+",his ATTORNEY,		      THE SHAWSHANK REDEMPTI,44,ANDY'S ATTORNEY,False,False,False,False,False,True,False,7254.0,96.0,41.0,7265.0,96.0,52.0,his ATTORNEY,his ATTORNEY
+7976,7979,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,7254.0,96.0,41.0,7256.0,96.0,43.0,his,his
+7995,7999,,,-1,-1," is a
+	single word: ""Thanks.""
+",D.A.,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,True,False,7267.0,97.0,0.0,7270.0,97.0,3.0,D.A.,D.A.
+8002,8003,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,False,False,7271.0,98.0,0.0,7271.0,98.0,0.0,I,I
+8012,8026,,,-1,-1," is a
+	single word: ""Thanks.""
+",Mr. Dufresne's,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,7281.0,98.0,10.0,7294.0,98.0,23.0,Mr. Dufresne's,Mr. Dufresne's
+8058,8059,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,False,False,7325.0,98.0,54.0,7325.0,98.0,54.0,I,I
+8078,8080,,,-1,-1," is a
+	single word: ""Thanks.""
+",he,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,7343.0,98.0,72.0,7344.0,98.0,73.0,he,he
+8203,8213,,,-1,-1," is a
+	single word: ""Thanks.""
+","his
+		wife",		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,True,False,7462.0,98.0,191.0,7469.0,98.0,198.0,his wife,"his
+		wife"
+8203,8206,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,7462.0,98.0,191.0,7464.0,98.0,193.0,his,his
+8236,8251,,,-1,-1," is a
+	single word: ""Thanks.""
+","Glenn
+		Quentin",		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,False,False,7493.0,98.0,222.0,7505.0,98.0,234.0,Glenn Quentin,"Glenn
+		Quentin"
+8309,8311,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,7559.0,99.0,0.0,7560.0,99.0,1.0,He,He
+8428,8432,,,-1,-1," is a
+	single word: ""Thanks.""
+",D.A.,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,True,False,7671.0,100.0,0.0,7674.0,100.0,3.0,D.A.,D.A.
+8478,8479,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,False,False,7716.0,101.0,41.0,7716.0,101.0,41.0,I,I
+8751,8753,,,-1,-1," is a
+	single word: ""Thanks.""
+",he,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,7975.0,101.0,300.0,7976.0,101.0,301.0,he,he
+8810,8812,,,-1,-1," is a
+	single word: ""Thanks.""
+",he,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,8030.0,101.0,355.0,8031.0,101.0,356.0,he,he
+8923,8924,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,13,D.A.,False,False,True,False,False,False,False,8112.0,101.0,437.0,8112.0,101.0,437.0,I,I
+9382,9384,,,-1,-1," is a
+	single word: ""Thanks.""
+",We,		      THE SHAWSHANK REDEMPTI,11,READER,False,False,False,False,False,False,False,8560.0,109.0,0.0,8561.0,109.0,1.0,We,We
+9390,9401,,,-1,-1," is a
+	single word: ""Thanks.""
+",the FOREMAN,		      THE SHAWSHANK REDEMPTI,30,FOREMAN,False,False,False,False,False,True,False,8568.0,109.0,8.0,8578.0,109.0,18.0,the FOREMAN,the FOREMAN
+9511,9515,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,8682.0,111.0,0.0,8685.0,111.0,3.0,Andy,Andy
+9540,9549,,,-1,-1," is a
+	single word: ""Thanks.""
+",THE JUDGE,		      THE SHAWSHANK REDEMPTI,43,JUDGE,False,False,True,False,False,True,False,8711.0,111.0,29.0,8719.0,111.0,37.0,THE JUDGE,THE JUDGE
+9629,9634,,,-1,-1," is a
+	single word: ""Thanks.""
+",JUDGE,		      THE SHAWSHANK REDEMPTI,43,JUDGE,False,False,True,False,False,True,False,8793.0,112.0,0.0,8797.0,112.0,4.0,JUDGE,JUDGE
+9637,9640,,,-1,-1," is a
+	single word: ""Thanks.""
+",You,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,8798.0,113.0,0.0,8800.0,113.0,2.0,You,You
+9648,9650,,,-1,-1," is a
+	single word: ""Thanks.""
+",me,		      THE SHAWSHANK REDEMPTI,43,JUDGE,False,False,True,False,False,False,False,8809.0,113.0,11.0,8810.0,113.0,12.0,me,me
+9696,9708,,,-1,-1," is a
+	single word: ""Thanks.""
+",Mr. Dufresne,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,8855.0,113.0,57.0,8866.0,113.0,68.0,Mr. Dufresne,Mr. Dufresne
+9722,9724,,,-1,-1," is a
+	single word: ""Thanks.""
+",my,		      THE SHAWSHANK REDEMPTI,43,JUDGE,False,False,True,False,False,False,False,8879.0,113.0,81.0,8880.0,113.0,82.0,my,my
+9749,9752,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,8904.0,113.0,106.0,8906.0,113.0,108.0,you,you
+9777,9779,,,-1,-1," is a
+	single word: ""Thanks.""
+",me,		      THE SHAWSHANK REDEMPTI,43,JUDGE,False,False,True,False,False,False,False,8932.0,113.0,134.0,8933.0,113.0,135.0,me,me
+9805,9806,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,43,JUDGE,False,False,True,False,False,False,False,8958.0,113.0,160.0,8958.0,113.0,160.0,I,I
+9822,9825,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,8973.0,113.0,175.0,8975.0,113.0,177.0,you,you
+9887,9891,,,-1,-1," is a
+	single word: ""Thanks.""
+",your,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,9036.0,113.0,238.0,9039.0,113.0,241.0,your,your
+9915,9917,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,43,JUDGE,False,False,True,False,False,False,False,9059.0,114.0,0.0,9060.0,114.0,1.0,He,He
+9923,9926,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,43,JUDGE,False,False,True,False,False,False,False,9067.0,114.0,8.0,9069.0,114.0,10.0,his,his
+9936,9938,,,-1,-1," is a
+	single word: ""Thanks.""
+",we,		      THE SHAWSHANK REDEMPTI,11,READER,False,False,False,False,False,False,False,9080.0,114.0,21.0,9081.0,114.0,22.0,we,we
+10169,10171,,,-1,-1," is a
+	single word: ""Thanks.""
+",We,		      THE SHAWSHANK REDEMPTI,11,READER,False,False,False,False,False,False,False,9305.0,114.0,246.0,9306.0,114.0,247.0,We,We
+10233,10236,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,9363.0,116.0,0.0,9365.0,116.0,2.0,RED,RED
+10253,10256,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,9383.0,116.0,20.0,9385.0,116.0,22.0,his,his
+10290,10296,,,-1,-1," is a
+	single word: ""Thanks.""
+",MAN #1,		      THE SHAWSHANK REDEMPTI,39,MAN #1,False,False,True,False,False,True,False,9414.0,117.0,0.0,9419.0,117.0,5.0,MAN #1,MAN #1
+10306,10309,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,9424.0,119.0,0.0,9426.0,119.0,2.0,Red,Red
+10370,10376,,,-1,-1," is a
+	single word: ""Thanks.""
+",MAN #2,		      THE SHAWSHANK REDEMPTI,42,MAN #2,False,False,True,False,False,True,False,9482.0,120.0,0.0,9487.0,120.0,5.0,MAN #2,MAN #2
+10389,10393,,,-1,-1," is a
+	single word: ""Thanks.""
+",your,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,9498.0,121.0,10.0,9501.0,121.0,13.0,your,your
+10399,10402,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,9508.0,121.0,20.0,9510.0,121.0,22.0,you,you
+10453,10459,,,-1,-1," is a
+	single word: ""Thanks.""
+",MAN #3,		      THE SHAWSHANK REDEMPTI,1,MAN #3,False,False,True,False,False,True,False,9554.0,122.0,0.0,9559.0,122.0,5.0,MAN #3,MAN #3
+10462,10465,,,-1,-1," is a
+	single word: ""Thanks.""
+",You,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,9560.0,123.0,0.0,9562.0,123.0,2.0,You,You
+10471,10474,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,9569.0,123.0,9.0,9571.0,123.0,11.0,you,you
+10503,10506,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,9595.0,124.0,0.0,9597.0,124.0,2.0,RED,RED
+10514,10517,,,-1,-1," is a
+	single word: ""Thanks.""
+",sir,		      THE SHAWSHANK REDEMPTI,1,MAN #3,False,False,True,False,False,True,False,9603.0,125.0,5.0,9605.0,125.0,7.0,sir,sir
+10531,10532,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,9620.0,125.0,22.0,9620.0,125.0,22.0,I,I
+10546,10548,,,-1,-1," is a
+	single word: ""Thanks.""
+",my,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,9633.0,125.0,35.0,9634.0,125.0,36.0,my,my
+10557,10558,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,9644.0,125.0,46.0,9644.0,125.0,46.0,I,I
+10576,10577,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,9663.0,125.0,65.0,9663.0,125.0,65.0,I,I
+10597,10598,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,9682.0,125.0,84.0,9682.0,125.0,84.0,I,I
+10710,10713,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,9788.0,126.0,22.0,9790.0,126.0,24.0,him,him
+11107,11110,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,10169.0,128.0,219.0,10171.0,128.0,221.0,RED,RED
+11193,11196,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,10254.0,128.0,304.0,10256.0,128.0,306.0,his,his
+11248,11250,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,10308.0,128.0,358.0,10309.0,128.0,359.0,He,He
+11281,11284,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,10335.0,129.0,0.0,10337.0,129.0,2.0,RED,RED
+11313,11315,,,-1,-1," is a
+	single word: ""Thanks.""
+",me,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,10357.0,130.0,19.0,10358.0,130.0,20.0,me,me
+11346,11347,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,10388.0,130.0,50.0,10388.0,130.0,50.0,I,I
+11355,11356,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,10397.0,130.0,59.0,10397.0,130.0,59.0,I,I
+11552,11554,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,10585.0,132.0,0.0,10586.0,132.0,1.0,He,He
+11617,11620,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,10644.0,133.0,0.0,10646.0,133.0,2.0,RED,RED
+11639,11640,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,10656.0,134.0,9.0,10656.0,134.0,9.0,I,I
+11848,11851,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,10856.0,137.0,0.0,10858.0,137.0,2.0,RED,RED
+11869,11882,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy Dufresne,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,10867.0,138.0,8.0,10879.0,138.0,20.0,Andy Dufresne,Andy Dufresne
+11891,11893,,,-1,-1," is a
+	single word: ""Thanks.""
+",me,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,10889.0,138.0,30.0,10890.0,138.0,31.0,me,me
+11914,11916,,,-1,-1," is a
+	single word: ""Thanks.""
+",me,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,10910.0,138.0,51.0,10911.0,138.0,52.0,me,me
+11964,11967,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,10958.0,138.0,99.0,10960.0,138.0,101.0,him,him
+11969,11970,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,10963.0,138.0,104.0,10963.0,138.0,104.0,I,I
+11978,11981,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,10970.0,138.0,111.0,10972.0,138.0,113.0,him,him
+12014,12017,,,-1,-1," is a
+	single word: ""Thanks.""
+",CON,		      THE SHAWSHANK REDEMPTI,31,CON SHOUTING FRESH FISH,False,False,True,False,False,True,False,11004.0,140.0,0.0,11006.0,140.0,2.0,CON,CON
+12052,12055,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,11036.0,142.0,0.0,11038.0,142.0,2.0,Red,Red
+12069,12076,,,-1,-1," is a
+	single word: ""Thanks.""
+",HEYWOOD,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,11053.0,142.0,17.0,11059.0,142.0,23.0,HEYWOOD,HEYWOOD
+12078,12083,,,-1,-1," is a
+	single word: ""Thanks.""
+",SKEET,		      THE SHAWSHANK REDEMPTI,24,SKEET,False,False,True,False,False,False,False,11062.0,142.0,26.0,11066.0,142.0,30.0,SKEET,SKEET
+12085,12090,,,-1,-1," is a
+	single word: ""Thanks.""
+",FLOYD,		      THE SHAWSHANK REDEMPTI,7,FLOYD,False,False,True,False,False,False,False,11069.0,142.0,33.0,11073.0,142.0,37.0,FLOYD,FLOYD
+12092,12098,,,-1,-1," is a
+	single word: ""Thanks.""
+",JIGGER,		      THE SHAWSHANK REDEMPTI,21,JIGGER,False,False,True,False,False,False,False,11076.0,142.0,40.0,11081.0,142.0,45.0,JIGGER,JIGGER
+12100,12105,,,-1,-1," is a
+	single word: ""Thanks.""
+",ERNIE,		      THE SHAWSHANK REDEMPTI,33,ERNIE,False,False,True,False,False,False,False,11084.0,142.0,48.0,11088.0,142.0,52.0,ERNIE,ERNIE
+12107,12113,,,-1,-1," is a
+	single word: ""Thanks.""
+",SNOOZE,		      THE SHAWSHANK REDEMPTI,12,SNOOZE,False,False,True,False,False,False,False,11091.0,142.0,55.0,11096.0,142.0,60.0,SNOOZE,SNOOZE
+12167,12170,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,11150.0,142.0,114.0,11152.0,142.0,116.0,Red,Red
+12175,12178,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,11158.0,142.0,122.0,11160.0,142.0,124.0,his,his
+12275,12279,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,11252.0,144.0,0.0,11255.0,144.0,3.0,Andy,Andy
+12332,12335,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,11303.0,145.0,0.0,11305.0,145.0,2.0,RED,RED
+12345,12349,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,11306.0,146.0,0.0,11309.0,146.0,3.0,Andy,Andy
+12405,12413,,,-1,-1," is a
+	single word: ""Thanks.""
+",his wife,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,True,False,11364.0,146.0,58.0,11371.0,146.0,65.0,his wife,his wife
+12405,12408,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,11364.0,146.0,58.0,11366.0,146.0,60.0,his,his
+12420,12445,,,-1,-1," is a
+	single word: ""Thanks.""
+",the fella she was bangin',		      THE SHAWSHANK REDEMPTI,29,ANDY'S WIFE'S LOVER,False,False,False,False,False,True,False,11377.0,146.0,71.0,11401.0,146.0,95.0,the fella she was bangin',the fella she was bangin'
+12430,12433,,,-1,-1," is a
+	single word: ""Thanks.""
+",she,		      THE SHAWSHANK REDEMPTI,19,ANDY'S WIFE,False,False,True,False,False,False,False,11387.0,146.0,81.0,11389.0,146.0,83.0,she,she
+12501,12505,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,11459.0,148.0,52.0,11462.0,148.0,55.0,Andy,Andy
+12553,12556,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,11504.0,149.0,0.0,11506.0,149.0,2.0,RED,RED
+12582,12584,,,-1,-1," is a
+	single word: ""Thanks.""
+",he,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,11523.0,150.0,16.0,11524.0,150.0,17.0,he,he
+12670,12672,,,-1,-1," is a
+	single word: ""Thanks.""
+",he,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,11607.0,150.0,100.0,11608.0,150.0,101.0,he,he
+12744,12755,,,-1,-1," is a
+	single word: ""Thanks.""
+",TOWER GUARD,		      THE SHAWSHANK REDEMPTI,40,TOWER GUARD,False,False,True,False,False,True,False,11675.0,152.0,0.0,11685.0,152.0,10.0,TOWER GUARD,TOWER GUARD
+12926,12930,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,11849.0,154.0,153.0,11852.0,154.0,156.0,Andy,Andy
+12948,12972,,,-1,-1," is a
+	single word: ""Thanks.""
+","the MAN in
+	front of him",		      THE SHAWSHANK REDEMPTI,14,MAN IN FRONT OF ANDY,False,False,False,False,False,True,False,11871.0,154.0,175.0,11893.0,154.0,197.0,the MAN in front of him,"the MAN in
+	front of him"
+12969,12972,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,11891.0,154.0,195.0,11893.0,154.0,197.0,him,him
+12987,12990,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,14,MAN IN FRONT OF ANDY,False,False,False,False,False,False,False,11909.0,154.0,213.0,11911.0,154.0,215.0,him,him
+12999,13033,,,-1,-1," is a
+	single word: ""Thanks.""
+","BYRON HADLEY, captain of the guard",		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,True,False,False,11919.0,154.0,223.0,11952.0,154.0,256.0,"BYRON HADLEY, captain of the guard","BYRON HADLEY, captain of the guard"
+13041,13044,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,11961.0,154.0,265.0,11963.0,154.0,267.0,his,his
+13057,13063,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy's,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,11976.0,154.0,280.0,11981.0,154.0,285.0,Andy's,Andy's
+13070,13074,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,11989.0,154.0,293.0,11992.0,154.0,296.0,Andy,Andy
+13083,13086,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,12002.0,154.0,306.0,12004.0,154.0,308.0,his,his
+13155,13161,,,-1,-1," is a
+	single word: ""Thanks.""
+",HADLEY,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,12067.0,155.0,0.0,12072.0,155.0,5.0,HADLEY,HADLEY
+13167,13171,,,-1,-1," is a
+	single word: ""Thanks.""
+",your,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,12076.0,156.0,3.0,12079.0,156.0,6.0,your,your
+13184,13185,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,12093.0,156.0,20.0,12093.0,156.0,20.0,I,I
+13191,13194,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,12100.0,156.0,27.0,12102.0,156.0,29.0,you,you
+13207,13210,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,12114.0,156.0,41.0,12116.0,156.0,43.0,you,you
+13259,13262,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,12157.0,158.0,0.0,12159.0,158.0,2.0,RED,RED
+13320,13327,,,-1,-1," is a
+	single word: ""Thanks.""
+",HEYWOOD,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,12207.0,160.0,0.0,12213.0,160.0,6.0,HEYWOOD,HEYWOOD
+13387,13389,,,-1,-1," is a
+	single word: ""Thanks.""
+",my,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,12269.0,161.0,55.0,12270.0,161.0,56.0,my,my
+13401,13407,,,-1,-1," is a
+	single word: ""Thanks.""
+",JIGGER,		      THE SHAWSHANK REDEMPTI,21,JIGGER,False,False,True,False,False,False,False,12277.0,162.0,0.0,12282.0,162.0,5.0,JIGGER,JIGGER
+13422,13425,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,12295.0,163.0,12.0,12297.0,163.0,14.0,you,you
+13427,13434,,,-1,-1," is a
+	single word: ""Thanks.""
+",Heywood,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,12300.0,163.0,17.0,12306.0,163.0,23.0,Heywood,Heywood
+13436,13439,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,12309.0,163.0,26.0,12311.0,163.0,28.0,you,you
+13474,13479,,,-1,-1," is a
+	single word: ""Thanks.""
+",FLOYD,		      THE SHAWSHANK REDEMPTI,7,FLOYD,False,False,True,False,False,False,False,12339.0,164.0,0.0,12343.0,164.0,4.0,FLOYD,FLOYD
+13501,13504,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,12363.0,165.0,19.0,12365.0,165.0,21.0,Red,Red
+13511,13514,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,12367.0,166.0,0.0,12369.0,166.0,2.0,RED,RED
+13626,13631,,,-1,-1," is a
+	single word: ""Thanks.""
+",FLOYD,		      THE SHAWSHANK REDEMPTI,7,FLOYD,False,False,True,False,False,False,False,12465.0,169.0,0.0,12469.0,169.0,4.0,FLOYD,FLOYD
+13646,13648,,,-1,-1," is a
+	single word: ""Thanks.""
+",me,		      THE SHAWSHANK REDEMPTI,7,FLOYD,False,False,True,False,False,False,False,12482.0,170.0,12.0,12483.0,170.0,13.0,me,me
+13668,13671,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,12498.0,171.0,0.0,12500.0,171.0,2.0,RED,RED
+13693,13697,,,-1,-1," is a
+	single word: ""Thanks.""
+",your,		      THE SHAWSHANK REDEMPTI,7,FLOYD,False,False,True,False,False,False,False,12520.0,172.0,19.0,12523.0,172.0,22.0,your,your
+13710,13715,,,-1,-1," is a
+	single word: ""Thanks.""
+",FLOYD,		      THE SHAWSHANK REDEMPTI,7,FLOYD,False,False,True,False,False,False,False,12531.0,173.0,0.0,12535.0,173.0,4.0,FLOYD,FLOYD
+13718,13766,,,-1,-1," is a
+	single word: ""Thanks.""
+","That gangly sack of shit, third
+		from the front",		      THE SHAWSHANK REDEMPTI,37,FLOYD'S BET,False,False,False,False,False,True,False,12536.0,174.0,0.0,12581.0,174.0,45.0,"That gangly sack of shit, third from the front","That gangly sack of shit, third
+		from the front"
+13768,13770,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,37,FLOYD'S BET,False,False,False,False,False,False,False,12584.0,174.0,48.0,12585.0,174.0,49.0,He,He
+13793,13800,,,-1,-1," is a
+	single word: ""Thanks.""
+",HEYWOOD,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,12603.0,175.0,0.0,12609.0,175.0,6.0,HEYWOOD,HEYWOOD
+13813,13814,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,12620.0,176.0,10.0,12620.0,176.0,10.0,I,I
+13841,13846,,,-1,-1," is a
+	single word: ""Thanks.""
+",ERNIE,		      THE SHAWSHANK REDEMPTI,33,ERNIE,False,False,True,False,False,False,False,12642.0,177.0,0.0,12646.0,177.0,4.0,ERNIE,ERNIE
+13849,13851,,,-1,-1," is a
+	single word: ""Thanks.""
+",Me,		      THE SHAWSHANK REDEMPTI,33,ERNIE,False,False,True,False,False,False,False,12647.0,178.0,0.0,12648.0,178.0,1.0,Me,Me
+13878,13881,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,12673.0,179.0,19.0,12675.0,179.0,21.0,Red,Red
+13903,13910,,,-1,-1," is a
+	single word: ""Thanks.""
+",HEYWOOD,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,12692.0,180.0,0.0,12698.0,180.0,6.0,HEYWOOD,HEYWOOD
+13913,13916,,,-1,-1," is a
+	single word: ""Thanks.""
+",You,		      THE SHAWSHANK REDEMPTI,7,FLOYD,False,False,True,False,False,False,False,12699.0,181.0,0.0,12701.0,181.0,2.0,You,You
+13937,13940,,,-1,-1," is a
+	single word: ""Thanks.""
+",son,		      THE SHAWSHANK REDEMPTI,7,FLOYD,False,False,True,True,False,True,False,12723.0,181.0,24.0,12725.0,181.0,26.0,son,son
+13949,13951,,,-1,-1," is a
+	single word: ""Thanks.""
+",my,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,12733.0,181.0,34.0,12734.0,181.0,35.0,my,my
+13963,13968,,,-1,-1," is a
+	single word: ""Thanks.""
+",FLOYD,		      THE SHAWSHANK REDEMPTI,7,FLOYD,False,False,True,False,False,False,False,12741.0,182.0,0.0,12745.0,182.0,4.0,FLOYD,FLOYD
+13971,13974,,,-1,-1," is a
+	single word: ""Thanks.""
+",You,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,12746.0,183.0,0.0,12748.0,183.0,2.0,You,You
+13988,13991,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,12763.0,183.0,17.0,12765.0,183.0,19.0,you,you
+14006,14013,,,-1,-1," is a
+	single word: ""Thanks.""
+",HEYWOOD,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,12775.0,184.0,0.0,12781.0,184.0,6.0,HEYWOOD,HEYWOOD
+14016,14017,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,12782.0,185.0,0.0,12782.0,185.0,0.0,I,I
+14022,14041,,,-1,-1," is a
+	single word: ""Thanks.""
+",that chubby fat-ass,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,12788.0,185.0,6.0,12806.0,185.0,24.0,that chubby fat-ass,that chubby fat-ass
+14084,14086,,,-1,-1," is a
+	single word: ""Thanks.""
+",me,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,12848.0,185.0,66.0,12849.0,185.0,67.0,me,me
+14119,14122,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,12875.0,186.0,0.0,12877.0,186.0,2.0,RED,RED
+14151,14158,,,-1,-1," is a
+	single word: ""Thanks.""
+",Fat-Ass,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,12904.0,187.0,26.0,12910.0,187.0,32.0,Fat-Ass,Fat-Ass
+14194,14198,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,12942.0,188.0,18.0,12945.0,188.0,21.0,Andy,Andy
+14496,14500,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,13239.0,188.0,315.0,13242.0,188.0,318.0,Andy,Andy
+14507,14510,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,13244.0,189.0,0.0,13246.0,189.0,2.0,RED,RED
+14520,14521,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,13247.0,190.0,0.0,13247.0,190.0,0.0,I,I
+14533,14534,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,13260.0,190.0,13.0,13260.0,190.0,13.0,I,I
+14558,14562,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,13283.0,190.0,36.0,13286.0,190.0,39.0,Andy,Andy
+14574,14575,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,13299.0,190.0,52.0,13299.0,190.0,52.0,I,I
+14589,14592,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,13314.0,190.0,67.0,13316.0,190.0,69.0,him,him
+14596,14598,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,13319.0,190.0,72.0,13320.0,190.0,73.0,He,He
+14652,14654,,,-1,-1," is a
+	single word: ""Thanks.""
+",he,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,13373.0,190.0,126.0,13374.0,190.0,127.0,he,he
+14737,14740,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,13454.0,190.0,207.0,13456.0,190.0,209.0,him,him
+14758,14760,,,-1,-1," is a
+	single word: ""Thanks.""
+",my,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,13473.0,190.0,226.0,13474.0,190.0,227.0,my,my
+14783,14790,,,-1,-1," is a
+	single word: ""Thanks.""
+",the man,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,True,False,13496.0,190.0,249.0,13502.0,190.0,255.0,the man,the man
+14797,14802,,,-1,-1," is a
+	single word: ""Thanks.""
+",SKEET,		      THE SHAWSHANK REDEMPTI,24,SKEET,False,False,True,False,False,False,False,13508.0,192.0,0.0,13512.0,192.0,4.0,SKEET,SKEET
+14815,14818,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,13523.0,193.0,10.0,13525.0,193.0,12.0,Red,Red
+14825,14828,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,13527.0,194.0,0.0,13529.0,194.0,2.0,RED,RED
+14831,14854,,,-1,-1," is a
+	single word: ""Thanks.""
+",Little fella on the end,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,True,False,13530.0,195.0,0.0,13552.0,195.0,22.0,Little fella on the end,Little fella on the end
+14870,14871,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,13567.0,195.0,37.0,13567.0,195.0,37.0,I,I
+14908,14914,,,-1,-1," is a
+	single word: ""Thanks.""
+",SNOOZE,		      THE SHAWSHANK REDEMPTI,12,SNOOZE,False,False,True,False,False,False,False,13599.0,196.0,0.0,13604.0,196.0,5.0,SNOOZE,SNOOZE
+14932,14935,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,13614.0,198.0,0.0,13616.0,198.0,2.0,RED,RED
+14969,14971,,,-1,-1," is a
+	single word: ""Thanks.""
+",me,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,13648.0,199.0,31.0,13649.0,199.0,32.0,me,me
+15000,15005,,,-1,-1," is a
+	single word: ""Thanks.""
+",Floyd,		      THE SHAWSHANK REDEMPTI,7,FLOYD,False,False,True,False,False,False,False,13658.0,199.0,41.0,13662.0,199.0,45.0,Floyd,Floyd
+15007,15012,,,-1,-1," is a
+	single word: ""Thanks.""
+",Skeet,		      THE SHAWSHANK REDEMPTI,24,SKEET,False,False,True,False,False,False,False,13665.0,199.0,48.0,13669.0,199.0,52.0,Skeet,Skeet
+15014,15017,,,-1,-1," is a
+	single word: ""Thanks.""
+",Joe,		      THE SHAWSHANK REDEMPTI,21,JIGGER,False,False,True,True,False,False,False,13672.0,199.0,55.0,13674.0,199.0,57.0,Joe,Joe
+15019,15026,,,-1,-1," is a
+	single word: ""Thanks.""
+",Heywood,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,13677.0,199.0,60.0,13683.0,199.0,66.0,Heywood,Heywood
+15115,15118,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,13777.0,201.0,0.0,13779.0,201.0,2.0,Red,Red
+15127,15130,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,13789.0,201.0,12.0,13791.0,201.0,14.0,his,his
+15410,15416,,,-1,-1," is a
+	single word: ""Thanks.""
+",HADLEY,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,14046.0,207.0,0.0,14051.0,207.0,5.0,HADLEY,HADLEY
+15433,15453,,,-1,-1," is a
+	single word: ""Thanks.""
+",WARDEN SAMUEL NORTON,		      THE SHAWSHANK REDEMPTI,26,WARDEN SAMUEL NORTON,False,False,True,False,False,False,False,14063.0,209.0,0.0,14082.0,209.0,19.0,WARDEN SAMUEL NORTON,WARDEN SAMUEL NORTON
+15469,15530,,,-1,-1," is a
+	single word: ""Thanks.""
+","a colorless man in a gray
+	suit and a church pin in his lapel",		      THE SHAWSHANK REDEMPTI,26,WARDEN SAMUEL NORTON,False,False,True,True,False,True,False,14099.0,209.0,36.0,14158.0,209.0,95.0,a colorless man in a gray suit and a church pin in his lapel,"a colorless man in a gray
+	suit and a church pin in his lapel"
+15521,15524,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,26,WARDEN SAMUEL NORTON,False,False,True,False,False,False,False,14150.0,209.0,87.0,14152.0,209.0,89.0,his,his
+15532,15534,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,26,WARDEN SAMUEL NORTON,False,False,True,False,False,False,False,14161.0,209.0,98.0,14162.0,209.0,99.0,He,He
+15546,15548,,,-1,-1," is a
+	single word: ""Thanks.""
+",he,		      THE SHAWSHANK REDEMPTI,26,WARDEN SAMUEL NORTON,False,False,True,False,False,False,False,14175.0,209.0,112.0,14176.0,209.0,113.0,he,he
+15572,15574,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,26,WARDEN SAMUEL NORTON,False,False,True,False,False,False,False,14200.0,209.0,137.0,14201.0,209.0,138.0,He,He
+15622,15628,,,-1,-1," is a
+	single word: ""Thanks.""
+",NORTON,		      THE SHAWSHANK REDEMPTI,26,WARDEN SAMUEL NORTON,False,False,True,False,False,False,False,14244.0,210.0,0.0,14249.0,210.0,5.0,NORTON,NORTON
+15639,15673,,,-1,-1," is a
+	single word: ""Thanks.""
+","Mr. Hadley, captain of the
+		guard",		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,True,False,False,14258.0,211.0,8.0,14289.0,211.0,39.0,"Mr. Hadley, captain of the guard","Mr. Hadley, captain of the
+		guard"
+15680,15702,,,-1,-1," is a
+	single word: ""Thanks.""
+","Mr. Norton, the warden",		      THE SHAWSHANK REDEMPTI,26,WARDEN SAMUEL NORTON,False,False,True,False,True,False,False,14297.0,211.0,47.0,14318.0,211.0,68.0,"Mr. Norton, the warden","Mr. Norton, the warden"
+15762,15764,,,-1,-1," is a
+	single word: ""Thanks.""
+",me,		      THE SHAWSHANK REDEMPTI,26,WARDEN SAMUEL NORTON,False,False,True,False,False,False,False,14375.0,211.0,125.0,14376.0,211.0,126.0,me,me
+15801,15802,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,26,WARDEN SAMUEL NORTON,False,False,True,False,False,False,False,14412.0,211.0,162.0,14412.0,211.0,162.0,I,I
+15852,15854,,,-1,-1," is a
+	single word: ""Thanks.""
+",my,		      THE SHAWSHANK REDEMPTI,26,WARDEN SAMUEL NORTON,False,False,True,False,False,False,False,14459.0,211.0,209.0,14460.0,211.0,210.0,my,my
+15938,15941,,,-1,-1," is a
+	single word: ""Thanks.""
+",CON,		      THE SHAWSHANK REDEMPTI,6,CON ASKING ABOUT EATING,False,False,True,False,False,True,False,14535.0,212.0,0.0,14537.0,212.0,2.0,CON,CON
+15970,15978,,,-1,-1," is a
+	single word: ""Thanks.""
+",Norton's,		      THE SHAWSHANK REDEMPTI,26,WARDEN SAMUEL NORTON,False,False,True,False,False,False,False,14561.0,214.0,8.0,14568.0,214.0,15.0,Norton's,Norton's
+15987,15993,,,-1,-1," is a
+	single word: ""Thanks.""
+",Hadley,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,14578.0,214.0,25.0,14583.0,214.0,30.0,Hadley,Hadley
+16006,16013,,,-1,-1," is a
+	single word: ""Thanks.""
+",the con,		      THE SHAWSHANK REDEMPTI,6,CON ASKING ABOUT EATING,False,False,True,False,False,True,False,14597.0,214.0,44.0,14603.0,214.0,50.0,the con,the con
+16036,16039,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,6,CON ASKING ABOUT EATING,False,False,True,False,False,False,False,14626.0,214.0,73.0,14628.0,214.0,75.0,his,his
+16051,16057,,,-1,-1," is a
+	single word: ""Thanks.""
+",HADLEY,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,14635.0,215.0,0.0,14640.0,215.0,5.0,HADLEY,HADLEY
+16060,16063,,,-1,-1," is a
+	single word: ""Thanks.""
+",YOU,		      THE SHAWSHANK REDEMPTI,6,CON ASKING ABOUT EATING,False,False,True,False,False,False,False,14641.0,216.0,0.0,14643.0,216.0,2.0,YOU,YOU
+16080,16083,,,-1,-1," is a
+	single word: ""Thanks.""
+",YOU,		      THE SHAWSHANK REDEMPTI,6,CON ASKING ABOUT EATING,False,False,True,False,False,False,False,14661.0,216.0,20.0,14663.0,216.0,22.0,YOU,YOU
+16089,16092,,,-1,-1," is a
+	single word: ""Thanks.""
+",YOU,		      THE SHAWSHANK REDEMPTI,6,CON ASKING ABOUT EATING,False,False,True,False,False,False,False,14670.0,216.0,29.0,14672.0,216.0,31.0,YOU,YOU
+16112,16115,,,-1,-1," is a
+	single word: ""Thanks.""
+",YOU,		      THE SHAWSHANK REDEMPTI,6,CON ASKING ABOUT EATING,False,False,True,False,False,False,False,14691.0,216.0,50.0,14693.0,216.0,52.0,YOU,YOU
+16122,16125,,,-1,-1," is a
+	single word: ""Thanks.""
+",YOU,		      THE SHAWSHANK REDEMPTI,6,CON ASKING ABOUT EATING,False,False,True,False,False,False,False,14701.0,216.0,60.0,14703.0,216.0,62.0,YOU,YOU
+16145,16148,,,-1,-1," is a
+	single word: ""Thanks.""
+",YOU,		      THE SHAWSHANK REDEMPTI,6,CON ASKING ABOUT EATING,False,False,True,False,False,False,False,14722.0,216.0,81.0,14724.0,216.0,83.0,YOU,YOU
+16155,16158,,,-1,-1," is a
+	single word: ""Thanks.""
+",YOU,		      THE SHAWSHANK REDEMPTI,6,CON ASKING ABOUT EATING,False,False,True,False,False,False,False,14732.0,216.0,91.0,14734.0,216.0,93.0,YOU,YOU
+16179,16182,,,-1,-1," is a
+	single word: ""Thanks.""
+",YOU,		      THE SHAWSHANK REDEMPTI,6,CON ASKING ABOUT EATING,False,False,True,False,False,False,False,14754.0,216.0,113.0,14756.0,216.0,115.0,YOU,YOU
+16190,16221,,,-1,-1," is a
+	single word: ""Thanks.""
+","YOU MAGGOT-
+		DICK MOTHERFUCKER",		      THE SHAWSHANK REDEMPTI,6,CON ASKING ABOUT EATING,False,False,True,False,False,True,False,14765.0,216.0,124.0,14793.0,216.0,152.0,YOU MAGGOT- DICK MOTHERFUCKER,"YOU MAGGOT-
+		DICK MOTHERFUCKER"
+16225,16231,,,-1,-1," is a
+	single word: ""Thanks.""
+",Hadley,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,14795.0,217.0,0.0,14800.0,217.0,5.0,Hadley,Hadley
+16248,16251,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,14818.0,217.0,23.0,14820.0,217.0,25.0,his,his
+16262,16271,,,-1,-1," is a
+	single word: ""Thanks.""
+",the con's,		      THE SHAWSHANK REDEMPTI,6,CON ASKING ABOUT EATING,False,False,True,False,False,True,False,14832.0,217.0,37.0,14840.0,217.0,45.0,the con's,the con's
+16279,16287,,,-1,-1," is a
+	single word: ""Thanks.""
+","The
+	man",		      THE SHAWSHANK REDEMPTI,6,CON ASKING ABOUT EATING,False,False,True,False,False,True,False,14849.0,217.0,54.0,14855.0,217.0,60.0,The man,"The
+	man"
+16297,16300,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,6,CON ASKING ABOUT EATING,False,False,True,False,False,False,False,14866.0,217.0,71.0,14868.0,217.0,73.0,his,his
+16330,16337,,,-1,-1," is a
+	single word: ""Thanks.""
+",himself,		      THE SHAWSHANK REDEMPTI,6,CON ASKING ABOUT EATING,False,False,True,False,False,False,False,14899.0,217.0,104.0,14905.0,217.0,110.0,himself,himself
+16340,16346,,,-1,-1," is a
+	single word: ""Thanks.""
+",Hadley,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,14908.0,217.0,113.0,14913.0,217.0,118.0,Hadley,Hadley
+16353,16356,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,14921.0,217.0,126.0,14923.0,217.0,128.0,his,his
+16366,16374,,,-1,-1," is a
+	single word: ""Thanks.""
+",Norton's,		      THE SHAWSHANK REDEMPTI,26,WARDEN SAMUEL NORTON,False,False,True,False,False,False,False,14934.0,217.0,139.0,14941.0,217.0,146.0,Norton's,Norton's
+16400,16406,,,-1,-1," is a
+	single word: ""Thanks.""
+",NORTON,		      THE SHAWSHANK REDEMPTI,26,WARDEN SAMUEL NORTON,False,False,True,False,False,False,False,14962.0,218.0,0.0,14967.0,218.0,5.0,NORTON,NORTON
+16452,16453,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,26,WARDEN SAMUEL NORTON,False,False,True,False,False,False,False,14989.0,219.0,21.0,14989.0,219.0,21.0,I,I
+16641,16647,,,-1,-1," is a
+	single word: ""Thanks.""
+",HADLEY,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,15171.0,221.0,0.0,15176.0,221.0,5.0,HADLEY,HADLEY
+16677,16678,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,15204.0,222.0,27.0,15204.0,222.0,27.0,I,I
+16719,16720,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,15244.0,222.0,67.0,15244.0,222.0,67.0,I,I
+16790,16796,,,-1,-1," is a
+	single word: ""Thanks.""
+",HADLEY,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,15306.0,224.0,0.0,15311.0,224.0,5.0,HADLEY,HADLEY
+16828,16834,,,-1,-1," is a
+	single word: ""Thanks.""
+",Hadley,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,15338.0,226.0,0.0,15343.0,226.0,5.0,Hadley,Hadley
+16842,16855,,,-1,-1," is a
+	single word: ""Thanks.""
+",the FIRST CON,		      THE SHAWSHANK REDEMPTI,20,CON WASHED FIRST,False,False,False,False,False,True,False,15352.0,226.0,14.0,15364.0,226.0,26.0,the FIRST CON,the FIRST CON
+16931,16938,,,-1,-1," is a
+	single word: ""Thanks.""
+",The con,		      THE SHAWSHANK REDEMPTI,20,CON WASHED FIRST,False,False,False,False,False,True,False,15440.0,226.0,102.0,15446.0,226.0,108.0,The con,The con
+17044,17051,,,-1,-1," is a
+	single word: ""Thanks.""
+",the con,		      THE SHAWSHANK REDEMPTI,20,CON WASHED FIRST,False,False,False,False,False,True,False,15551.0,226.0,213.0,15557.0,226.0,219.0,the con,the con
+17069,17075,,,-1,-1," is a
+	single word: ""Thanks.""
+",HADLEY,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,15570.0,227.0,0.0,15575.0,227.0,5.0,HADLEY,HADLEY
+17086,17104,,,-1,-1," is a
+	single word: ""Thanks.""
+",that piece of shit,		      THE SHAWSHANK REDEMPTI,20,CON WASHED FIRST,False,False,False,False,False,True,False,15584.0,228.0,8.0,15601.0,228.0,25.0,that piece of shit,that piece of shit
+17123,17130,,,-1,-1," is a
+	single word: ""Thanks.""
+",The con,		      THE SHAWSHANK REDEMPTI,20,CON WASHED FIRST,False,False,False,False,False,True,False,15616.0,229.0,0.0,15622.0,229.0,6.0,The con,The con
+17192,17195,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,20,CON WASHED FIRST,False,False,False,False,False,False,False,15684.0,229.0,68.0,15686.0,229.0,70.0,him,him
+17240,17243,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,20,CON WASHED FIRST,False,False,False,False,False,False,False,15732.0,229.0,116.0,15734.0,229.0,118.0,his,his
+17251,17253,,,-1,-1," is a
+	single word: ""Thanks.""
+",he,		      THE SHAWSHANK REDEMPTI,20,CON WASHED FIRST,False,False,False,False,False,False,False,15742.0,229.0,126.0,15743.0,229.0,127.0,he,he
+17269,17280,,,-1,-1," is a
+	single word: ""Thanks.""
+",a trustee's,		      THE SHAWSHANK REDEMPTI,25,TRUSTEE,False,False,False,True,False,True,False,15760.0,229.0,144.0,15770.0,229.0,154.0,a trustee's,a trustee's
+17287,17298,,,-1,-1," is a
+	single word: ""Thanks.""
+",The TRUSTEE,		      THE SHAWSHANK REDEMPTI,25,TRUSTEE,False,False,False,False,False,True,False,15778.0,229.0,162.0,15788.0,229.0,172.0,The TRUSTEE,The TRUSTEE
+17508,17519,,,-1,-1," is a
+	single word: ""Thanks.""
+",A naked CON,		      THE SHAWSHANK REDEMPTI,32,NAKED CON,False,False,False,False,False,True,False,15991.0,231.0,0.0,16001.0,231.0,10.0,A naked CON,A naked CON
+17533,17541,,,-1,-1," is a
+	single word: ""Thanks.""
+",a DOCTOR,		      THE SHAWSHANK REDEMPTI,18,DOCTOR,False,False,True,False,False,True,False,16016.0,231.0,25.0,16023.0,231.0,32.0,a DOCTOR,a DOCTOR
+17592,17595,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,32,NAKED CON,False,False,False,False,False,False,False,16074.0,231.0,83.0,16076.0,231.0,85.0,his,his
+17631,17637,,,-1,-1," is a
+	single word: ""Thanks.""
+",DOCTOR,		      THE SHAWSHANK REDEMPTI,18,DOCTOR,False,False,True,False,False,True,False,16107.0,232.0,0.0,16112.0,232.0,5.0,DOCTOR,DOCTOR
+17653,17660,,,-1,-1," is a
+	single word: ""Thanks.""
+",The con,		      THE SHAWSHANK REDEMPTI,32,NAKED CON,False,False,False,False,False,True,False,16123.0,234.0,0.0,16129.0,234.0,6.0,The con,The con
+17667,17674,,,-1,-1," is a
+	single word: ""Thanks.""
+",A GUARD,		      THE SHAWSHANK REDEMPTI,9,GUARD,False,False,False,False,False,True,False,16137.0,234.0,14.0,16143.0,234.0,20.0,A GUARD,A GUARD
+17694,17697,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,9,GUARD,False,False,False,False,False,False,False,16164.0,234.0,41.0,16166.0,234.0,43.0,his,his
+17712,17715,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,32,NAKED CON,False,False,False,False,False,False,False,16182.0,234.0,59.0,16184.0,234.0,61.0,his,his
+17734,17737,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,32,NAKED CON,False,False,False,False,False,False,False,16203.0,234.0,80.0,16205.0,234.0,82.0,his,his
+17753,17757,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,16222.0,234.0,99.0,16225.0,234.0,102.0,Andy,Andy
+17770,17772,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,16239.0,234.0,116.0,16240.0,234.0,117.0,He,He
+17955,17963,,,-1,-1," is a
+	single word: ""Thanks.""
+",CHAPLAIN,		      THE SHAWSHANK REDEMPTI,16,CHAPLAIN,False,True,False,False,False,False,False,16410.0,237.0,0.0,16417.0,237.0,7.0,CHAPLAIN,CHAPLAIN
+17983,17985,,,-1,-1," is a
+	single word: ""Thanks.""
+",me,		      THE SHAWSHANK REDEMPTI,16,CHAPLAIN,False,True,False,True,False,False,False,16428.0,238.0,10.0,16429.0,238.0,11.0,me,me
+18030,18032,,,-1,-1," is a
+	single word: ""Thanks.""
+",me,		      THE SHAWSHANK REDEMPTI,16,CHAPLAIN,False,True,False,True,False,False,False,16473.0,238.0,55.0,16474.0,238.0,56.0,me,me
+18073,18075,,,-1,-1," is a
+	single word: ""Thanks.""
+",my,		      THE SHAWSHANK REDEMPTI,16,CHAPLAIN,False,True,False,True,False,False,False,16514.0,238.0,96.0,16515.0,238.0,97.0,my,my
+18194,18198,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,16633.0,241.0,62.0,16636.0,241.0,65.0,Andy,Andy
+18441,18444,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,16871.0,242.0,0.0,16873.0,242.0,2.0,RED,RED
+18667,18670,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,17078.0,245.0,0.0,17080.0,245.0,2.0,Red,Red
+18684,18687,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,17095.0,245.0,17.0,17097.0,245.0,19.0,his,his
+18750,18753,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,17160.0,245.0,82.0,17162.0,245.0,84.0,his,his
+18768,18771,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,17172.0,246.0,0.0,17174.0,246.0,2.0,RED,RED
+19102,19106,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,17483.0,249.0,46.0,17486.0,249.0,49.0,Andy,Andy
+19164,19167,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,17538.0,250.0,0.0,17540.0,250.0,2.0,RED,RED
+19337,19341,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,17694.0,253.0,0.0,17697.0,253.0,3.0,Andy,Andy
+19400,19403,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,17751.0,254.0,0.0,17753.0,254.0,2.0,RED,RED
+19454,19455,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,17793.0,255.0,39.0,17793.0,255.0,39.0,I,I
+19463,19464,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,17802.0,255.0,48.0,17802.0,255.0,48.0,I,I
+19483,19496,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy Dufresne,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,17820.0,255.0,66.0,17832.0,255.0,78.0,Andy Dufresne,Andy Dufresne
+19511,19517,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY'S,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,17850.0,257.0,10.0,17855.0,257.0,15.0,ANDY'S,ANDY'S
+19564,19568,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,17900.0,258.0,20.0,17903.0,258.0,23.0,Andy,Andy
+19581,19584,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,17917.0,258.0,37.0,17919.0,258.0,39.0,his,his
+19601,19604,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,17937.0,258.0,57.0,17939.0,258.0,59.0,his,his
+19615,19617,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,17950.0,258.0,70.0,17951.0,258.0,71.0,He,He
+19634,19637,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,17969.0,258.0,89.0,17971.0,258.0,91.0,his,his
+19671,19673,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,18005.0,258.0,125.0,18006.0,258.0,126.0,He,He
+19697,19704,,,-1,-1," is a
+	single word: ""Thanks.""
+",himself,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,18031.0,258.0,151.0,18037.0,258.0,157.0,himself,himself
+19922,19927,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED'S,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,18247.0,261.0,10.0,18251.0,261.0,14.0,RED'S,RED'S
+19954,19957,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,18276.0,262.0,0.0,18278.0,262.0,2.0,Red,Red
+19966,19969,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,18288.0,262.0,12.0,18290.0,262.0,14.0,his,his
+19981,19983,,,-1,-1," is a
+	single word: ""Thanks.""
+",us,		      THE SHAWSHANK REDEMPTI,11,READER,False,False,False,False,False,False,False,18303.0,262.0,27.0,18304.0,262.0,28.0,us,us
+19993,19996,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,18315.0,262.0,39.0,18317.0,262.0,41.0,his,his
+20049,20051,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,18370.0,262.0,94.0,18371.0,262.0,95.0,He,He
+20194,20211,,,-1,-1," is a
+	single word: ""Thanks.""
+",A CELLBLOCK GUARD,		      THE SHAWSHANK REDEMPTI,34,CELLBLOCK GUARD,False,False,True,False,False,True,False,18509.0,264.0,11.0,18525.0,264.0,27.0,A CELLBLOCK GUARD,A CELLBLOCK GUARD
+20237,20242,,,-1,-1," is a
+	single word: ""Thanks.""
+",GUARD,		      THE SHAWSHANK REDEMPTI,34,CELLBLOCK GUARD,False,False,True,False,False,True,False,18546.0,265.0,0.0,18550.0,265.0,4.0,GUARD,GUARD
+20319,20328,,,-1,-1," is a
+	single word: ""Thanks.""
+",The guard,		      THE SHAWSHANK REDEMPTI,34,CELLBLOCK GUARD,False,False,True,False,False,True,False,18622.0,267.0,33.0,18630.0,267.0,41.0,The guard,The guard
+20419,20424,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red's,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,18720.0,267.0,131.0,18724.0,267.0,135.0,Red's,Red's
+20436,20439,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,18731.0,268.0,0.0,18733.0,268.0,2.0,RED,RED
+20449,20450,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,18734.0,269.0,0.0,18734.0,269.0,0.0,I,I
+20460,20462,,,-1,-1," is a
+	single word: ""Thanks.""
+",my,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,18745.0,269.0,11.0,18746.0,269.0,12.0,my,my
+20507,20510,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,18791.0,271.0,0.0,18793.0,271.0,2.0,Red,Red
+20997,21000,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,19242.0,275.0,0.0,19244.0,275.0,2.0,RED,RED
+21443,21448,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED'S,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,19665.0,281.0,10.0,19669.0,281.0,14.0,RED'S,RED'S
+21475,21478,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,19694.0,282.0,0.0,19696.0,282.0,2.0,Red,Red
+21518,21520,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,19737.0,282.0,43.0,19738.0,282.0,44.0,He,He
+21528,21531,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,19747.0,282.0,53.0,19749.0,282.0,55.0,his,his
+21557,21563,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy's,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,19775.0,282.0,81.0,19780.0,282.0,86.0,Andy's,Andy's
+21596,21603,,,-1,-1," is a
+	single word: ""Thanks.""
+",HEYWOOD,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,19808.0,283.0,0.0,19814.0,283.0,6.0,HEYWOOD,HEYWOOD
+21613,21620,,,-1,-1," is a
+	single word: ""Thanks.""
+",Fat-Ass,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,19815.0,284.0,0.0,19821.0,284.0,6.0,Fat-Ass,Fat-Ass
+21627,21637,,,-1,-1," is a
+	single word: ""Thanks.""
+",Faaaat-Ass,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,19829.0,284.0,14.0,19838.0,284.0,23.0,Faaaat-Ass,Faaaat-Ass
+21653,21656,,,-1,-1," is a
+	single word: ""Thanks.""
+",boy,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,19853.0,284.0,38.0,19855.0,284.0,40.0,boy,boy
+21658,21659,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,19858.0,284.0,43.0,19858.0,284.0,43.0,I,I
+21665,21668,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,19865.0,284.0,50.0,19867.0,284.0,52.0,you,you
+21682,21683,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,19882.0,284.0,67.0,19882.0,284.0,67.0,I,I
+21695,21698,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,19893.0,284.0,78.0,19895.0,284.0,80.0,you,you
+21722,21725,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,19918.0,284.0,103.0,19920.0,284.0,105.0,you,you
+21768,21776,,,-1,-1," is a
+	single word: ""Thanks.""
+",FAT-ASS',		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,19966.0,286.0,10.0,19973.0,286.0,17.0,FAT-ASS',FAT-ASS'
+21803,21810,,,-1,-1," is a
+	single word: ""Thanks.""
+",Fat-Ass,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,19998.0,287.0,0.0,20004.0,287.0,6.0,Fat-Ass,Fat-Ass
+21857,21864,,,-1,-1," is a
+	single word: ""Thanks.""
+",HEYWOOD,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,20046.0,288.0,0.0,20052.0,288.0,6.0,HEYWOOD,HEYWOOD
+21903,21904,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,20082.0,289.0,29.0,20082.0,289.0,29.0,I,I
+21920,21923,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,20097.0,289.0,44.0,20099.0,289.0,46.0,you,you
+21937,21940,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,20114.0,289.0,61.0,20116.0,289.0,63.0,you,you
+21963,21964,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,20138.0,289.0,85.0,20138.0,289.0,85.0,I,I
+22016,22020,,,-1,-1," is a
+	single word: ""Thanks.""
+",your,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,20189.0,289.0,136.0,20192.0,289.0,139.0,your,your
+22080,22085,,,-1,-1," is a
+	single word: ""Thanks.""
+",yours,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,20249.0,289.0,196.0,20253.0,289.0,200.0,yours,yours
+22106,22113,,,-1,-1," is a
+	single word: ""Thanks.""
+",Fat-Ass,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,20276.0,291.0,15.0,20282.0,291.0,21.0,Fat-Ass,Fat-Ass
+22152,22159,,,-1,-1," is a
+	single word: ""Thanks.""
+",FAT-ASS,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,20316.0,292.0,0.0,20322.0,292.0,6.0,FAT-ASS,FAT-ASS
+22170,22171,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,20331.0,293.0,8.0,20331.0,293.0,8.0,I,I
+22191,22192,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,20352.0,293.0,29.0,20352.0,293.0,29.0,I,I
+22221,22230,,,-1,-1," is a
+	single word: ""Thanks.""
+",HEYWOOD'S,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,20378.0,294.0,10.0,20386.0,294.0,18.0,HEYWOOD'S,HEYWOOD'S
+22260,22267,,,-1,-1," is a
+	single word: ""Thanks.""
+",HEYWOOD,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,20411.0,295.0,0.0,20417.0,295.0,6.0,HEYWOOD,HEYWOOD
+22279,22286,,,-1,-1," is a
+	single word: ""Thanks.""
+",FAT-ASS,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,20427.0,296.0,9.0,20433.0,296.0,15.0,FAT-ASS,FAT-ASS
+22362,22369,,,-1,-1," is a
+	single word: ""Thanks.""
+",Fat-Ass,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,20505.0,298.0,21.0,20511.0,298.0,27.0,Fat-Ass,Fat-Ass
+22522,22529,,,-1,-1," is a
+	single word: ""Thanks.""
+",FAT-ASS,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,20647.0,301.0,0.0,20653.0,301.0,6.0,FAT-ASS,FAT-ASS
+22532,22533,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,20654.0,302.0,0.0,20654.0,302.0,0.0,I,I
+22549,22550,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,20671.0,302.0,17.0,20671.0,302.0,17.0,I,I
+22556,22558,,,-1,-1," is a
+	single word: ""Thanks.""
+",MY,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,20678.0,302.0,24.0,20679.0,302.0,25.0,MY,MY
+22677,22683,,,-1,-1," is a
+	single word: ""Thanks.""
+",Hadley,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,20782.0,306.0,43.0,20787.0,306.0,48.0,Hadley,Hadley
+22684,22691,,,-1,-1," is a
+	single word: ""Thanks.""
+",himself,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,20789.0,306.0,50.0,20795.0,306.0,56.0,himself,himself
+22698,22704,,,-1,-1," is a
+	single word: ""Thanks.""
+",HADLEY,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,20797.0,307.0,0.0,20802.0,307.0,5.0,HADLEY,HADLEY
+22810,22820,,,-1,-1," is a
+	single word: ""Thanks.""
+",the warden,		      THE SHAWSHANK REDEMPTI,26,WARDEN SAMUEL NORTON,False,False,True,False,False,True,False,20888.0,310.0,45.0,20897.0,310.0,54.0,the warden,the warden
+22827,22833,,,-1,-1," is a
+	single word: ""Thanks.""
+",HADLEY,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,20903.0,312.0,0.0,20908.0,312.0,5.0,HADLEY,HADLEY
+22877,22880,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,26,WARDEN SAMUEL NORTON,False,False,True,False,False,False,False,20927.0,313.0,18.0,20929.0,313.0,20.0,him,him
+22886,22888,,,-1,-1," is a
+	single word: ""Thanks.""
+",my,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,20936.0,313.0,27.0,20937.0,313.0,28.0,my,my
+22912,22918,,,-1,-1," is a
+	single word: ""Thanks.""
+",Hadley,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,20974.0,315.0,0.0,20979.0,315.0,5.0,Hadley,Hadley
+22930,22938,,,-1,-1," is a
+	single word: ""Thanks.""
+",Fat-Ass',		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,20992.0,315.0,18.0,20999.0,315.0,25.0,Fat-Ass',Fat-Ass'
+22978,22984,,,-1,-1," is a
+	single word: ""Thanks.""
+",HADLEY,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,21034.0,316.0,0.0,21039.0,316.0,5.0,HADLEY,HADLEY
+22994,22998,,,-1,-1," is a
+	single word: ""Thanks.""
+",your,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,21047.0,317.0,7.0,21050.0,317.0,10.0,your,your
+23011,23051,,,-1,-1," is a
+	single word: ""Thanks.""
+","you fat
+		fuckin' barrel of monkey-spunk",		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,21064.0,317.0,24.0,21101.0,317.0,61.0,you fat fuckin' barrel of monkey-spunk,"you fat
+		fuckin' barrel of monkey-spunk"
+23058,23065,,,-1,-1," is a
+	single word: ""Thanks.""
+",FAT-ASS,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,21103.0,318.0,0.0,21109.0,318.0,6.0,FAT-ASS,FAT-ASS
+23094,23095,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,21136.0,319.0,26.0,21136.0,319.0,26.0,I,I
+23129,23131,,,-1,-1," is a
+	single word: ""Thanks.""
+",ME,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,21169.0,319.0,59.0,21170.0,319.0,60.0,ME,ME
+23138,23144,,,-1,-1," is a
+	single word: ""Thanks.""
+",HADLEY,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,21172.0,320.0,0.0,21177.0,320.0,5.0,HADLEY,HADLEY
+23147,23148,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,21178.0,321.0,0.0,21178.0,321.0,0.0,I,I
+23225,23226,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,21252.0,321.0,74.0,21252.0,321.0,74.0,I,I
+23232,23235,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,21259.0,321.0,81.0,21261.0,321.0,83.0,you,you
+23250,23257,,,-1,-1," is a
+	single word: ""Thanks.""
+",Fat-Ass,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,21274.0,322.0,0.0,21280.0,322.0,6.0,Fat-Ass,Fat-Ass
+23305,23311,,,-1,-1," is a
+	single word: ""Thanks.""
+",Hadley,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,21329.0,322.0,55.0,21334.0,322.0,60.0,Hadley,Hadley
+23319,23322,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,21342.0,322.0,68.0,21344.0,322.0,70.0,his,his
+23401,23408,,,-1,-1," is a
+	single word: ""Thanks.""
+",Fat-Ass,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,21422.0,322.0,148.0,21428.0,322.0,154.0,Fat-Ass,Fat-Ass
+23433,23436,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,21453.0,322.0,179.0,21455.0,322.0,181.0,him,him
+23477,23484,,,-1,-1," is a
+	single word: ""Thanks.""
+",Fat-Ass,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,21497.0,322.0,223.0,21503.0,322.0,229.0,Fat-Ass,Fat-Ass
+23543,23545,,,-1,-1," is a
+	single word: ""Thanks.""
+",we,		      THE SHAWSHANK REDEMPTI,11,READER,False,False,False,False,False,False,False,21560.0,322.0,286.0,21561.0,322.0,287.0,we,we
+23603,23610,,,-1,-1," is a
+	single word: ""Thanks.""
+",Fat-ass,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,21619.0,322.0,345.0,21625.0,322.0,351.0,Fat-ass,Fat-ass
+23623,23629,,,-1,-1," is a
+	single word: ""Thanks.""
+",Hadley,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,21639.0,322.0,365.0,21644.0,322.0,370.0,Hadley,Hadley
+23680,23686,,,-1,-1," is a
+	single word: ""Thanks.""
+",HADLEY,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,21689.0,323.0,0.0,21694.0,323.0,5.0,HADLEY,HADLEY
+23693,23709,,,-1,-1," is a
+	single word: ""Thanks.""
+",this tub of shit,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,21699.0,324.0,4.0,21714.0,324.0,19.0,this tub of shit,this tub of shit
+23758,23759,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,21742.0,324.0,47.0,21742.0,324.0,47.0,I,I
+23935,23942,,,-1,-1," is a
+	single word: ""Thanks.""
+",Fat-Ass,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,21920.0,326.0,19.0,21926.0,326.0,25.0,Fat-Ass,Fat-Ass
+23970,23973,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,21955.0,326.0,54.0,21957.0,326.0,56.0,him,him
+24049,24054,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED'S,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,22031.0,327.0,10.0,22035.0,327.0,14.0,RED'S,RED'S
+24081,24084,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,22060.0,328.0,0.0,22062.0,328.0,2.0,Red,Red
+24183,24190,,,-1,-1," is a
+	single word: ""Thanks.""
+",Fat-Ass,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,22161.0,328.0,101.0,22167.0,328.0,107.0,Fat-Ass,Fat-Ass
+24207,24210,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,22179.0,329.0,0.0,22181.0,329.0,2.0,RED,RED
+24220,24223,,,-1,-1," is a
+	single word: ""Thanks.""
+",His,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,22182.0,330.0,0.0,22184.0,330.0,2.0,His,His
+24250,24265,,,-1,-1," is a
+	single word: ""Thanks.""
+","Andy
+		Dufresne",		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,22212.0,330.0,30.0,22224.0,330.0,42.0,Andy Dufresne,"Andy
+		Dufresne"
+24271,24273,,,-1,-1," is a
+	single word: ""Thanks.""
+",me,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,22231.0,330.0,49.0,22232.0,330.0,50.0,me,me
+24301,24303,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,22259.0,330.0,77.0,22260.0,330.0,78.0,He,He
+24520,24533,,,-1,-1," is a
+	single word: ""Thanks.""
+",the HEAD BULL,		      THE SHAWSHANK REDEMPTI,15,HEAD BULL,False,False,False,False,False,True,False,22475.0,333.0,143.0,22487.0,333.0,155.0,the HEAD BULL,the HEAD BULL
+24561,24564,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,22515.0,333.0,183.0,22517.0,333.0,185.0,Red,Red
+24574,24578,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,22528.0,333.0,196.0,22531.0,333.0,199.0,Andy,Andy
+24589,24592,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,22543.0,333.0,211.0,22545.0,333.0,213.0,him,him
+24598,24602,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,22552.0,333.0,220.0,22555.0,333.0,223.0,Andy,Andy
+24694,24698,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,22642.0,335.0,0.0,22645.0,335.0,3.0,Andy,Andy
+24757,24760,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,22704.0,335.0,62.0,22706.0,335.0,64.0,his,his
+24767,24769,,,-1,-1," is a
+	single word: ""Thanks.""
+",WE,		      THE SHAWSHANK REDEMPTI,11,READER,False,False,False,False,False,False,False,22714.0,335.0,72.0,22715.0,335.0,73.0,WE,WE
+24774,24778,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,22721.0,335.0,79.0,22724.0,335.0,82.0,ANDY,ANDY
+24827,24839,,,-1,-1," is a
+	single word: ""Thanks.""
+",BOGS DIAMOND,		      THE SHAWSHANK REDEMPTI,5,BOGS,False,False,True,False,False,False,False,22773.0,335.0,131.0,22784.0,335.0,142.0,BOGS DIAMOND,BOGS DIAMOND
+24844,24860,,,-1,-1," is a
+	single word: ""Thanks.""
+",ROOSTER MacBRIDE,		      THE SHAWSHANK REDEMPTI,8,ROOSTER,False,False,False,False,False,False,False,22790.0,335.0,148.0,22805.0,335.0,163.0,ROOSTER MacBRIDE,ROOSTER MacBRIDE
+24870,24874,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,22816.0,335.0,174.0,22819.0,335.0,177.0,Andy,Andy
+24883,24887,,,-1,-1," is a
+	single word: ""Thanks.""
+",Bogs,		      THE SHAWSHANK REDEMPTI,5,BOGS,False,False,True,False,False,False,False,22828.0,335.0,186.0,22831.0,335.0,189.0,Bogs,Bogs
+24894,24898,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,22839.0,335.0,197.0,22842.0,335.0,200.0,Andy,Andy
+24928,24931,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,5,BOGS,False,False,True,False,False,False,False,22873.0,335.0,231.0,22875.0,335.0,233.0,his,his
+24959,24966,,,-1,-1," is a
+	single word: ""Thanks.""
+",Rooster,		      THE SHAWSHANK REDEMPTI,8,ROOSTER,False,False,False,False,False,False,False,22903.0,335.0,261.0,22909.0,335.0,267.0,Rooster,Rooster
+24968,24975,,,-1,-1," is a
+	single word: ""Thanks.""
+",Rooster,		      THE SHAWSHANK REDEMPTI,8,ROOSTER,False,False,False,False,False,False,False,22912.0,335.0,270.0,22918.0,335.0,276.0,Rooster,Rooster
+24986,24990,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,22928.0,335.0,286.0,22931.0,335.0,289.0,Andy,Andy
+25017,25020,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,22959.0,335.0,317.0,22961.0,335.0,319.0,Red,Red
+25025,25028,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,22967.0,335.0,325.0,22969.0,335.0,327.0,his,his
+25115,25117,,,-1,-1," is a
+	single word: ""Thanks.""
+",he,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,23055.0,335.0,413.0,23056.0,335.0,414.0,he,he
+25127,25130,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,23067.0,335.0,425.0,23069.0,335.0,427.0,his,his
+25173,25176,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,23112.0,335.0,470.0,23114.0,335.0,472.0,his,his
+25183,25185,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,23122.0,335.0,480.0,23123.0,335.0,481.0,He,He
+25215,25218,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,23154.0,335.0,512.0,23156.0,335.0,514.0,his,his
+25255,25259,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,23192.0,335.0,550.0,23195.0,335.0,553.0,Andy,Andy
+25298,25311,,,-1,-1," is a
+	single word: ""Thanks.""
+",BROOKS HATLEN,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,23234.0,335.0,592.0,23246.0,335.0,604.0,BROOKS HATLEN,BROOKS HATLEN
+25351,25353,,,-1,-1," is a
+	single word: ""Thanks.""
+",he,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,23287.0,335.0,645.0,23288.0,335.0,646.0,he,he
+25406,25412,,,-1,-1," is a
+	single word: ""Thanks.""
+",BROOKS,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,23335.0,336.0,0.0,23340.0,336.0,5.0,BROOKS,BROOKS
+25415,25418,,,-1,-1," is a
+	single word: ""Thanks.""
+",You,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,23341.0,337.0,0.0,23343.0,337.0,2.0,You,You
+25440,25444,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,23360.0,338.0,0.0,23363.0,338.0,3.0,ANDY,ANDY
+25474,25480,,,-1,-1," is a
+	single word: ""Thanks.""
+",BROOKS,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,23385.0,340.0,0.0,23390.0,340.0,5.0,BROOKS,BROOKS
+25483,25486,,,-1,-1," is a
+	single word: ""Thanks.""
+",You,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,23391.0,341.0,0.0,23393.0,341.0,2.0,You,You
+25495,25499,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,23400.0,342.0,0.0,23403.0,342.0,3.0,Andy,Andy
+25521,25527,,,-1,-1," is a
+	single word: ""Thanks.""
+",Brooks,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,23426.0,342.0,26.0,23431.0,342.0,31.0,Brooks,Brooks
+25529,25535,,,-1,-1," is a
+	single word: ""Thanks.""
+",Brooks,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,23434.0,342.0,34.0,23439.0,342.0,39.0,Brooks,Brooks
+25569,25572,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,23473.0,342.0,73.0,23475.0,342.0,75.0,his,his
+25623,25627,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,23526.0,342.0,126.0,23529.0,342.0,129.0,Andy,Andy
+25663,25669,,,-1,-1," is a
+	single word: ""Thanks.""
+",BROOKS,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,23560.0,343.0,0.0,23565.0,343.0,5.0,BROOKS,BROOKS
+25694,25698,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,23585.0,345.0,0.0,23588.0,345.0,3.0,Andy,Andy
+25720,25726,,,-1,-1," is a
+	single word: ""Thanks.""
+",Brooks,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,23611.0,345.0,26.0,23616.0,345.0,31.0,Brooks,Brooks
+25736,25739,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,23627.0,345.0,42.0,23629.0,345.0,44.0,his,his
+25815,25819,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,23704.0,345.0,119.0,23707.0,345.0,122.0,Andy,Andy
+25852,25858,,,-1,-1," is a
+	single word: ""Thanks.""
+",BROOKS,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,23735.0,346.0,0.0,23740.0,346.0,5.0,BROOKS,BROOKS
+25983,25987,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,23854.0,348.0,0.0,23857.0,348.0,3.0,Andy,Andy
+26022,26029,,,-1,-1," is a
+	single word: ""Thanks.""
+",Heywood,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,23893.0,348.0,39.0,23899.0,348.0,45.0,Heywood,Heywood
+26047,26053,,,-1,-1," is a
+	single word: ""Thanks.""
+",JIGGER,		      THE SHAWSHANK REDEMPTI,21,JIGGER,False,False,True,False,False,False,False,23912.0,349.0,0.0,23917.0,349.0,5.0,JIGGER,JIGGER
+26073,26075,,,-1,-1," is a
+	single word: ""Thanks.""
+",he,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,23935.0,350.0,17.0,23936.0,350.0,18.0,he,he
+26088,26095,,,-1,-1," is a
+	single word: ""Thanks.""
+",HEYWOOD,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,23944.0,351.0,0.0,23950.0,351.0,6.0,HEYWOOD,HEYWOOD
+26162,26169,,,-1,-1," is a
+	single word: ""Thanks.""
+",Heywood,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,24010.0,353.0,0.0,24016.0,353.0,6.0,Heywood,Heywood
+26176,26179,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,24024.0,353.0,14.0,24026.0,353.0,16.0,his,his
+26263,26270,,,-1,-1," is a
+	single word: ""Thanks.""
+",HEYWOOD,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,24104.0,354.0,0.0,24110.0,354.0,6.0,HEYWOOD,HEYWOOD
+26306,26307,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,24144.0,355.0,33.0,24144.0,355.0,33.0,I,I
+26398,26405,,,-1,-1," is a
+	single word: ""Thanks.""
+",Heywood,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,24229.0,356.0,26.0,24235.0,356.0,32.0,Heywood,Heywood
+26472,26477,,,-1,-1," is a
+	single word: ""Thanks.""
+",FLOYD,		      THE SHAWSHANK REDEMPTI,7,FLOYD,False,False,True,False,False,False,False,24296.0,357.0,0.0,24300.0,357.0,4.0,FLOYD,FLOYD
+26486,26488,,,-1,-1," is a
+	single word: ""Thanks.""
+",my,		      THE SHAWSHANK REDEMPTI,7,FLOYD,False,False,True,False,False,False,False,24307.0,358.0,6.0,24308.0,358.0,7.0,my,my
+26501,26508,,,-1,-1," is a
+	single word: ""Thanks.""
+",HEYWOOD,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,24316.0,359.0,0.0,24322.0,359.0,6.0,HEYWOOD,HEYWOOD
+26516,26519,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,24328.0,360.0,5.0,24330.0,360.0,7.0,Red,Red
+26537,26541,,,-1,-1," is a
+	single word: ""Thanks.""
+",your,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,24349.0,360.0,26.0,24352.0,360.0,29.0,your,your
+26537,26549,,,-1,-1," is a
+	single word: ""Thanks.""
+","your
+		horse",		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,True,False,24349.0,360.0,26.0,24358.0,360.0,35.0,your horse,"your
+		horse"
+26582,26583,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,24390.0,360.0,67.0,24390.0,360.0,67.0,I,I
+26597,26617,,,-1,-1," is a
+	single word: ""Thanks.""
+","that horse of
+		mine",		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,24405.0,360.0,82.0,24422.0,360.0,99.0,that horse of mine,"that horse of
+		mine"
+26619,26620,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,24425.0,360.0,102.0,24425.0,360.0,102.0,I,I
+26629,26630,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,24435.0,360.0,112.0,24435.0,360.0,112.0,I,I
+26635,26643,,,-1,-1," is a
+	single word: ""Thanks.""
+",that boy,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,24441.0,360.0,118.0,24448.0,360.0,125.0,that boy,that boy
+26669,26670,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,24473.0,360.0,150.0,24473.0,360.0,150.0,I,I
+26685,26688,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,24483.0,361.0,0.0,24485.0,361.0,2.0,RED,RED
+26696,26699,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,24491.0,362.0,5.0,24493.0,362.0,7.0,him,him
+26707,26711,,,-1,-1," is a
+	single word: ""Thanks.""
+",your,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,24502.0,362.0,16.0,24505.0,362.0,19.0,your,your
+26734,26747,,,-1,-1," is a
+	single word: ""Thanks.""
+",cheap bastard,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,True,False,True,False,24527.0,362.0,41.0,24539.0,362.0,53.0,cheap bastard,cheap bastard
+26754,26761,,,-1,-1," is a
+	single word: ""Thanks.""
+",HEYWOOD,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,24541.0,363.0,0.0,24547.0,363.0,6.0,HEYWOOD,HEYWOOD
+26768,26774,,,-1,-1," is a
+	single word: ""Thanks.""
+",Tyrell,		      THE SHAWSHANK REDEMPTI,41,TYRELL,False,False,True,False,False,False,False,24552.0,364.0,4.0,24557.0,364.0,9.0,Tyrell,Tyrell
+26776,26779,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,41,TYRELL,False,False,True,False,False,False,False,24560.0,364.0,12.0,24562.0,364.0,14.0,you,you
+26819,26847,,,-1,-1," is a
+	single word: ""Thanks.""
+","that winnin' horse
+		of mine",		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,24601.0,364.0,53.0,24626.0,364.0,78.0,that winnin' horse of mine,"that winnin' horse
+		of mine"
+26843,26847,,,-1,-1," is a
+	single word: ""Thanks.""
+",mine,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,24623.0,364.0,75.0,24626.0,364.0,78.0,mine,mine
+26862,26868,,,-1,-1," is a
+	single word: ""Thanks.""
+",TYRELL,		      THE SHAWSHANK REDEMPTI,41,TYRELL,False,False,True,False,False,False,False,24636.0,365.0,0.0,24641.0,365.0,5.0,TYRELL,TYRELL
+26904,26910,,,-1,-1," is a
+	single word: ""Thanks.""
+",Hadley,		      THE SHAWSHANK REDEMPTI,3,BYRON HADLEY,False,False,True,False,False,False,False,24648.0,366.0,6.0,24653.0,366.0,11.0,Hadley,Hadley
+26918,26921,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,24662.0,366.0,20.0,24664.0,366.0,22.0,his,his
+26942,26945,,,-1,-1," is a
+	single word: ""Thanks.""
+",Doc,		      THE SHAWSHANK REDEMPTI,18,DOCTOR,False,False,True,False,False,True,False,24684.0,366.0,42.0,24686.0,366.0,44.0,Doc,Doc
+26981,26993,,,-1,-1," is a
+	single word: ""Thanks.""
+",Poor bastard,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,True,False,24721.0,366.0,79.0,24732.0,366.0,90.0,Poor bastard,Poor bastard
+27038,27040,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,41,TYRELL,False,False,True,False,False,False,False,24792.0,368.0,0.0,24793.0,368.0,1.0,He,He
+27048,27051,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,41,TYRELL,False,False,True,False,False,False,False,24802.0,368.0,10.0,24804.0,368.0,12.0,his,his
+27072,27075,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,41,TYRELL,False,False,True,False,False,False,False,24826.0,368.0,34.0,24828.0,368.0,36.0,his,his
+27103,27110,,,-1,-1," is a
+	single word: ""Thanks.""
+",Heywood,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,24856.0,368.0,64.0,24862.0,368.0,70.0,Heywood,Heywood
+27159,27163,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,24906.0,369.0,0.0,24909.0,369.0,3.0,ANDY,ANDY
+27175,27178,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,24919.0,370.0,9.0,24921.0,370.0,11.0,his,his
+27190,27197,,,-1,-1," is a
+	single word: ""Thanks.""
+",HEYWOOD,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,24928.0,371.0,0.0,24934.0,371.0,6.0,HEYWOOD,HEYWOOD
+27213,27216,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,24948.0,372.0,13.0,24950.0,372.0,15.0,you,you
+27227,27231,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,24956.0,373.0,0.0,24959.0,373.0,3.0,ANDY,ANDY
+27234,27235,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,24960.0,374.0,0.0,24960.0,374.0,0.0,I,I
+27265,27268,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,24991.0,374.0,31.0,24993.0,374.0,33.0,his,his
+27282,27289,,,-1,-1," is a
+	single word: ""Thanks.""
+",HEYWOOD,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,25000.0,375.0,0.0,25006.0,375.0,6.0,HEYWOOD,HEYWOOD
+27306,27309,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,25021.0,376.0,14.0,25023.0,376.0,16.0,you,you
+27316,27324,,,-1,-1," is a
+	single word: ""Thanks.""
+",new fish,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,True,False,25031.0,376.0,24.0,25038.0,376.0,31.0,new fish,new fish
+27368,27371,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,25061.0,376.0,54.0,25063.0,376.0,56.0,his,his
+27392,27394,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,27,HEYWOOD'S BET,False,False,True,False,False,False,False,25083.0,376.0,76.0,25084.0,376.0,77.0,He,He
+27501,27505,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,25201.0,379.0,53.0,25204.0,379.0,56.0,Andy,Andy
+27550,27552,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,25249.0,379.0,101.0,25250.0,379.0,102.0,He,He
+27566,27587,,,-1,-1," is a
+	single word: ""Thanks.""
+","BOB, the
+	con foreman",		      THE SHAWSHANK REDEMPTI,38,BOB,False,False,False,False,False,False,False,25265.0,379.0,117.0,25284.0,379.0,136.0,"BOB, the con foreman","BOB, the
+	con foreman"
+27596,27599,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,25294.0,379.0,146.0,25296.0,379.0,148.0,him,him
+27616,27619,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,25314.0,379.0,166.0,25316.0,379.0,168.0,him,him
+27712,27716,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,25405.0,381.0,39.0,25408.0,381.0,42.0,Andy,Andy
+27815,27818,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,25506.0,381.0,140.0,25508.0,381.0,142.0,his,his
+27839,27843,,,-1,-1," is a
+	single word: ""Thanks.""
+",Bogs,		      THE SHAWSHANK REDEMPTI,5,BOGS,False,False,True,False,False,False,False,25528.0,381.0,162.0,25531.0,381.0,165.0,Bogs,Bogs
+27894,27898,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,25583.0,381.0,217.0,25586.0,381.0,220.0,Andy,Andy
+27913,27920,,,-1,-1," is a
+	single word: ""Thanks.""
+",Rooster,		      THE SHAWSHANK REDEMPTI,8,ROOSTER,False,False,False,False,False,False,False,25601.0,381.0,235.0,25607.0,381.0,241.0,Rooster,Rooster
+27925,27929,,,-1,-1," is a
+	single word: ""Thanks.""
+",PETE,		      THE SHAWSHANK REDEMPTI,17,PETE,False,False,False,False,False,False,False,25613.0,381.0,247.0,25616.0,381.0,250.0,PETE,PETE
+27971,27975,,,-1,-1," is a
+	single word: ""Thanks.""
+",BOGS,		      THE SHAWSHANK REDEMPTI,5,BOGS,False,False,True,False,False,False,False,25654.0,381.0,288.0,25657.0,381.0,291.0,BOGS,BOGS
+27978,27981,,,-1,-1," is a
+	single word: ""Thanks.""
+",You,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,25659.0,381.0,293.0,25661.0,381.0,295.0,You,You
+28002,28005,,,-1,-1," is a
+	single word: ""Thanks.""
+",You,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,25683.0,381.0,317.0,25685.0,381.0,319.0,You,You
+28028,28032,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,25706.0,381.0,340.0,25709.0,381.0,343.0,Andy,Andy
+28058,28060,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,25736.0,381.0,370.0,25737.0,381.0,371.0,He,He
+28155,28159,,,-1,-1," is a
+	single word: ""Thanks.""
+",BOGS,		      THE SHAWSHANK REDEMPTI,5,BOGS,False,False,True,False,False,False,False,25826.0,382.0,0.0,25829.0,382.0,3.0,BOGS,BOGS
+28175,28176,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,5,BOGS,False,False,True,False,False,False,False,25843.0,383.0,13.0,25843.0,383.0,13.0,I,I
+28190,28194,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,25855.0,384.0,0.0,25858.0,384.0,3.0,Andy,Andy
+28229,28231,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,25894.0,384.0,39.0,25895.0,384.0,40.0,He,He
+28293,28299,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY'S,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,25955.0,385.0,10.0,25960.0,385.0,15.0,ANDY'S,ANDY'S
+28326,28330,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,25985.0,386.0,0.0,25988.0,386.0,3.0,Andy,Andy
+28439,28442,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,26093.0,388.0,17.0,26095.0,388.0,19.0,Red,Red
+28460,28467,,,-1,-1," is a
+	single word: ""Thanks.""
+",Heywood,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,26114.0,388.0,38.0,26120.0,388.0,44.0,Heywood,Heywood
+28472,28478,,,-1,-1," is a
+	single word: ""Thanks.""
+",Jigger,		      THE SHAWSHANK REDEMPTI,21,JIGGER,False,False,True,False,False,False,False,26126.0,388.0,50.0,26131.0,388.0,55.0,Jigger,Jigger
+28515,28518,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,26168.0,388.0,92.0,26170.0,388.0,94.0,Red,Red
+28527,28531,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,26180.0,388.0,104.0,26183.0,388.0,107.0,Andy,Andy
+28562,28566,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,26214.0,388.0,138.0,26217.0,388.0,141.0,Andy,Andy
+28603,28610,,,-1,-1," is a
+	single word: ""Thanks.""
+",Heywood,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,26254.0,388.0,178.0,26260.0,388.0,184.0,Heywood,Heywood
+28615,28621,,,-1,-1," is a
+	single word: ""Thanks.""
+",Jigger,		      THE SHAWSHANK REDEMPTI,21,JIGGER,False,False,True,False,False,False,False,26266.0,388.0,190.0,26271.0,388.0,195.0,Jigger,Jigger
+28644,28648,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,26289.0,389.0,0.0,26292.0,389.0,3.0,ANDY,ANDY
+28660,28663,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,,,,,,,,his
+28683,28696,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy Dufresne,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,26304.0,390.0,11.0,26316.0,390.0,23.0,Andy Dufresne,Andy Dufresne
+28700,28703,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,26333.0,392.0,0.0,26335.0,392.0,2.0,Red,Red
+28762,28765,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,26389.0,393.0,0.0,26391.0,393.0,2.0,RED,RED
+28768,28791,,,-1,-1," is a
+	single word: ""Thanks.""
+",The wife-killin' banker,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,True,False,26392.0,394.0,0.0,26414.0,394.0,22.0,The wife-killin' banker,The wife-killin' banker
+28798,28802,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,26416.0,395.0,0.0,26419.0,395.0,3.0,ANDY,ANDY
+28812,28815,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,26427.0,396.0,7.0,26429.0,396.0,9.0,you,you
+28832,28835,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,26441.0,397.0,0.0,26443.0,397.0,2.0,RED,RED
+28838,28839,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,26444.0,398.0,0.0,26444.0,398.0,0.0,I,I
+28845,28847,,,-1,-1," is a
+	single word: ""Thanks.""
+",my,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,26451.0,398.0,7.0,26452.0,398.0,8.0,my,my
+28875,28878,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,26479.0,398.0,35.0,26481.0,398.0,37.0,you,you
+28891,28895,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,26489.0,399.0,0.0,26492.0,399.0,3.0,ANDY,ANDY
+28898,28899,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,26493.0,400.0,0.0,26493.0,400.0,0.0,I,I
+28914,28917,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,26509.0,400.0,16.0,26511.0,400.0,18.0,you,you
+28928,28931,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,26517.0,401.0,0.0,26519.0,401.0,2.0,RED,RED
+28940,28943,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,26526.0,402.0,6.0,26528.0,402.0,8.0,you,you
+28975,28981,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy's,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,,,,,,,,Andy's
+29027,29030,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,26588.0,402.0,68.0,26590.0,402.0,70.0,you,you
+29042,29049,,,-1,-1," is a
+	single word: ""Thanks.""
+",Heywood,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,26603.0,402.0,83.0,26609.0,402.0,89.0,Heywood,Heywood
+29062,29065,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,26621.0,402.0,101.0,26623.0,402.0,103.0,you,you
+29074,29077,,,-1,-1," is a
+	single word: ""Thanks.""
+",boy,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,26633.0,402.0,113.0,26635.0,402.0,115.0,boy,boy
+29084,29091,,,-1,-1," is a
+	single word: ""Thanks.""
+",HEYWOOD,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,26652.0,404.0,0.0,26658.0,404.0,6.0,HEYWOOD,HEYWOOD
+29122,29124,,,-1,-1," is a
+	single word: ""Thanks.""
+",me,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,26687.0,405.0,28.0,26688.0,405.0,29.0,me,me
+29128,29131,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,26690.0,406.0,0.0,26692.0,406.0,2.0,Red,Red
+29138,29142,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,26700.0,406.0,10.0,26703.0,406.0,13.0,Andy,Andy
+29161,29165,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,26717.0,407.0,0.0,26720.0,407.0,3.0,ANDY,ANDY
+29183,29186,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,26736.0,408.0,15.0,26738.0,408.0,17.0,you,you
+29199,29202,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,26746.0,409.0,0.0,26748.0,409.0,2.0,RED,RED
+29216,29219,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,26760.0,410.0,11.0,26762.0,410.0,13.0,you,you
+29247,29250,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,26789.0,410.0,40.0,26791.0,410.0,42.0,you,you
+29257,29261,,,-1,-1," is a
+	single word: ""Thanks.""
+",your,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,26799.0,410.0,50.0,26802.0,410.0,53.0,your,your
+29316,29320,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,26849.0,411.0,0.0,26852.0,411.0,3.0,ANDY,ANDY
+29331,29334,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,26861.0,412.0,8.0,26863.0,412.0,10.0,you,you
+29347,29350,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,26871.0,413.0,0.0,26873.0,413.0,2.0,RED,RED
+29367,29369,,,-1,-1," is a
+	single word: ""Thanks.""
+",my,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,26888.0,414.0,14.0,26889.0,414.0,15.0,my,my
+29382,29389,,,-1,-1," is a
+	single word: ""Thanks.""
+",Heywood,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,26900.0,415.0,0.0,26906.0,415.0,6.0,Heywood,Heywood
+29397,29403,,,-1,-1," is a
+	single word: ""Thanks.""
+",Jigger,		      THE SHAWSHANK REDEMPTI,21,JIGGER,False,False,True,False,False,False,False,26915.0,415.0,15.0,26920.0,415.0,20.0,Jigger,Jigger
+29417,29419,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,26935.0,415.0,35.0,26936.0,415.0,36.0,He,He
+29467,29473,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy's,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,26984.0,415.0,84.0,26989.0,415.0,89.0,Andy's,Andy's
+29480,29484,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,26997.0,415.0,97.0,27000.0,415.0,100.0,Andy,Andy
+29522,29525,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,27038.0,415.0,138.0,27040.0,415.0,140.0,his,his
+29560,29562,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,27076.0,415.0,176.0,27077.0,415.0,177.0,He,He
+29607,29616,,,-1,-1," is a
+	single word: ""Thanks.""
+",Heywood's,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,27122.0,415.0,222.0,27130.0,415.0,230.0,Heywood's,Heywood's
+29624,29631,,,-1,-1," is a
+	single word: ""Thanks.""
+",Heywood,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,27139.0,415.0,239.0,27145.0,415.0,245.0,Heywood,Heywood
+29671,29674,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,0,HEYWOOD,False,False,True,False,False,False,False,27185.0,415.0,285.0,27187.0,415.0,287.0,his,his
+29693,29697,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,27201.0,416.0,0.0,27204.0,416.0,3.0,ANDY,ANDY
+29700,29701,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,27205.0,417.0,0.0,27205.0,417.0,0.0,I,I
+29713,29716,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,27218.0,417.0,13.0,27220.0,417.0,15.0,you,you
+29762,29765,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,27259.0,418.0,0.0,27261.0,418.0,2.0,RED,RED
+29768,29769,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,27262.0,419.0,0.0,27262.0,419.0,0.0,I,I
+29849,29851,,,-1,-1," is a
+	single word: ""Thanks.""
+",my,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,27339.0,419.0,77.0,27340.0,419.0,78.0,my,my
+29879,29880,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,27367.0,419.0,105.0,27367.0,419.0,105.0,I,I
+29895,29899,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,27377.0,420.0,0.0,27380.0,420.0,3.0,ANDY,ANDY
+29902,29903,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,27381.0,421.0,0.0,27381.0,421.0,0.0,I,I
+29914,29917,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,27393.0,421.0,12.0,27395.0,421.0,14.0,you,you
+29928,29930,,,-1,-1," is a
+	single word: ""Thanks.""
+",me,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,27407.0,421.0,26.0,27408.0,421.0,27.0,me,me
+29953,29956,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,27424.0,422.0,0.0,27426.0,422.0,2.0,RED,RED
+29984,29988,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,27446.0,424.0,0.0,27449.0,424.0,3.0,ANDY,ANDY
+29991,29994,,,-1,-1," is a
+	single word: ""Thanks.""
+",You,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,27450.0,425.0,0.0,27452.0,425.0,2.0,You,You
+30000,30004,,,-1,-1," is a
+	single word: ""Thanks.""
+",your,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,27459.0,425.0,9.0,27462.0,425.0,12.0,your,your
+30036,30040,,,-1,-1," is a
+	single word: ""Thanks.""
+",your,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,27493.0,425.0,43.0,27496.0,425.0,46.0,your,your
+30057,30060,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,27507.0,426.0,0.0,27509.0,426.0,2.0,RED,RED
+30066,30069,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,27513.0,427.0,3.0,27515.0,427.0,5.0,you,you
+30091,30092,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,27538.0,427.0,28.0,27538.0,427.0,28.0,I,I
+30119,30120,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,27564.0,427.0,54.0,27564.0,427.0,54.0,I,I
+30203,30207,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,27638.0,428.0,0.0,27641.0,428.0,3.0,ANDY,ANDY
+30409,30412,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,27825.0,430.0,0.0,27827.0,430.0,2.0,RED,RED
+30424,30428,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,27834.0,432.0,0.0,27837.0,432.0,3.0,Andy,Andy
+30445,30448,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,27855.0,432.0,21.0,27857.0,432.0,23.0,Red,Red
+30457,30460,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,27867.0,432.0,33.0,27869.0,432.0,35.0,him,him
+30462,30466,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,27872.0,432.0,38.0,27875.0,432.0,41.0,Andy,Andy
+30513,30516,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,27922.0,432.0,88.0,27924.0,432.0,90.0,his,his
+30524,30526,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,27933.0,432.0,99.0,27934.0,432.0,100.0,He,He
+30588,30590,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,27996.0,432.0,162.0,27997.0,432.0,163.0,He,He
+30604,30607,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,28012.0,432.0,178.0,28014.0,432.0,180.0,Red,Red
+30614,30617,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,28016.0,433.0,0.0,28018.0,433.0,2.0,RED,RED
+30633,30637,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28026.0,435.0,0.0,28029.0,435.0,3.0,ANDY,ANDY
+30782,30785,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,28160.0,437.0,0.0,28162.0,437.0,2.0,RED,RED
+30797,30801,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28166.0,439.0,0.0,28169.0,439.0,3.0,ANDY,ANDY
+30804,30805,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28170.0,440.0,0.0,28170.0,440.0,0.0,I,I
+30830,30831,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28196.0,440.0,26.0,28196.0,440.0,26.0,I,I
+30842,30844,,,-1,-1," is a
+	single word: ""Thanks.""
+",my,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28206.0,440.0,36.0,28207.0,440.0,37.0,my,my
+30855,30856,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28219.0,440.0,49.0,28219.0,440.0,49.0,I,I
+30904,30907,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,28260.0,441.0,0.0,28262.0,441.0,2.0,RED,RED
+30936,30940,,,-1,-1," is a
+	single word: ""Thanks.""
+",your,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28289.0,442.0,26.0,28292.0,442.0,29.0,your,your
+30973,30977,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28318.0,443.0,0.0,28321.0,443.0,3.0,ANDY,ANDY
+30980,30981,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28322.0,444.0,0.0,28322.0,444.0,0.0,I,I
+31009,31012,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,28345.0,445.0,0.0,28347.0,445.0,2.0,RED,RED
+31032,31035,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,28362.0,447.0,0.0,28364.0,447.0,2.0,Red,Red
+31057,31061,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28387.0,447.0,25.0,28390.0,447.0,28.0,Andy,Andy
+31063,31067,,,-1,-1," is a
+	single word: ""Thanks.""
+",Bogs,		      THE SHAWSHANK REDEMPTI,5,BOGS,False,False,True,False,False,False,False,28393.0,447.0,31.0,28396.0,447.0,34.0,Bogs,Bogs
+31091,31094,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,28415.0,448.0,0.0,28417.0,448.0,2.0,RED,RED
+31156,31159,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28475.0,449.0,57.0,28477.0,449.0,59.0,you,you
+31189,31193,,,-1,-1," is a
+	single word: ""Thanks.""
+",Bogs,		      THE SHAWSHANK REDEMPTI,5,BOGS,False,False,True,False,False,False,False,28506.0,449.0,88.0,28509.0,449.0,91.0,Bogs,Bogs
+31200,31204,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28511.0,450.0,0.0,28514.0,450.0,3.0,ANDY,ANDY
+31212,31214,,,-1,-1," is a
+	single word: ""Thanks.""
+",me,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28520.0,451.0,5.0,28521.0,451.0,6.0,me,me
+31245,31246,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28551.0,451.0,36.0,28551.0,451.0,36.0,I,I
+31265,31266,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28571.0,451.0,56.0,28571.0,451.0,56.0,I,I
+31292,31295,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,28590.0,452.0,0.0,28592.0,452.0,2.0,RED,RED
+31374,31380,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy's,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,,,,,,,,Andy's
+31454,31455,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,28722.0,453.0,129.0,28722.0,453.0,129.0,I,I
+31485,31487,,,-1,-1," is a
+	single word: ""Thanks.""
+",my,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,28751.0,453.0,158.0,28752.0,453.0,159.0,my,my
+31498,31499,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,28762.0,453.0,169.0,28762.0,453.0,169.0,I,I
+31505,31508,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28769.0,453.0,176.0,28771.0,453.0,178.0,you,you
+31515,31519,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28788.0,455.0,0.0,28791.0,455.0,3.0,ANDY,ANDY
+31550,31553,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,28814.0,457.0,0.0,28816.0,457.0,2.0,RED,RED
+31577,31580,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28838.0,458.0,21.0,28840.0,458.0,23.0,you,you
+31594,31596,,,-1,-1," is a
+	single word: ""Thanks.""
+",my,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,28853.0,458.0,36.0,28854.0,458.0,37.0,my,my
+31611,31615,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28864.0,459.0,0.0,28867.0,459.0,3.0,ANDY,ANDY
+31638,31639,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28888.0,460.0,20.0,28888.0,460.0,20.0,I,I
+31671,31673,,,-1,-1," is a
+	single word: ""Thanks.""
+",me,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28919.0,460.0,51.0,28920.0,460.0,52.0,me,me
+31689,31692,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,28931.0,461.0,0.0,28933.0,461.0,2.0,RED,RED
+31700,31701,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,28939.0,462.0,5.0,28939.0,462.0,5.0,I,I
+31708,31711,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,28947.0,462.0,13.0,28949.0,462.0,15.0,you,you
+31761,31765,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,,,,,,,,Andy
+31785,31786,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,28994.0,462.0,60.0,28994.0,462.0,60.0,I,I
+31824,31828,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,29047.0,464.0,0.0,29050.0,464.0,3.0,ANDY,ANDY
+31831,31834,,,-1,-1," is a
+	single word: ""Thanks.""
+",You,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,29052.0,464.0,5.0,29054.0,464.0,7.0,You,You
+31848,31851,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,29069.0,464.0,22.0,29071.0,464.0,24.0,you,you
+31880,31883,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,29094.0,465.0,0.0,29096.0,465.0,2.0,RED,RED
+31924,31928,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,29129.0,467.0,0.0,29132.0,467.0,3.0,ANDY,ANDY
+31976,31979,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,29172.0,469.0,0.0,29174.0,469.0,2.0,RED,RED
+31982,31984,,,-1,-1," is a
+	single word: ""Thanks.""
+",My,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,29175.0,470.0,0.0,29176.0,470.0,1.0,My,My
+32126,32130,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,29307.0,471.0,0.0,29310.0,471.0,3.0,ANDY,ANDY
+32149,32152,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,29321.0,473.0,0.0,29323.0,473.0,2.0,RED,RED
+32155,32156,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,29324.0,474.0,0.0,29324.0,474.0,0.0,I,I
+32169,32170,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,29338.0,474.0,14.0,29338.0,474.0,14.0,I,I
+32239,32243,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,29394.0,476.0,0.0,29397.0,476.0,3.0,ANDY,ANDY
+32255,32258,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,29401.0,478.0,0.0,29403.0,478.0,2.0,RED,RED
+32408,32411,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,29543.0,479.0,139.0,29545.0,479.0,141.0,you,you
+32432,32434,,,-1,-1," is a
+	single word: ""Thanks.""
+",my,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,29567.0,479.0,163.0,29568.0,479.0,164.0,my,my
+32530,32534,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,29653.0,480.0,0.0,29656.0,480.0,3.0,ANDY,ANDY
+32537,32538,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,29657.0,481.0,0.0,29657.0,481.0,0.0,I,I
+32557,32560,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,29677.0,481.0,20.0,29679.0,481.0,22.0,you,you
+32574,32577,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,29688.0,482.0,0.0,29690.0,482.0,2.0,RED,RED
+32580,32583,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,29691.0,483.0,0.0,29693.0,483.0,2.0,Red,Red
+32596,32599,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,True,False,False,False,29707.0,483.0,16.0,29709.0,483.0,18.0,Red,Red
+32606,32610,,,-1,-1," is a
+	single word: ""Thanks.""
+",ANDY,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,29711.0,484.0,0.0,29714.0,484.0,3.0,ANDY,ANDY
+32613,32616,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,29715.0,485.0,0.0,29717.0,485.0,2.0,Red,Red
+32622,32626,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,29724.0,485.0,9.0,29727.0,485.0,12.0,Andy,Andy
+32659,32662,,,-1,-1," is a
+	single word: ""Thanks.""
+",you,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,29759.0,485.0,44.0,29761.0,485.0,46.0,you,you
+32678,32682,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,29775.0,486.0,12.0,29778.0,486.0,15.0,Andy,Andy
+32696,32699,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,29793.0,486.0,30.0,29795.0,486.0,32.0,Red,Red
+32708,32711,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,29805.0,486.0,42.0,29807.0,486.0,44.0,him,him
+32721,32724,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,29812.0,487.0,0.0,29814.0,487.0,2.0,RED,RED
+32734,32735,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,29815.0,488.0,0.0,29815.0,488.0,0.0,I,I
+32774,32777,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,29853.0,488.0,38.0,29855.0,488.0,40.0,him,him
+32790,32792,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,29869.0,488.0,54.0,29870.0,488.0,55.0,He,He
+32817,32820,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,29894.0,488.0,79.0,29896.0,488.0,81.0,him,him
+32881,32883,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,29954.0,488.0,139.0,29955.0,488.0,140.0,He,He
+32949,32951,,,-1,-1," is a
+	single word: ""Thanks.""
+",he,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,30018.0,488.0,203.0,30019.0,488.0,204.0,he,he
+32997,33000,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,30064.0,488.0,249.0,30066.0,488.0,251.0,him,him
+33052,33053,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,30090.0,488.0,275.0,30090.0,488.0,275.0,I,I
+33086,33087,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,30122.0,488.0,307.0,30122.0,488.0,307.0,I,I
+33094,33098,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,30130.0,488.0,315.0,30133.0,488.0,318.0,Andy,Andy
+33155,33158,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,30212.0,491.0,0.0,30214.0,491.0,2.0,Red,Red
+33164,33167,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,30221.0,491.0,9.0,30223.0,491.0,11.0,his,his
+33201,33205,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,30258.0,491.0,46.0,30261.0,491.0,49.0,Andy,Andy
+33228,33231,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,30284.0,491.0,72.0,30286.0,491.0,74.0,him,him
+33277,33282,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED'S,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,30331.0,492.0,10.0,30335.0,492.0,14.0,RED'S,RED'S
+33318,33321,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,30369.0,493.0,9.0,30371.0,493.0,11.0,his,his
+33328,33331,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,30379.0,493.0,19.0,30381.0,493.0,21.0,Red,Red
+33376,33379,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,30421.0,494.0,0.0,30423.0,494.0,2.0,RED,RED
+33576,33579,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,30603.0,499.0,0.0,30605.0,499.0,2.0,RED,RED
+33602,33603,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,30619.0,500.0,13.0,30619.0,500.0,13.0,I,I
+33614,33616,,,-1,-1," is a
+	single word: ""Thanks.""
+",he,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,30631.0,500.0,25.0,30632.0,500.0,26.0,he,he
+33709,33725,,,-1,-1," is a
+	single word: ""Thanks.""
+",The TRUCK DRIVER,		      THE SHAWSHANK REDEMPTI,23,TRUCK DRIVER,False,False,False,False,False,True,False,30723.0,502.0,31.0,30738.0,502.0,46.0,The TRUCK DRIVER,The TRUCK DRIVER
+33744,33764,,,-1,-1," is a
+	single word: ""Thanks.""
+","a black con, LEONARD",		      THE SHAWSHANK REDEMPTI,35,LEONARD,False,False,False,False,True,False,False,30757.0,502.0,65.0,30776.0,502.0,84.0,"a black con, LEONARD","a black con, LEONARD"
+33786,33793,,,-1,-1," is a
+	single word: ""Thanks.""
+",a GUARD,		      THE SHAWSHANK REDEMPTI,36,GUARD,False,False,False,False,False,True,False,30799.0,502.0,107.0,30805.0,502.0,113.0,a GUARD,a GUARD
+33814,33821,,,-1,-1," is a
+	single word: ""Thanks.""
+",Leonard,		      THE SHAWSHANK REDEMPTI,35,LEONARD,False,False,False,False,False,False,False,30826.0,502.0,134.0,30832.0,502.0,140.0,Leonard,Leonard
+33929,33936,,,-1,-1," is a
+	single word: ""Thanks.""
+",Leonard,		      THE SHAWSHANK REDEMPTI,35,LEONARD,False,False,False,False,False,False,False,30936.0,504.0,33.0,30942.0,504.0,39.0,Leonard,Leonard
+33960,33963,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,30961.0,505.0,0.0,30963.0,505.0,2.0,RED,RED
+34200,34207,,,-1,-1," is a
+	single word: ""Thanks.""
+",Leonard,		      THE SHAWSHANK REDEMPTI,35,LEONARD,False,False,False,False,False,False,False,31180.0,508.0,0.0,31186.0,508.0,6.0,Leonard,Leonard
+34284,34287,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,35,LEONARD,False,False,False,False,False,False,False,31263.0,508.0,83.0,31265.0,508.0,85.0,his,his
+34370,34373,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,31346.0,508.0,166.0,31348.0,508.0,168.0,Red,Red
+34383,34386,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,31359.0,508.0,179.0,31361.0,508.0,181.0,his,his
+34478,34481,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,31447.0,509.0,0.0,31449.0,509.0,2.0,RED,RED
+34502,34506,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,31461.0,510.0,11.0,31464.0,510.0,14.0,Andy,Andy
+34591,34594,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,31546.0,510.0,96.0,31548.0,510.0,98.0,his,his
+34622,34629,,,-1,-1," is a
+	single word: ""Thanks.""
+",Leonard,		      THE SHAWSHANK REDEMPTI,35,LEONARD,False,False,False,False,False,False,False,31576.0,512.0,0.0,31582.0,512.0,6.0,Leonard,Leonard
+34638,34643,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red's,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,31592.0,512.0,16.0,31596.0,512.0,20.0,Red's,Red's
+34700,34702,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,35,LEONARD,False,False,False,False,False,False,False,31653.0,512.0,77.0,31654.0,512.0,78.0,He,He
+34722,34725,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,31675.0,512.0,99.0,31677.0,512.0,101.0,Red,Red
+34829,34834,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red's,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,31777.0,512.0,201.0,31781.0,512.0,205.0,Red's,Red's
+34845,34854,,,-1,-1," is a
+	single word: ""Thanks.""
+",Leonard's,		      THE SHAWSHANK REDEMPTI,35,LEONARD,False,False,False,False,False,False,False,31793.0,512.0,217.0,31801.0,512.0,225.0,Leonard's,Leonard's
+34867,34872,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED'S,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,31813.0,513.0,10.0,31817.0,513.0,14.0,RED'S,RED'S
+34897,34900,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,31840.0,514.0,0.0,31842.0,514.0,2.0,Red,Red
+34926,34929,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,31869.0,514.0,29.0,31871.0,514.0,31.0,his,his
+35005,35007,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,31947.0,514.0,107.0,31948.0,514.0,108.0,He,He
+35049,35053,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,31990.0,514.0,150.0,31993.0,514.0,153.0,Andy,Andy
+35065,35068,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,32006.0,514.0,166.0,32008.0,514.0,168.0,Red,Red
+35089,35092,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,32024.0,515.0,0.0,32026.0,515.0,2.0,RED,RED
+35102,35106,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,32027.0,516.0,0.0,32030.0,516.0,3.0,Andy,Andy
+35118,35119,,,-1,-1," is a
+	single word: ""Thanks.""
+",I,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,32043.0,516.0,16.0,32043.0,516.0,16.0,I,I
+35295,35308,,,-1,-1," is a
+	single word: ""Thanks.""
+",Brooks Hatlen,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,32213.0,519.0,0.0,32225.0,519.0,12.0,Brooks Hatlen,Brooks Hatlen
+35373,35375,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,32290.0,519.0,77.0,32291.0,519.0,78.0,He,He
+35382,35385,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,32299.0,519.0,86.0,32301.0,519.0,88.0,Red,Red
+35398,35401,,,-1,-1," is a
+	single word: ""Thanks.""
+",him,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,32315.0,519.0,102.0,32317.0,519.0,104.0,him,him
+35403,35406,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,32320.0,519.0,107.0,32322.0,519.0,109.0,Red,Red
+35539,35542,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,32449.0,519.0,236.0,32451.0,519.0,238.0,RED,RED
+35545,35553,,,-1,-1," is a
+	single word: ""Thanks.""
+",Dufresne,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,32453.0,519.0,240.0,32460.0,519.0,247.0,Dufresne,Dufresne
+35557,35563,,,-1,-1," is a
+	single word: ""Thanks.""
+",Brooks,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,32463.0,519.0,250.0,32468.0,519.0,255.0,Brooks,Brooks
+35592,35594,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,32498.0,519.0,285.0,32499.0,519.0,286.0,He,He
+35601,35604,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,32507.0,519.0,294.0,32509.0,519.0,296.0,his,his
+35614,35620,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy's,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,32519.0,519.0,306.0,32524.0,519.0,311.0,Andy's,Andy's
+35658,35664,,,-1,-1," is a
+	single word: ""Thanks.""
+",BROOKS,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,32557.0,520.0,0.0,32562.0,520.0,5.0,BROOKS,BROOKS
+35703,35709,,,-1,-1," is a
+	single word: ""Thanks.""
+",Andy's,		      THE SHAWSHANK REDEMPTI,10,ANDY,False,False,True,False,False,False,False,32596.0,522.0,0.0,32601.0,522.0,5.0,Andy's,Andy's
+35863,35869,,,-1,-1," is a
+	single word: ""Thanks.""
+",Brooks,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,32754.0,522.0,158.0,32759.0,522.0,163.0,Brooks,Brooks
+35876,35879,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,32767.0,522.0,171.0,32769.0,522.0,173.0,his,his
+35908,35910,,,-1,-1," is a
+	single word: ""Thanks.""
+",He,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,32798.0,522.0,202.0,32799.0,522.0,203.0,He,He
+35927,35930,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,32817.0,522.0,221.0,32819.0,522.0,223.0,his,his
+35954,35957,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,32843.0,522.0,247.0,32845.0,522.0,249.0,Red,Red
+35985,35991,,,-1,-1," is a
+	single word: ""Thanks.""
+",Brooks,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,32874.0,522.0,278.0,32879.0,522.0,283.0,Brooks,Brooks
+36053,36056,,,-1,-1," is a
+	single word: ""Thanks.""
+",his,		      THE SHAWSHANK REDEMPTI,22,BROOKS,False,False,True,False,False,False,False,32941.0,522.0,345.0,32943.0,522.0,347.0,his,his
+36076,36081,,,-1,-1," is a
+	single word: ""Thanks.""
+",RED'S,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,32962.0,523.0,10.0,32966.0,523.0,14.0,RED'S,RED'S
+36108,36111,,,-1,-1," is a
+	single word: ""Thanks.""
+",Red,		      THE SHAWSHANK REDEMPTI,4,RED,False,False,True,False,False,False,False,32991.0,524.0,0.0,32993.0,524.0,2.0,Red,Red

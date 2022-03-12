@@ -1,0 +1,10 @@
+numpy
+pandas
+tqdm
+textdistance
+scikit-learn
+scipy
+scorch
+spacy
+allennlp
+allennlp-models

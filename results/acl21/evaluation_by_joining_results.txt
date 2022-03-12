@@ -1,0 +1,286 @@
+loading allennlp coreference model
+script = basterds
+SEP = newline,                           KEEP ONLY GOLD SPEAKERS = FALSE
+loading spacy model
+spacy tokenization of screenplay elements
+
+finding global gold mention positions
+1008 gold mentions
+988 (98.01587301587301%) gold mentions found after parse
+980 (97.22222222222223%) gold mentions' spacy tokenization span found
+
+finding gold clusters
+23 gold clusters
+
+
+allennlp coreference resolution
+finding sys clusters
+42 sys clusters
+
+
+MUC  : P = 0.7460 R = 0.6259 F1 = 0.6807
+B3   : P = 0.4475 R = 0.1940 F1 = 0.2707
+CEAFe: P = 0.1805 R = 0.3296 F1 = 0.2333
+CoNLL 2012 score: 0.3949
+SEP = 'says' after C, otherwise newline, KEEP ONLY GOLD SPEAKERS = FALSE
+loading spacy model
+spacy tokenization of screenplay elements
+
+finding global gold mention positions
+1008 gold mentions
+988 (98.01587301587301%) gold mentions found after parse
+980 (97.22222222222223%) gold mentions' spacy tokenization span found
+
+finding gold clusters
+23 gold clusters
+
+
+allennlp coreference resolution
+finding sys clusters
+40 sys clusters
+
+
+MUC  : P = 0.7876 R = 0.6782 F1 = 0.7288
+B3   : P = 0.5691 R = 0.2532 F1 = 0.3505
+CEAFe: P = 0.2100 R = 0.3653 F1 = 0.2667
+CoNLL 2012 score: 0.4487
+SEP = newline,                           KEEP ONLY GOLD SPEAKERS = TRUE
+loading spacy model
+spacy tokenization of screenplay elements
+
+finding global gold mention positions
+1008 gold mentions
+988 (98.01587301587301%) gold mentions found after parse
+980 (97.22222222222223%) gold mentions' spacy tokenization span found
+
+finding gold clusters
+keeping only gold clusters
+13 gold clusters
+
+
+allennlp coreference resolution
+finding sys clusters
+42 sys clusters
+
+
+MUC  : P = 0.7422 R = 0.6659 F1 = 0.7020
+B3   : P = 0.4454 R = 0.2064 F1 = 0.2821
+CEAFe: P = 0.1674 R = 0.5409 F1 = 0.2557
+CoNLL 2012 score: 0.4133
+SEP = 'says' after C, otherwise newline, KEEP ONLY GOLD SPEAKERS = TRUE
+loading spacy model
+spacy tokenization of screenplay elements
+
+finding global gold mention positions
+1008 gold mentions
+988 (98.01587301587301%) gold mentions found after parse
+980 (97.22222222222223%) gold mentions' spacy tokenization span found
+
+finding gold clusters
+keeping only gold clusters
+13 gold clusters
+
+
+allennlp coreference resolution
+finding sys clusters
+40 sys clusters
+
+
+MUC  : P = 0.7767 R = 0.7151 F1 = 0.7446
+B3   : P = 0.5659 R = 0.2644 F1 = 0.3604
+CEAFe: P = 0.1947 R = 0.5989 F1 = 0.2938
+CoNLL 2012 score: 0.4663
+
+
+
+
+script = bourne
+SEP = newline,                           KEEP ONLY GOLD SPEAKERS = FALSE
+loading spacy model
+spacy tokenization of screenplay elements
+
+finding global gold mention positions
+911 gold mentions
+894 (98.13391877058177%) gold mentions found after parse
+887 (97.36553238199781%) gold mentions' spacy tokenization span found
+
+finding gold clusters
+38 gold clusters
+
+
+allennlp coreference resolution
+finding sys clusters
+12 sys clusters
+
+
+MUC  : P = 0.9263 R = 0.7550 F1 = 0.8319
+B3   : P = 0.7108 R = 0.4783 F1 = 0.5718
+CEAFe: P = 0.6758 R = 0.2134 F1 = 0.3244
+CoNLL 2012 score: 0.5761
+SEP = 'says' after C, otherwise newline, KEEP ONLY GOLD SPEAKERS = FALSE
+loading spacy model
+spacy tokenization of screenplay elements
+
+finding global gold mention positions
+911 gold mentions
+894 (98.13391877058177%) gold mentions found after parse
+887 (97.36553238199781%) gold mentions' spacy tokenization span found
+
+finding gold clusters
+38 gold clusters
+
+
+allennlp coreference resolution
+finding sys clusters
+18 sys clusters
+
+
+MUC  : P = 0.9129 R = 0.8021 F1 = 0.8539
+B3   : P = 0.8308 R = 0.6253 F1 = 0.7135
+CEAFe: P = 0.6887 R = 0.3262 F1 = 0.4427
+CoNLL 2012 score: 0.6701
+SEP = newline,                           KEEP ONLY GOLD SPEAKERS = TRUE
+loading spacy model
+spacy tokenization of screenplay elements
+
+finding global gold mention positions
+911 gold mentions
+894 (98.13391877058177%) gold mentions found after parse
+887 (97.36553238199781%) gold mentions' spacy tokenization span found
+
+finding gold clusters
+keeping only gold clusters
+20 gold clusters
+
+
+allennlp coreference resolution
+finding sys clusters
+12 sys clusters
+
+
+MUC  : P = 0.9191 R = 0.8133 F1 = 0.8630
+B3   : P = 0.7075 R = 0.5216 F1 = 0.6005
+CEAFe: P = 0.6377 R = 0.3826 F1 = 0.4783
+CoNLL 2012 score: 0.6473
+SEP = 'says' after C, otherwise newline, KEEP ONLY GOLD SPEAKERS = TRUE
+loading spacy model
+spacy tokenization of screenplay elements
+
+finding global gold mention positions
+911 gold mentions
+894 (98.13391877058177%) gold mentions found after parse
+887 (97.36553238199781%) gold mentions' spacy tokenization span found
+
+finding gold clusters
+keeping only gold clusters
+20 gold clusters
+
+
+allennlp coreference resolution
+finding sys clusters
+18 sys clusters
+
+
+MUC  : P = 0.9088 R = 0.8670 F1 = 0.8874
+B3   : P = 0.8277 R = 0.6870 F1 = 0.7508
+CEAFe: P = 0.6570 R = 0.5913 F1 = 0.6224
+CoNLL 2012 score: 0.7536
+
+
+
+
+script = shawshank
+SEP = newline,                           KEEP ONLY GOLD SPEAKERS = FALSE
+loading spacy model
+spacy tokenization of screenplay elements
+
+finding global gold mention positions
+888 gold mentions
+881 (99.21171171171171%) gold mentions found after parse
+880 (99.09909909909909%) gold mentions' spacy tokenization span found
+
+finding gold clusters
+44 gold clusters
+
+
+allennlp coreference resolution
+finding sys clusters
+21 sys clusters
+
+
+MUC  : P = 0.8930 R = 0.7584 F1 = 0.8202
+B3   : P = 0.6048 R = 0.5087 F1 = 0.5526
+CEAFe: P = 0.5284 R = 0.2522 F1 = 0.3414
+CoNLL 2012 score: 0.5714
+SEP = 'says' after C, otherwise newline, KEEP ONLY GOLD SPEAKERS = FALSE
+loading spacy model
+spacy tokenization of screenplay elements
+
+finding global gold mention positions
+888 gold mentions
+881 (99.21171171171171%) gold mentions found after parse
+880 (99.09909909909909%) gold mentions' spacy tokenization span found
+
+finding gold clusters
+44 gold clusters
+
+
+allennlp coreference resolution
+finding sys clusters
+26 sys clusters
+
+
+MUC  : P = 0.9143 R = 0.8170 F1 = 0.8629
+B3   : P = 0.6874 R = 0.6628 F1 = 0.6749
+CEAFe: P = 0.5728 R = 0.3384 F1 = 0.4255
+CoNLL 2012 score: 0.6544
+SEP = newline,                           KEEP ONLY GOLD SPEAKERS = TRUE
+loading spacy model
+spacy tokenization of screenplay elements
+
+finding global gold mention positions
+888 gold mentions
+881 (99.21171171171171%) gold mentions found after parse
+880 (99.09909909909909%) gold mentions' spacy tokenization span found
+
+finding gold clusters
+keeping only gold clusters
+25 gold clusters
+
+
+allennlp coreference resolution
+finding sys clusters
+21 sys clusters
+
+
+MUC  : P = 0.8930 R = 0.8181 F1 = 0.8539
+B3   : P = 0.6048 R = 0.5589 F1 = 0.5810
+CEAFe: P = 0.5284 R = 0.4438 F1 = 0.4824
+CoNLL 2012 score: 0.6391
+SEP = 'says' after C, otherwise newline, KEEP ONLY GOLD SPEAKERS = TRUE
+loading spacy model
+spacy tokenization of screenplay elements
+
+finding global gold mention positions
+888 gold mentions
+881 (99.21171171171171%) gold mentions found after parse
+880 (99.09909909909909%) gold mentions' spacy tokenization span found
+
+finding gold clusters
+keeping only gold clusters
+25 gold clusters
+
+
+allennlp coreference resolution
+finding sys clusters
+26 sys clusters
+
+
+MUC  : P = 0.9009 R = 0.8684 F1 = 0.8844
+B3   : P = 0.6805 R = 0.7141 F1 = 0.6969
+CEAFe: P = 0.5420 R = 0.5637 F1 = 0.5526
+CoNLL 2012 score: 0.7113
+
+
+
+
