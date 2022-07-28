@@ -128,8 +128,5 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-annotator/*.jar
-data/ontonotes*
-data/roberta_(e20_2021.05.02_01.16)_release.pt
-moviecoref/wl-coref/data
-moviecoref/wl-coref/roberta-large_english_train_head.jsonlines.pickle
+# data
+data/
