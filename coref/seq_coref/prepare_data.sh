@@ -44,7 +44,7 @@ download_conll_2012() {
 	dlx http://conll.cemantix.org/download reference-coreference-scorers.v8.01.tar.gz
 
 	# moving perl coreference scorer to scripts
-	mv $data_directory/reference-coreference-scorers/v8.01 $3/scorer
+	mv $data_directory/reference-coreference-scorers/v8.01 $scripts_directory/scorer
 	rm -rf $data_directory/reference-coreference-scorers
 }
 
