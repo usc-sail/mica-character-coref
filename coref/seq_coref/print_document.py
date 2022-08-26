@@ -10,9 +10,11 @@ def pretty_format_coref_document(document: data.CorefDocument) -> str:
     desc += f"{document.doc_key}\n\n"
     desc += "DOCUMENT\n"
     desc += "========\n"
-    document_words = [word for sentence in document.sentences for word in sentence]
+    document_words = [word for sentence in document.sentences
+    for word in sentence]
 
-    for sentence_speakers, sentence_words in zip(document.speakers, document.sentences):
+    for sentence_speakers, sentence_words in zip(document.speakers,
+    document.sentences):
         speaker = sentence_speakers[0]
         block = util.indent_block(sentence_words, 20, 80)
         desc += f"{speaker:17s} : " + block + "\n"
@@ -25,7 +27,8 @@ def pretty_format_coref_document(document: data.CorefDocument) -> str:
         cluster_index = f"Cluster {i + 1}"
         mentions = []
         for mention in cluster:
-            mention = "[" + " ".join(document_words[mention.begin: mention.end + 1]) + "]"
+            mention = "[" + " ".join(
+                document_words[mention.begin: mention.end + 1]) + "]"
             mentions.append(mention)
         block = util.indent_block(mentions, 20, 80)
         desc += f"{cluster_index:17s} : " + block + "\n"

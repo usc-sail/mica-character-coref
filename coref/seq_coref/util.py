@@ -4,10 +4,23 @@
 from mica_text_coref.coref.seq_coref import data
 
 def find_mention_pair_relationship(
-    first_mention: data.Mention, second_mention: data.Mention) -> data.MentionPairRelationship:
-    """Find intersection relationship between two mentions"""
-    first_mention_elements = set([i for i in range(first_mention.begin, first_mention.end + 1)])
-    second_mention_elements = set([i for i in range(second_mention.begin, second_mention.end + 1)])
+    first_mention: data.Mention, second_mention: data.Mention) -> (
+    data.MentionPairRelationship):
+    """Find intersection relationship between two mentions.
+
+    Args:
+        first_mention: First data.Mention object.
+        second_mention: Second data.Mention object.
+    
+    Returns:
+        data.MentionPairRelationship, which defines the overlap relationship
+        between first_mention and second_mention. It can be EQUAL, DISJOINT,
+        SUBSPAN, or INTERSECT
+    """
+    first_mention_elements = set([i for i in range(
+        first_mention.begin, first_mention.end + 1)])
+    second_mention_elements = set([i for i in range(
+        second_mention.begin, second_mention.end + 1)])
     if first_mention_elements == second_mention_elements:
         return data.MentionPairRelationship.EQUAL
     elif first_mention_elements.isdisjoint(second_mention_elements):
@@ -20,7 +33,16 @@ def find_mention_pair_relationship(
 
 
 def indent_block(words: list[str], indent: int, width: int) -> str:
-    """Indent and justify block for pretty-printing"""
+    """Indent and justify block for pretty-printing.
+
+    Args:
+        words: List of words.
+        indent: Indent on the left-hand-side.
+        width: Width of the text block.
+    
+    Returns:
+        A text string, indented and justified.
+    """
     block = ""
     current_length_of_line = 0
     n_words_in_current_line = 0
@@ -28,7 +50,8 @@ def indent_block(words: list[str], indent: int, width: int) -> str:
     i = 0
 
     while i < len(words):
-        if current_length_of_line + len(words[i]) < width or n_words_in_current_line == 0:
+        if current_length_of_line + len(words[i]) < width or (
+         n_words_in_current_line == 0):
             prefix = " " if n_words_in_current_line > 0 else ""
             block += prefix + words[i]
             current_length_of_line += len(prefix + words[i])

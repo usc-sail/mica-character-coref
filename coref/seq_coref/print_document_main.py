@@ -14,7 +14,7 @@ The output is formatted as follows:
 """
 
 from mica_text_coref.coref.seq_coref import data
-from mica_text_coref.coref.seq_coref import util
+from mica_text_coref.coref.seq_coref import print_document
 
 from absl import flags
 from absl import app
@@ -24,17 +24,20 @@ FLAGS = flags.FLAGS
 flags.DEFINE_string("conll_jsonlines", None,
                     "Path to conll-2012 gold jsonlines file", required=True)
 flags.DEFINE_string("doc_key", None,
-                    "conll-2012 document key e.g. bc/msnbc/00/msnbc_0000_12", required=True)
+                    "conll-2012 document key e.g. bc/msnbc/00/msnbc_0000_12",
+                    required=True)
 
 def pretty_print_document():
     with jsonlines.open(FLAGS.conll_jsonlines) as reader:
         for json in reader:
             if json["doc_key"] == FLAGS.doc_key:
                 coref_document = data.CorefDocument(json)
-                print(util.pretty_format_coref_document(coref_document))
+                print(print_document.pretty_format_coref_document(
+                    coref_document))
                 break
         else:
-            print(f"doc_key={FLAGS.doc_key} not found in jsonlines file={FLAGS.conll_jsonlines}")
+            print(f"doc_key={FLAGS.doc_key} not found in "
+                  f"jsonlines file={FLAGS.conll_jsonlines}")
 
 def main(argv):
     pretty_print_document()

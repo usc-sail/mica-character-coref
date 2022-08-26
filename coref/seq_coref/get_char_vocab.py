@@ -1,12 +1,12 @@
 import os
-import sys
 import json
 import io
 from absl import flags
 from absl import app
 
 FLAGS = flags.FLAGS
-flags.DEFINE_string("conll_directory", None, "Path to the conll-2012 gold directory",
+flags.DEFINE_string("conll_directory", None,
+  "Path to the conll-2012 gold directory",
  required=True)
 
 def get_char_vocab(input_filenames, output_filename):
@@ -26,7 +26,8 @@ def get_char_vocab(input_filenames, output_filename):
 
 def get_char_vocab_language(language):
   conll_directory = FLAGS.conll_directory
-  get_char_vocab([os.path.join(conll_directory, "{}.{}.jsonlines".format(partition, language))
+  get_char_vocab([os.path.join(conll_directory, 
+  "{}.{}.jsonlines".format(partition, language))
    for partition in ("train", "dev", "test")], os.path.join(
     conll_directory, "char_vocab.{}.txt".format(language)))
 
