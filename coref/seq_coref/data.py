@@ -13,7 +13,8 @@ class MentionPairRelationship(Enum):
 
 
 class Mention:
-    """Data structure of a mention. It defines a text span's indexes.
+    """Data structure of a mention. It defines a text span's indexes. The begin
+    and end indexes are inclusive.
     """
 
     def __init__(self, begin:int, end:int) -> None:
@@ -44,31 +45,38 @@ class Mention:
 
 class CorefDocument:
     """Data structure of a text document, annotated with coreference relations.
-    It contains the document key, sentences, speakers, and clusters.
-    Sentences is a list of list of strings. Speakers is also a list of list of
-    strings, of the same dimensions as sentences. Clusters is a list of set of
-    data.Mention objects, each set representing a coreference chain.
+    It contains the document key, sentences, speakers, clusters, named entity,
+    and constituents. Sentences is a list of list of strings. Speakers is also a
+    list of list of strings, of the same dimensions as sentences. Clusters is a
+    list of set of data.Mention objects, each set representing a coreference
+    chain. Named entities and constituents are dictionaries of data.Mention
+    objects to their named entity and constituency tag respectively.
     """
 
-    def __init__(self, json: dict[any]) -> None:
-        self.doc_key: str = json["doc_key"]
-        self.sentences: list[list[str]] = json["sentences"]
-        self.speakers: list[list[str]] = json["speakers"]
+    def __init__(self, json: None | dict[any] = None) -> None:
+        self.doc_key: str = ""
+        self.sentences: list[list[str]] = []
+        self.speakers: list[list[str]] = []
         self.named_entities: dict[Mention, str] = {}
         self.constituents: dict[Mention, str] = {}
         self.clusters: list[set[Mention]] = []
-        for annotated_mention in json["ner"]:
-            mention = Mention(annotated_mention[0], annotated_mention[1])
-            self.named_entities[mention] = annotated_mention[2]
-        for annotated_mention in json["constituents"]:
-            mention = Mention(annotated_mention[0], annotated_mention[1])
-            self.constituents[mention] = annotated_mention[2]
-        for cluster in json["clusters"]:
-            cluster_set = set() 
-            for mention in cluster:
-                mention = Mention(mention[0], mention[1])
-                cluster_set.add(mention)
-            self.clusters.append(cluster_set)
+        
+        if json is not None:
+            self.doc_key: str = json["doc_key"]
+            self.sentences: list[list[str]] = json["sentences"]
+            self.speakers: list[list[str]] = json["speakers"]
+            for annotated_mention in json["ner"]:
+                mention = Mention(annotated_mention[0], annotated_mention[1])
+                self.named_entities[mention] = annotated_mention[2]
+            for annotated_mention in json["constituents"]:
+                mention = Mention(annotated_mention[0], annotated_mention[1])
+                self.constituents[mention] = annotated_mention[2]
+            for cluster in json["clusters"]:
+                cluster_set = set() 
+                for mention in cluster:
+                    mention = Mention(mention[0], mention[1])
+                    cluster_set.add(mention)
+                self.clusters.append(cluster_set)
 
 
 class CorefCorpus:
