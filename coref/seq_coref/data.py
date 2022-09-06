@@ -60,17 +60,40 @@ class CorefDocument:
         self.named_entities: dict[Mention, str] = {}
         self.constituents: dict[Mention, str] = {}
         self.clusters: list[set[Mention]] = []
-        
+
         if json is not None:
             self.doc_key: str = json["doc_key"]
             self.sentences: list[list[str]] = json["sentences"]
             self.speakers: list[list[str]] = json["speakers"]
+            new_sentences = []
+
+            for sentence in self.sentences:
+                new_sentence = []
+                for word in sentence:
+                    if word == "-LRB-":
+                        word = "("
+                    elif word == "-RRB-":
+                        word = ")"
+                    elif word == "-LSB-":
+                        word = "["
+                    elif word == "-RSB-":
+                        word = "]"
+                    elif word == "-LCB-":
+                        word = "{"
+                    elif word == "-RCB-":
+                        word = "}"
+                    new_sentence.append(word)
+                new_sentences.append(new_sentence)
+            self.sentences = new_sentences
+
             for annotated_mention in json["ner"]:
                 mention = Mention(annotated_mention[0], annotated_mention[1])
                 self.named_entities[mention] = annotated_mention[2]
+
             for annotated_mention in json["constituents"]:
                 mention = Mention(annotated_mention[0], annotated_mention[1])
                 self.constituents[mention] = annotated_mention[2]
+
             for cluster in json["clusters"]:
                 cluster_set = set() 
                 for mention in cluster:
