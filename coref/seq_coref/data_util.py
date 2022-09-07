@@ -3,6 +3,7 @@
 
 from mica_text_coref.coref.seq_coref import data
 from mica_text_coref.coref.seq_coref import mention_tree
+from mica_text_coref.coref.seq_coref import map_characters
 
 import copy
 import numpy as np
@@ -17,7 +18,7 @@ def remove_overlaps(corpus: data.CorefCorpus,
     """
     new_corpus = data.CorefCorpus()
 
-    for document in tqdm.tqdm(corpus.documents):
+    for document in tqdm.tqdm(corpus.documents, desc="remove overlaps"):
         new_document = copy.deepcopy(document)
         clusters = []
         
@@ -44,7 +45,8 @@ def remap_spans_word_level(corpus: data.CorefCorpus,
     the named entity and constituent dictionaries are also adjusted.
     """
     new_corpus = data.CorefCorpus()
-    for document in tqdm.tqdm(corpus.documents):
+    for document in tqdm.tqdm(corpus.documents, 
+                              desc="remap spans at word level"):
         new_document = data.CorefDocument()
         mapping: list[int] = [0]
         n_tokens = 0
@@ -83,6 +85,7 @@ def remap_spans_word_level(corpus: data.CorefCorpus,
             new_document.constituents[new_mention] = constituency_tag
         
         new_document.doc_key = document.doc_key
+        new_document.doc_id = document.doc_id
         new_corpus.documents.append(new_document)
 
     return new_corpus
@@ -98,7 +101,8 @@ def remap_spans_document_level(
     """
     new_corpus = data.CorefCorpus()
 
-    for document in tqdm.tqdm(corpus.documents):
+    for document in tqdm.tqdm(corpus.documents, 
+                              desc="remap spans at document level"):
         new_document = data.CorefDocument()
         words = [word for sentence in document.sentences for word in sentence]
         text = " ".join(words)
@@ -107,26 +111,22 @@ def remap_spans_document_level(
         token_characters = "".join(tokens)
         word_begin_to_word_character = np.zeros(len(words), dtype=int)
         word_end_to_word_character = np.zeros(len(words), dtype=int)
-        word_character_to_token_character = np.zeros(len(word_characters),
-                                                    dtype=int)
         token_character_to_token_index = np.zeros(len(token_characters),
                                                 dtype=int)
-        
+
         c = 0
         for i, word in enumerate(words):
             word_begin_to_word_character[i] = c
             word_end_to_word_character[i] = c + len(word) - 1
             c += len(word)
-        
-        i, j = 0, 0
-        while i < len(word_characters) and j < len(token_characters):
-            if word_characters[i] == token_characters[j]:
-                word_character_to_token_character[i] = j
-                i += 1
-                j += 1
-            else:
-                j += 1
-        
+
+        word_character_to_token_character = map_characters.map_characters_naive(
+            word_characters, token_characters, ignore_token_characters=["Ġ"])
+
+        for i in range(len(word_character_to_token_character) - 1):
+            assert word_character_to_token_character[i] <= (
+                    word_character_to_token_character[i + 1])
+
         c = 0
         for i, token in enumerate(tokens):
             token_character_to_token_index[c: c + len(token)] = i
@@ -141,7 +141,7 @@ def remap_spans_document_level(
             return token_character_to_token_index[
                     word_character_to_token_character[
                         word_end_to_word_character[word_end]]]
-        
+
         for cluster in document.clusters:
             new_cluster: set[data.Mention] = set()
             for mention in cluster:
@@ -156,13 +156,13 @@ def remap_spans_document_level(
             new_end = map_end(mention.end)
             new_mention = data.Mention(new_begin, new_end)
             new_document.named_entities[new_mention] = ner_tag
-        
+
         for mention, constituency_tag in document.constituents.items():
             new_begin = map_begin(mention.begin)
             new_end = map_end(mention.end)
             new_mention = data.Mention(new_begin, new_end)
             new_document.constituents[new_mention] = constituency_tag
-        
+
         new_sentences = []
         new_speakers = []
         i, j = 0, 0
@@ -178,6 +178,7 @@ def remap_spans_document_level(
         new_document.speakers = new_speakers
 
         new_document.doc_key = document.doc_key
+        new_document.doc_id = document.doc_id
         new_corpus.documents.append(new_document)
-    
+
     return new_corpus
