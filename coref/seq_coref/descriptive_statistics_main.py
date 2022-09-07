@@ -24,7 +24,9 @@ def find_descriptive_statistics(language:str, partition:str):
     """Find descriptive statistics of given language, partition dataset"""
     jsonfiles_path = os.path.join(
         FLAGS.conll_directory, f"{partition}.{language}.jsonlines")
-    coref_corpus = data.CorefCorpus(jsonfiles_path)
+    use_ascii_transliteration = language == "english"
+    coref_corpus = data.CorefCorpus(jsonfiles_path, 
+                            use_ascii_transliteration=use_ascii_transliteration)
 
     total_n_mentions = 0
     total_n_entities = 0

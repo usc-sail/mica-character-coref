@@ -3,7 +3,9 @@
 
 from enum import Enum
 import jsonlines
-
+import re
+import tqdm
+import unidecode
 
 class MentionPairRelationship(Enum):
     DISJOINT = 0
@@ -53,7 +55,10 @@ class CorefDocument:
     objects to their named entity and constituency tag respectively.
     """
 
-    def __init__(self, json: None | dict[any] = None) -> None:
+    def __init__(self, json: None | dict[any] = None, 
+                use_ascii_transliteration = False, verbose = False) -> None:
+        """Set use_ascii_transliteration for English documents only."""
+        self.doc_id: int = -1
         self.doc_key: str = ""
         self.sentences: list[list[str]] = []
         self.speakers: list[list[str]] = []
@@ -82,7 +87,16 @@ class CorefDocument:
                         word = "{"
                     elif word == "-RCB-":
                         word = "}"
-                    new_sentence.append(word)
+                    if use_ascii_transliteration:
+                        ascii_word = re.sub(r"\s", "", unidecode.unidecode(
+                            word))
+                        if len(ascii_word) == 0:
+                            ascii_word = "."
+                        if verbose and ascii_word != word:
+                            print(f"Using '{ascii_word}' instead of '{word}'")
+                    else:
+                        ascii_word = word
+                    new_sentence.append(ascii_word)
                 new_sentences.append(new_sentence)
             self.sentences = new_sentences
 
@@ -107,17 +121,26 @@ class CorefCorpus:
     Data structure of a list of coreference-annotated text documents.
     """
 
-    def __init__(self, jsonlines_file: str | None = None) -> None:
+    def __init__(self, jsonlines_file: str | None = None, 
+                use_ascii_transliteration = False, verbose = False) -> None:
+        """Set use_ascii_transliteration for English corpus only."""
         self.documents: list[CorefDocument] = []
         if jsonlines_file is not None:
             with jsonlines.open(jsonlines_file) as reader:
-                for document in reader:
-                    document = CorefDocument(document)
+                for i, document in tqdm.tqdm(enumerate(reader),
+                                             desc="reading jsonlines"):
+                    document = CorefDocument(
+                        document, 
+                        use_ascii_transliteration=use_ascii_transliteration, 
+                        verbose=verbose)
+                    document.doc_id = i
                     self.documents.append(document)
 
     def __add__(self, other: "CorefCorpus") -> "CorefCorpus":
         combined = CorefCorpus()
         combined.documents = self.documents + other.documents
+        for i, document in enumerate(combined.documents):
+            document.doc_id = i
         return combined
     
     def __len__(self) -> int:
