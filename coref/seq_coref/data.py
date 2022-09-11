@@ -143,5 +143,17 @@ class CorefCorpus:
             document.doc_id = i
         return combined
     
+    def get_doc_id_to_doc_key(self) -> dict[int, str]:
+        doc_id_to_doc_key: dict[int, str] = {}
+        for document in self.documents:
+            doc_id_to_doc_key[document.doc_id] = document.doc_key
+        return doc_id_to_doc_key
+
+    def get_doc_id_to_sentences(self) -> dict[int, list[list[str]]]:
+        doc_id_to_sentences: dict[int, list[list[str]]] = {}
+        for document in self.documents:
+            doc_id_to_sentences[document.doc_id] = document.sentences
+        return doc_id_to_sentences
+
     def __len__(self) -> int:
         return len(self.documents)
