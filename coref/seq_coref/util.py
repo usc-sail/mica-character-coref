@@ -31,7 +31,6 @@ def find_mention_pair_relationship(
     else:
         return data.MentionPairRelationship.INTERSECT
 
-
 def indent_block(words: list[str], indent: int, width: int) -> str:
     """Indent and justify block for pretty-printing.
 
@@ -63,3 +62,9 @@ def indent_block(words: list[str], indent: int, width: int) -> str:
             n_words_in_current_line = 0
     
     return block
+
+def convert_float_seconds_to_time_string(seconds: float) -> str:
+    seconds = int(seconds)
+    minutes, seconds = seconds//60, seconds%60
+    hours, minutes = minutes//60, minutes%60
+    return f"{hours}h {minutes}m {seconds}s"
