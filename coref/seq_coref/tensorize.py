@@ -1,17 +1,17 @@
 """Create sequence coreference pytorch tensors data for training and testing."""
 
 from mica_text_coref.coref.seq_coref import data
-from mica_text_coref.coref.seq_coref import coref_longformer
 
 from keras_preprocessing import sequence
 import tqdm
 import torch
 from torch.utils import data as tdata
+from transformers import LongformerTokenizer
 
 def create_tensors(
     corpus: data.CorefCorpus, 
     representative_mentions: list[list[data.Mention]],
-    coref_longformer_model: coref_longformer.CorefLongformerModel) -> (
+    longformer_tokenizer: LongformerTokenizer) -> (
         tdata.TensorDataset):
     """Create Tensor Dataset from coreference corpus and representative mentions
      for each document's cluster. The number of representative
@@ -44,10 +44,7 @@ def create_tensors(
     for document in corpus.documents:
         n_tokens = sum(len(sentence) for sentence in document.sentences)
         max_sequence_length = max(n_tokens, max_sequence_length)
-    max_sequence_length = min(
-        coref_longformer_model.longformer.config.max_position_embeddings, 
-        max_sequence_length)
-    tokenizer = coref_longformer_model.tokenizer
+    max_sequence_length = min(4096, max_sequence_length)
 
     token_ids_list: list[list[int]] = []
     mention_ids_list: list[list[int]] = []
@@ -60,7 +57,8 @@ def create_tensors(
                                            total=len(corpus.documents)):
         tokens = [token for sentence in document.sentences 
                         for token in sentence]
-        token_ids: list[int] = tokenizer.convert_tokens_to_ids(tokens)
+        token_ids: list[int] = longformer_tokenizer.convert_tokens_to_ids(
+            tokens)
         attn_mask: list[int] = [1 for _ in range(len(tokens))]
         doc_id = document.doc_id
         
@@ -92,7 +90,7 @@ def create_tensors(
     
     token_ids_pt = torch.LongTensor(sequence.pad_sequences(token_ids_list, 
         maxlen=max_sequence_length, dtype=int, padding="post", 
-        truncating="post", value=tokenizer.pad_token_id))
+        truncating="post", value=longformer_tokenizer.pad_token_id))
     mention_ids_pt = torch.IntTensor(sequence.pad_sequences(mention_ids_list,
         maxlen=max_sequence_length, dtype=int, padding="post",
         truncating="post", value=0))

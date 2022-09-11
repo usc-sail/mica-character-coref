@@ -6,12 +6,12 @@ from mica_text_coref.coref.seq_coref import data
 from mica_text_coref.coref.seq_coref import data_util
 from mica_text_coref.coref.seq_coref import tensorize
 from mica_text_coref.coref.seq_coref import representatives
-from mica_text_coref.coref.seq_coref import coref_longformer
 
 from absl import flags
 from absl import app
 import os
 import torch
+from transformers import LongformerTokenizer
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string("conll_directory", None,
@@ -25,10 +25,8 @@ def create_and_save_tensors():
     """Create tensors for training and testing the English coreference
     dataset using the longformer sequence coreference model.
     """
-    print("Creating model...", end="")
-    model = coref_longformer.CorefLongformerModel()
-    print("done")
-    tokenizer = model.tokenizer
+    tokenizer: LongformerTokenizer = LongformerTokenizer.from_pretrained(
+        "allenai/longformer-base-4096")
     total_n_clusters = 0
     total_n_seq_clusters = 0
     total_n_tensor_seq_clusters = 0
@@ -57,7 +55,7 @@ def create_and_save_tensors():
         longformer_seq_corpus = data_util.remap_spans_document_level(
             seq_corpus, tokenizer.tokenize)
         dataset = tensorize.create_tensors(longformer_seq_corpus, mentions,
-                                            model)
+                                            tokenizer)
         n_tensor_seq_clusters = dataset.tensors[0].shape[0]
 
         (token_ids, mention_ids, label_ids, attn_mask, global_attn_mask,
@@ -71,7 +69,7 @@ def create_and_save_tensors():
         torch.save(attn_mask, os.path.join(directory, "attn.pt"))
         torch.save(global_attn_mask, os.path.join(directory, "global_attn.pt"))
         torch.save(doc_ids, os.path.join(directory, "docs.pt"))
-        
+
         print(f"Number of clusters = {n_clusters}")
         print(f"Number of clusters after removing overlaps = {n_seq_clusters}")
         print(f"Number of clusters after removing overlaps and tensorizing = "
@@ -80,7 +78,7 @@ def create_and_save_tensors():
         total_n_clusters += n_clusters
         total_n_seq_clusters += n_seq_clusters
         total_n_tensor_seq_clusters += n_tensor_seq_clusters
-    
+
     print(f"Number of clusters = {total_n_clusters}")
     print(f"Number of clusters after removing overlaps = "
           f"{total_n_seq_clusters}")
