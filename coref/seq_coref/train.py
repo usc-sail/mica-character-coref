@@ -7,6 +7,7 @@ from mica_text_coref.coref.seq_coref import data
 from mica_text_coref.coref.seq_coref import evaluate
 from mica_text_coref.coref.seq_coref import util
 
+import getpass
 import numpy as np
 import os
 import time
@@ -38,7 +39,7 @@ def train(model: coref_longformer.CorefLongformerModel,
     """Train model on train dataset until performance no longer improves
     on dev dataset. Return the trained model.
     """
-    user = os.getlogin()
+    user = getpass.getuser()
     device_index = -1 if device == "cpu" else int(device.lstrip("cuda:"))
 
     if use_official_evaluation:

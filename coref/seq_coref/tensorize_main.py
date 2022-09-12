@@ -20,6 +20,8 @@ flags.DEFINE_string("conll_directory", None,
 flags.DEFINE_string("longformer_tensors_directory", None,
                     "Directory to which the tensors will be saved",
                     required=True)
+flags.DEFINE_integer("max_sequence_length", default=4096,
+                    help="Maximum sequence length of documents", upper_bound=4096, lower_bound=1)
 
 def create_and_save_tensors():
     """Create tensors for training and testing the English coreference
@@ -55,8 +57,8 @@ def create_and_save_tensors():
 
         longformer_seq_corpus = data_util.remap_spans_document_level(
             seq_corpus, tokenizer.tokenize, verbose=True)
-        dataset = tensorize.create_tensors(longformer_seq_corpus, mentions,
-                                            tokenizer)
+        dataset = tensorize.create_tensors(longformer_seq_corpus, mentions, tokenizer,
+                                            FLAGS.max_sequence_length)
         n_tensor_seq_clusters = dataset.tensors[0].shape[0]
 
         (token_ids, mention_ids, label_ids, attn_mask, global_attn_mask,

@@ -31,31 +31,24 @@ Please cite the following paper if you found it useful. Thanks:)
 ## Setting up the conda environment
 
 1. Create python 3 conda environment. <br>
-  `conda create --name coref python=3.10`.
+  `conda create --name coreference python=3.10`.
 
 2. Activate the conda environment. <br> 
-  `conda activate coref`
+  `conda activate coreference`
 
-3. Install pytorch. <br> 
+3. Install libraries. <br>
+  `conda install -c conda-forge jsonlines absl-py unidecode ipywidgets ipykernel gpustat`
+
+4. Install pytorch. <br> 
   `conda install pytorch torchvision torchaudio cudatoolkit=11.6 -c pytorch -c conda-forge`
 
-4. Install huggingface transformers library. <br> 
+5. Install huggingface transformers library. <br> 
   `conda install -c huggingface transformers`
 
-5. Install the python scorch library, which is used for coreference evaluation. <br> 
+6. Install the python scorch library, which is used for coreference evaluation. <br> 
   `pip install scorch`
 
-6. Install the python unidecode library, which is used for ascii transliteration. <br> 
-  `conda install -c conda-forge unidecode`
-
-7. Install ipykernal and ipywidgest for vscode python notebooks. <br> 
-  `conda install ipykernel --update-deps --force-reinstall` <br>
-  `conda install -c conda-forge ipywidgets`
-
-8. Install gpustat library to find GPU usage. <br>
-  `conda install -c conda-forge gpustat`
-
-9. Create python 2 conda environment, which is required for the conll-2012 scripts. <br>
+7. Create python 2 conda environment, which is required for the conll-2012 scripts. <br>
   `conda create --name py2 python=2`
 
 ## Setting up the data
@@ -73,7 +66,7 @@ Please cite the following paper if you found it useful. Thanks:)
   `sh coref/seq_coref/prepare_data.sh data data/ontonotes-release-5.0 coref/seq_coref`
 
 5. Activate the python 3 conda environment. <br>
-  `conda activate coref`
+  `conda activate coreference`
 
 6. Convert the gold conll files to jsonlines. <br>
   `python coref/seq_coref/minimize.py --conll_directory=data/conll-2012/gold`

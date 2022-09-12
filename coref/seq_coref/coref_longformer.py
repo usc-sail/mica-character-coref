@@ -53,19 +53,19 @@ class CorefLongformerModel(nn.Module):
         gru_input: torch.FloatTensor = torch.cat(
             (longformer_hidden, mention_embedding), dim=2)
         gru_output: torch.FloatTensor = self.gru(gru_input)[0]
-        logits: torch.FloatTensor = self.token_classifier(gru_output).int()
-        predictions: torch.IntTensor = logits.argmax(dim=2)
+        logits: torch.FloatTensor = self.token_classifier(gru_output)
+        predictions: torch.IntTensor = logits.argmax(dim=2).int()
 
         if label_ids is not None:
             active_labels = label_ids[attn_mask == 1.]
             active_logits = logits.flatten(0, 1)[attn_mask.flatten() == 1.]
-            label_distribution = np.bincount(active_labels, 
+            label_distribution = np.bincount(active_labels.cpu(), 
                                              minlength=self.n_labels)
             class_weight = torch.FloatTensor(1/(1 + label_distribution)).to(
                 device)
             cross_entrop_loss_fn = nn.CrossEntropyLoss(weight=class_weight, 
                                                        reduction="mean")
-            loss = cross_entrop_loss_fn(active_logits, active_labels)
+            loss = cross_entrop_loss_fn(active_logits, active_labels.long())
             return predictions, loss
         else:
             return predictions 

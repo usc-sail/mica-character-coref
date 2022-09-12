@@ -11,7 +11,8 @@ from transformers import LongformerTokenizer
 def create_tensors(
     corpus: data.CorefCorpus, 
     representative_mentions: list[list[data.Mention]],
-    longformer_tokenizer: LongformerTokenizer) -> (
+    longformer_tokenizer: LongformerTokenizer,
+    max_sequence_length = 4096) -> (
         tdata.TensorDataset):
     """Create Tensor Dataset from coreference corpus and representative mentions
      for each document's cluster. The number of representative
@@ -40,11 +41,11 @@ def create_tensors(
         " should equal the number of representative mentions,"
         " doc key = {document.doc_key}"
 
-    max_sequence_length = 0
+    _max_sequence_length = 0
     for document in corpus.documents:
         n_tokens = sum(len(sentence) for sentence in document.sentences)
-        max_sequence_length = max(n_tokens, max_sequence_length)
-    max_sequence_length = min(4096, max_sequence_length)
+        _max_sequence_length = max(n_tokens, _max_sequence_length)
+    max_sequence_length = min(max_sequence_length, _max_sequence_length)
 
     token_ids_list: list[list[int]] = []
     mention_ids_list: list[list[int]] = []

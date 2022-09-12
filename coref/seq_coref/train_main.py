@@ -11,6 +11,7 @@ from mica_text_coref.coref.seq_coref import util
 
 from absl import app
 from absl import flags
+import getpass
 import os
 import re
 import time
@@ -70,7 +71,7 @@ def train_main():
                 print(f"{flag_item.name:<25s} = {flag_item._value}")
     print("\n")
     
-    user = os.getlogin()
+    user = getpass.getuser()
     device_index = -1 if FLAGS.device == "cpu" else (
         int(FLAGS.device.lstrip("cuda:")))
 
