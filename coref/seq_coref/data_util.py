@@ -7,18 +7,27 @@ from mica_text_coref.coref.seq_coref import map_characters
 
 import copy
 import numpy as np
+import os
+import torch
+from torch.utils import data as tdata
 import tqdm
 from typing import Callable
 
 def remove_overlaps(corpus: data.CorefCorpus, 
-                    keep_singletons: bool = False) -> data.CorefCorpus:
+                    keep_singletons: bool = False,
+                    verbose = False) -> data.CorefCorpus:
     """Remove overlapping mentions from coreference clusters. If the cluster
     becomes a singleton after removing the overlapping mentions, remove or keep
     it according to the keep_singletons argument.
     """
     new_corpus = data.CorefCorpus()
+    if verbose:
+        corpus_reader = tqdm.tqdm(corpus.documents, 
+                              desc="remove overlaps")
+    else:
+        corpus_reader = corpus.documents
 
-    for document in tqdm.tqdm(corpus.documents, desc="remove overlaps"):
+    for document in corpus_reader:
         new_document = copy.deepcopy(document)
         clusters = []
         
@@ -39,14 +48,20 @@ def remove_overlaps(corpus: data.CorefCorpus,
     return new_corpus
 
 def remap_spans_word_level(corpus: data.CorefCorpus, 
-                tokenize_fn: Callable[[str], list[str]]) -> data.CorefCorpus:
+                tokenize_fn: Callable[[str], list[str]],
+                verbose = False) -> data.CorefCorpus:
     """Apply the tokenize_fn to each word of the corpus's documents and adjust
     the indices of the mentions in the coreference clusters. The mentions of
     the named entity and constituent dictionaries are also adjusted.
     """
     new_corpus = data.CorefCorpus()
-    for document in tqdm.tqdm(corpus.documents, 
-                              desc="remap spans at word level"):
+    if verbose:
+        corpus_reader = tqdm.tqdm(corpus.documents, 
+                              desc="remap spans at word level")
+    else:
+        corpus_reader = corpus.documents
+
+    for document in corpus_reader:
         new_document = data.CorefDocument()
         mapping: list[int] = [0]
         n_tokens = 0
@@ -91,8 +106,8 @@ def remap_spans_word_level(corpus: data.CorefCorpus,
     return new_corpus
 
 def remap_spans_document_level(
-    corpus: data.CorefCorpus, tokenize_fn: Callable[[str], list[str]]) -> (
-        data.CorefCorpus):
+    corpus: data.CorefCorpus, tokenize_fn: Callable[[str], list[str]],
+    verbose = False) -> data.CorefCorpus:
     """Apply tokenize function at the document level by concatenating all
     words in the documents together. Then adjust the indices of the mentions
     in the coreference clusters, and the named entity and constituencies
@@ -100,9 +115,13 @@ def remap_spans_document_level(
     transformer-based tokenizers.
     """
     new_corpus = data.CorefCorpus()
+    if verbose:
+        corpus_reader = tqdm.tqdm(corpus.documents, 
+                              desc="remap spans at document level")
+    else:
+        corpus_reader = corpus.documents
 
-    for document in tqdm.tqdm(corpus.documents, 
-                              desc="remap spans at document level"):
+    for document in corpus_reader:
         new_document = data.CorefDocument()
         words = [word for sentence in document.sentences for word in sentence]
         text = " ".join(words)
@@ -182,3 +201,20 @@ def remap_spans_document_level(
         new_corpus.documents.append(new_document)
 
     return new_corpus
+
+def load_tensors(directory: str, device: str) -> tdata.TensorDataset:
+    token_ids = torch.load(
+        os.path.join(directory, "tokens.pt"), map_location=device)
+    mention_ids = torch.load(
+        os.path.join(directory, "mentions.pt"), map_location=device)
+    label_ids = torch.load(
+        os.path.join(directory, "labels.pt"), map_location=device)
+    attn_mask = torch.load(
+        os.path.join(directory, "attn.pt"), map_location=device)
+    global_attn_mask = torch.load(
+        os.path.join(directory, "global_attn.pt"), map_location=device)
+    doc_ids = torch.load(
+        os.path.join(directory, "docs.pt"), map_location=device)
+    dataset = tdata.TensorDataset(token_ids, mention_ids, label_ids,
+                                    attn_mask, global_attn_mask, doc_ids)
+    return dataset

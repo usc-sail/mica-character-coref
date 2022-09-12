@@ -127,8 +127,12 @@ class CorefCorpus:
         self.documents: list[CorefDocument] = []
         if jsonlines_file is not None:
             with jsonlines.open(jsonlines_file) as reader:
-                for i, document in tqdm.tqdm(enumerate(reader),
-                                             desc="reading jsonlines"):
+                if verbose:
+                    corpus_reader = tqdm.tqdm(enumerate(reader),
+                                             desc="reading jsonlines")
+                else:
+                    corpus_reader = enumerate(reader)
+                for i, document in corpus_reader:
                     document = CorefDocument(
                         document, 
                         use_ascii_transliteration=use_ascii_transliteration, 

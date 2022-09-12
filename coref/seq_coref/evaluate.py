@@ -383,7 +383,8 @@ def evaluate_dataloader(model: coref_longformer.CorefLongformerModel,
     official_scorer: str | None = None,
     use_official = False,
     batch_size = 64,
-    print_n_batches = 10
+    print_n_batches = 10,
+    use_dynamic_loading = False,
     ) -> CoreferenceMetric | tuple[CoreferenceMetric, CoreferenceMetric]:
     """
     Evaluate the trained coreference longformer model on the given dataloader,
@@ -395,6 +396,7 @@ def evaluate_dataloader(model: coref_longformer.CorefLongformerModel,
             "using official evaluation")
 
     model.eval()
+    device = next(model.parameters()).device
     label_ids_list: list[torch.IntTensor] = []
     prediction_ids_list: list[torch.IntTensor] = []
     doc_ids_list: list[torch.IntTensor] = []
@@ -409,12 +411,19 @@ def evaluate_dataloader(model: coref_longformer.CorefLongformerModel,
         for i, batch in enumerate(dataloader):
             (batch_token_ids, batch_mention_ids, batch_label_ids,
                 batch_attn_mask, batch_global_attn_mask, batch_doc_ids) = batch
+            
+            if use_dynamic_loading:
+                batch_token_ids = batch_token_ids.to(device)
+                batch_mention_ids = batch_mention_ids.to(device)
+                batch_attn_mask = batch_attn_mask.to(device)
+                batch_global_attn_mask = batch_global_attn_mask.to(device)
+
             start_time = time.time()
             batch_prediction_ids: torch.IntTensor = model(batch_token_ids,
                 batch_mention_ids, batch_attn_mask, batch_global_attn_mask)
-            label_ids_list.append(batch_label_ids)
-            prediction_ids_list.append(batch_prediction_ids.detach())
-            doc_ids_list.append(batch_doc_ids)
+            label_ids_list.append(batch_label_ids.cpu())
+            prediction_ids_list.append(batch_prediction_ids.detach().cpu())
+            doc_ids_list.append(batch_doc_ids.cpu())
             time_taken = time.time() - start_time
             running_batch_times.append(time_taken)
             

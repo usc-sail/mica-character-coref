@@ -3,6 +3,8 @@
 
 from mica_text_coref.coref.seq_coref import data
 
+import gpustat
+
 def find_mention_pair_relationship(
     first_mention: data.Mention, second_mention: data.Mention) -> (
     data.MentionPairRelationship):
@@ -64,7 +66,22 @@ def indent_block(words: list[str], indent: int, width: int) -> str:
     return block
 
 def convert_float_seconds_to_time_string(seconds: float) -> str:
+    """Convert seconds to h m s format"""
     seconds = int(seconds)
     minutes, seconds = seconds//60, seconds%60
     hours, minutes = minutes//60, minutes%60
     return f"{hours}h {minutes}m {seconds}s"
+
+def get_gpu_usage(user: str, device: int) -> tuple[int, int]:
+    """Find memory consumed on gpu by user processes, and available memory"""
+    gpu_collection = gpustat.new_query()
+    memory_consumed = 0
+    memory_available = 0
+    for gpu in gpu_collection.gpus:
+        if gpu.index == device:
+            for process in gpu.processes:
+                if process["username"] == user:
+                    memory_consumed = process["gpu_memory_usage"]
+            memory_available = gpu.memory_free
+            return memory_consumed, memory_available
+    assert False, f"GPU:{device} not found"

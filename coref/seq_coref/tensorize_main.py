@@ -36,10 +36,11 @@ def create_and_save_tensors():
         jsonfiles_path = os.path.join(FLAGS.conll_directory, 
                                       f"{partition}.english.jsonlines")
         corpus = data.CorefCorpus(jsonfiles_path, 
-                                  use_ascii_transliteration=True)
+                                  use_ascii_transliteration=True, verbose=True)
         n_clusters = sum(len(document.clusters) for document in 
                             corpus.documents)
-        seq_corpus = data_util.remove_overlaps(corpus, keep_singletons=False)
+        seq_corpus = data_util.remove_overlaps(corpus, keep_singletons=False,
+            verbose=True)
         n_seq_clusters = sum(len(document.clusters) for document in
                                 seq_corpus.documents)
 
@@ -53,7 +54,7 @@ def create_and_save_tensors():
             mentions.append(document_mentions)
 
         longformer_seq_corpus = data_util.remap_spans_document_level(
-            seq_corpus, tokenizer.tokenize)
+            seq_corpus, tokenizer.tokenize, verbose=True)
         dataset = tensorize.create_tensors(longformer_seq_corpus, mentions,
                                             tokenizer)
         n_tensor_seq_clusters = dataset.tensors[0].shape[0]
