@@ -47,17 +47,14 @@ class CoreferenceMetric:
 def convert_tensor_to_cluster(tensor: torch.LongTensor) -> set[data.Mention]:
     """Find the set of mentions from the annotated tensor"""
     cluster: set[data.Mention] = set()
-    i = 0
-    while i < len(tensor):
-        if tensor[i] == 1:
-            j = i + 1
-            while j < len(tensor) and tensor[j] == 2:
-                j += 1
-            mention = data.Mention(i, j - 1)
-            cluster.add(mention)
-            i = j
-        else:
-            i += 1
+    n = len(tensor)
+    for i in torch.where(tensor == 1)[0]:
+        i = i.item()
+        j = i + 1
+        while j < n and tensor[j] == 2:
+            j += 1
+        mention = data.Mention(i, j - 1)
+        cluster.add(mention)
     return cluster
 
 def convert_to_conll(doc_key_with_part_id: str, sentences: list[list[str]],
@@ -128,7 +125,8 @@ def evaluate_clusters_official(official_scorer: str,
     predictions: dict[int, list[set[data.Mention]]],
     doc_id_to_doc_key: dict[int, str],
     doc_id_to_sentences: dict[int, list[list[str]]],
-    verbose=False) -> CoreferenceMetric:
+    verbose=False
+    ) -> CoreferenceMetric:
     """Evaluates the predictions against the groundtruth annotations using
     the official conll-2012 perl scorer. This function will throw an error if
     any key of the groundtruth dictionary is not present in both the
@@ -211,8 +209,11 @@ def evaluate_clusters_official(official_scorer: str,
         return official_metric
 
 def evaluate_tensors_official(official_scorer: str,
-    groundtruth: torch.LongTensor, predictions: torch.LongTensor,
-    doc_ids: torch.IntTensor, corpus: data.CorefCorpus,
+    groundtruth: torch.LongTensor,
+    predictions: torch.LongTensor,
+    doc_ids: torch.IntTensor,
+    attn_mask: torch.FloatTensor,
+    corpus: data.CorefCorpus,
     evaluate_against_corpus = False) -> (
         CoreferenceMetric | tuple[CoreferenceMetric, CoreferenceMetric]):
     """Evaluate the predictions against the groundtruth annotations using the
@@ -240,10 +241,10 @@ def evaluate_tensors_official(official_scorer: str,
         corpus.get_doc_id_to_sentences())
 
     logging.info("Converting tensors to clusters")
-    for doc_id, gt_tensor, pred_tensor in zip(
-        doc_ids, groundtruth, predictions):
-        gt_cluster = convert_tensor_to_cluster(gt_tensor)
-        pred_cluster = convert_tensor_to_cluster(pred_tensor)
+    for doc_id, gt_tensor, pred_tensor, attn in zip(
+        doc_ids, groundtruth, predictions, attn_mask):
+        gt_cluster = convert_tensor_to_cluster(gt_tensor[attn == 1.])
+        pred_cluster = convert_tensor_to_cluster(pred_tensor[attn == 1.])
         doc_id = doc_id.item()
         if len(gt_cluster):
             if doc_id not in groundtruth_doc_id_to_clusters:
@@ -252,7 +253,7 @@ def evaluate_tensors_official(official_scorer: str,
         if len(pred_cluster):
             if doc_id not in predictions_doc_id_to_clusters:
                 predictions_doc_id_to_clusters[doc_id] = []
-            predictions_doc_id_to_clusters[doc_id].append(gt_cluster)
+            predictions_doc_id_to_clusters[doc_id].append(pred_cluster)
     
     coref_metric1 = evaluate_clusters_official(official_scorer, 
         groundtruth_doc_id_to_clusters, predictions_doc_id_to_clusters,
@@ -272,7 +273,8 @@ def evaluate_tensors_official(official_scorer: str,
 
 def evaluate_clusters_scorch(
     groundtruth: dict[int, list[set[data.Mention]]],
-    predictions: dict[int, list[set[data.Mention]]]) -> CoreferenceMetric:
+    predictions: dict[int, list[set[data.Mention]]]
+    ) -> CoreferenceMetric:
     """Evaluates the predictions against the groundtruth annotations using the
     unofficial python scorch package.
 
@@ -337,8 +339,11 @@ def evaluate_clusters_scorch(
 # TODO: pass mentions argument to only evaluate against the mention which are
 # not representative mentions
 def evaluate_tensors_scorch(groundtruth: torch.LongTensor, 
-    predictions: torch.LongTensor, doc_ids: torch.IntTensor,
-    corpus: data.CorefCorpus | None = None, evaluate_against_corpus = False
+    predictions: torch.LongTensor,
+    doc_ids: torch.IntTensor,
+    attn_mask: torch.FloatTensor,
+    corpus: data.CorefCorpus | None = None,
+    evaluate_against_corpus = False
     ) -> CoreferenceMetric | tuple[CoreferenceMetric, CoreferenceMetric]:
     """Evaluate the predictions against the groundtruth annotations using the
     unofficial python scorch library. The groundtruth and predictions are
@@ -363,10 +368,10 @@ def evaluate_tensors_scorch(groundtruth: torch.LongTensor,
     predictions_doc_id_to_clusters: dict[int, list[set[data.Mention]]] = {}
 
     logging.info("Converting tensors to clusters")
-    for doc_id, gt_tensor, pred_tensor in zip(
-        doc_ids, groundtruth, predictions):
-        gt_cluster = convert_tensor_to_cluster(gt_tensor)
-        pred_cluster = convert_tensor_to_cluster(pred_tensor)
+    for doc_id, gt_tensor, pred_tensor, attn in zip(
+        doc_ids, groundtruth, predictions, attn_mask):
+        gt_cluster = convert_tensor_to_cluster(gt_tensor[attn == 1.])
+        pred_cluster = convert_tensor_to_cluster(pred_tensor[attn == 1.])
         doc_id = doc_id.item()
         if len(gt_cluster):
             if doc_id not in groundtruth_doc_id_to_clusters:
@@ -375,7 +380,7 @@ def evaluate_tensors_scorch(groundtruth: torch.LongTensor,
         if len(pred_cluster):
             if doc_id not in predictions_doc_id_to_clusters:
                 predictions_doc_id_to_clusters[doc_id] = []
-            predictions_doc_id_to_clusters[doc_id].append(gt_cluster)
+            predictions_doc_id_to_clusters[doc_id].append(pred_cluster)
     
     coref_metric1 = evaluate_clusters_scorch(
         groundtruth_doc_id_to_clusters, predictions_doc_id_to_clusters)
@@ -418,6 +423,7 @@ def evaluate_dataloader(model: coref_longformer.CorefLongformerModel,
     label_ids_list: list[torch.LongTensor] = []
     prediction_ids_list: list[torch.LongTensor] = []
     doc_ids_list: list[torch.IntTensor] = []
+    attn_mask_list: list[torch.FloatTensor] = []
     n_batches = len(dataloader)
     eval_start_time = time.time()
     logging.info(f"Inference batch size = {batch_size}")
@@ -443,6 +449,7 @@ def evaluate_dataloader(model: coref_longformer.CorefLongformerModel,
             label_ids_list.append(batch_label_ids.cpu())
             prediction_ids_list.append(batch_prediction_ids.detach().cpu())
             doc_ids_list.append(batch_doc_ids.cpu())
+            attn_mask_list.append(batch_attn_mask.cpu())
             time_taken = time.time() - start_time
             running_batch_times.append(time_taken)
 
@@ -475,15 +482,17 @@ def evaluate_dataloader(model: coref_longformer.CorefLongformerModel,
     groundtruth = torch.cat(label_ids_list, dim=0)
     predictions = torch.cat(prediction_ids_list, dim=0)
     doc_ids = torch.cat(doc_ids_list, dim=0)
+    attn_mask = torch.cat(attn_mask_list, dim=0)
     start_time = time.time()
     if use_official:
         logging.info("Starting official evaluation...")
         output = evaluate_tensors_official(official_scorer, groundtruth,
-                    predictions, doc_ids, corpus, evaluate_against_corpus)
+                    predictions, doc_ids, attn_mask, corpus,
+                    evaluate_against_corpus)
     else:
         logging.info("Starting scorch evaluation...")
-        output = evaluate_tensors_scorch(groundtruth, predictions, doc_ids, 
-                    corpus, evaluate_against_corpus)
+        output = evaluate_tensors_scorch(groundtruth, predictions, doc_ids,
+                    attn_mask, corpus, evaluate_against_corpus)
     logging.info("...Evaluation done.")
     time_taken = time.time() - start_time
     time_taken_str = util.convert_float_seconds_to_time_string(time_taken)
