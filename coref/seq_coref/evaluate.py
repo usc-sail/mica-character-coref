@@ -191,10 +191,14 @@ def evaluate_clusters_official(official_scorer: str,
             r"Precision: \([0-9.]+ / [0-9.]+\) ([0-9.]+)%\s+F1:"
             r" ([0-9.]+)%", stdout, flags=re.DOTALL)
         
-        muc = Metric(float(matched_tuples[0][0]), float(matched_tuples[0][1]))
-        b3 = Metric(float(matched_tuples[1][0]), float(matched_tuples[1][1]))
-        ceafm = Metric(float(matched_tuples[2][0]), float(matched_tuples[2][1]))
-        ceafe = Metric(float(matched_tuples[3][0]), float(matched_tuples[3][1]))
+        muc = Metric(float(matched_tuples[0][0])/100,
+                    float(matched_tuples[0][1])/100)
+        b3 = Metric(float(matched_tuples[1][0])/100,
+                    float(matched_tuples[1][1])/100)
+        ceafm = Metric(float(matched_tuples[2][0])/100,
+                        float(matched_tuples[2][1])/100)
+        ceafe = Metric(float(matched_tuples[3][0])/100,
+                        float(matched_tuples[3][1])/100)
         
         mention_match = re.search(
             r"Mentions: Recall: \([0-9.]+ / [0-9.]+\) ([0-9.]+)%\s+Precision:"
