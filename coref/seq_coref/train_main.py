@@ -11,20 +11,22 @@ from mica_text_coref.coref.seq_coref import util
 
 from absl import app
 from absl import flags
+from absl import logging
 import getpass
 import os
-import re
 import time
+import torch
 
 FLAGS = flags.FLAGS
 flags.DEFINE_string("conll_directory",
     default="/home/sbaruah_usc_edu/mica_text_coref/data/conll-2012/gold",
     help="Directory containing English conll gold jsonlines files")
-flags.DEFINE_string("tensors_directory",
-    default=("/home/sbaruah_usc_edu/mica_text_coref/data/"
-            "tensors/longformer_seq_tensors"),
-    help="Directory containing English coreference tensors")
-flags.DEFINE_string("device", default="cuda:0", help="Device on which to train")
+flags.DEFINE_string("tensors_directory", default=None,
+    help="Directory containing English coreference tensors",
+    required=True)
+flags.DEFINE_bool("use_gpu", default=True, help="Set to use gpu")
+flags.DEFINE_bool("use_data_parallel", default=True,
+    help="Set to use data parallelism")
 flags.DEFINE_integer("train_batch_size", default=64,
     help="Batch size to use in training")
 flags.DEFINE_integer("infer_batch_size", default=64,
@@ -37,7 +39,7 @@ flags.DEFINE_integer("patience", default=3,
         "before early stopping"))
 flags.DEFINE_integer("warmup", default=50,
     help="Number of warmup steps in a linear schedule of the learning rate")
-flags.DEFINE_bool("use_official_evaluation", default=False,
+flags.DEFINE_bool("use_official_evaluation", default=True,
     help="Set to use the official perl scorer script in evaluation")
 flags.DEFINE_string("official_scorer_script",
     default=("/home/sbaruah_usc_edu/mica_text_coref/coref/seq_coref/"
@@ -46,7 +48,7 @@ flags.DEFINE_string("official_scorer_script",
 flags.DEFINE_bool("evaluate_against_original", default=False,
     help=("Set to evaluate against the original coreferece corpus "
         "(before removing overlaps)"))
-flags.DEFINE_integer("print_n_batches", default=10,
+flags.DEFINE_integer("print_n_batches", default=20,
     help="Number of batches after which to print to stdout")
 flags.DEFINE_integer("max_epochs", default=10,
     help="Maximum number of epochs to train")
@@ -56,119 +58,104 @@ flags.DEFINE_bool("evaluate_on_train", default=True,
     help="Set to also evaluate on the training dataset")
 flags.DEFINE_bool("use_large_longformer", default=False,
     help="Set to use the large version of the LongFormer transformer")
-flags.DEFINE_bool("use_dynamic_loading", default=False,
+flags.DEFINE_bool("use_dynamic_loading", default=True,
     help=("Set to dynamically load tensors onto GPU at each batch, otherwise"
             " load the full dataset of tensors before training"))
-
-flags.register_validator("device",
-    lambda v: re.match(r"^(cpu)|(cuda:\d+)$", v) is not None,
-    message="device should be cpu or cuda:{gpu_index}", flag_values=FLAGS)
 
 def train_main():
     for module_name, flag_items in FLAGS.flags_by_module_dict().items():
         if os.path.join(os.getcwd(), module_name) == __file__:
             for flag_item in flag_items:
-                print(f"{flag_item.name:<25s} = {flag_item._value}")
-    print("\n")
-    
+                logging.info(f"FLAGS: {flag_item.name:<25s} = "
+                                f"{flag_item._value}")
+
     user = getpass.getuser()
-    device_index = -1 if FLAGS.device == "cpu" else (
-        int(FLAGS.device.lstrip("cuda:")))
+    n_gpus = torch.cuda.device_count()
+    use_gpu = n_gpus > 0 and FLAGS.use_gpu
+    use_dynamic_loading = use_gpu and FLAGS.use_dynamic_loading
+    load_corpora = FLAGS.evaluate_against_original or (
+        FLAGS.use_official_evaluation)
+    devices = list(range(n_gpus))
+    device = "cuda:0"
 
     start_time = time.time()
-    print("Intializing CorefLongformer Model...\n")
+    logging.info("Intializing CorefLongformer Model...")
     model = coref_longformer.CorefLongformerModel(
         use_large=FLAGS.use_large_longformer)
     time_taken = util.convert_float_seconds_to_time_string(
         time.time() - start_time)
-    print(f"\nInitialization done. Time taken = {time_taken}\n\n")
+    logging.info(f"...Initialization done. Time taken = {time_taken}")
 
     start_time = time.time()
-    if FLAGS.use_dynamic_loading:
-        print("Loading train tensors onto cpu...", end="")
+    if use_dynamic_loading:
+        logging.info("Using dynamic loading, so loading tensors onto CPU.")
+        logging.info("Loading train tensors onto CPU...")
         train_dataset = data_util.load_tensors(
             os.path.join(FLAGS.tensors_directory, "train"), device="cpu")
-    else:
-        print(f"Loading train tensors onto {FLAGS.device}...", end="")
-        train_dataset = data_util.load_tensors(
-            os.path.join(FLAGS.tensors_directory, "train"), FLAGS.device)
-    time_taken = util.convert_float_seconds_to_time_string(
-        time.time() - start_time)
-    print(f"done. Time taken = {time_taken}")
-    if device_index > -1:
-        memory_consumed, memory_available = util.get_gpu_usage(user, 
-            device_index)
-        print(f"GPU memory consumed = {memory_consumed},"
-                f" availabe = {memory_available}")
-    print()
-
-    start_time = time.time()
-    if FLAGS.use_dynamic_loading:
-        print("Loading dev tensors onto cpu...", end="")
+        logging.info("Loading dev tensors onto cpu...")
         dev_dataset = data_util.load_tensors(
             os.path.join(FLAGS.tensors_directory, "dev"), device="cpu")
     else:
-        print(f"Loading dev tensors onto {FLAGS.device}...", end="")
+        logging.info("Not using dynamic loading, so loading tensors onto GPU.")
+        logging.info(f"Loading train tensors onto {device}...")
+        train_dataset = data_util.load_tensors(
+            os.path.join(FLAGS.tensors_directory, "train"), device=device)
+        logging.info(f"Loading dev tensors onto {device}...")
         dev_dataset = data_util.load_tensors(
-            os.path.join(FLAGS.tensors_directory, "dev"), FLAGS.device)
+            os.path.join(FLAGS.tensors_directory, "dev"), device=device)
     time_taken = util.convert_float_seconds_to_time_string(
         time.time() - start_time)
-    print(f"done. Time taken = {time_taken}")
-    if device_index > -1:
-        memory_consumed, memory_available = util.get_gpu_usage(user, 
-            device_index)
-        print(f"GPU memory consumed = {memory_consumed},"
-                f" availabel = {memory_available}")
-    print()
+    logging.info(f"...Loading done. Time taken = {time_taken}")
+    util.print_gpu_usage(user, devices)
 
     longformer_train_corpus = None
     longformer_dev_corpus = None
 
-    if FLAGS.evaluate_against_original:
+    if load_corpora:
+        logging.info("Loading corpora.")
         train_jsonlines_path = os.path.join(FLAGS.conll_directory, 
             "train.english.jsonlines")
         start_time = time.time()
-        print(f"Loading train corpus...", end="")
+        logging.info(f"Loading train corpus...")
         train_corpus = data.CorefCorpus(train_jsonlines_path,
             use_ascii_transliteration=True)
         time_taken = util.convert_float_seconds_to_time_string(
             time.time() - start_time)
-        print(f"done. Time taken = {time_taken}")
+        logging.info(f"...Loading done. Time taken = {time_taken}")
 
         start_time = time.time()
-        print(f"Re-tokenizing train corpus using longformer tokenizer...",
-            end="")
+        logging.info("Re-tokenizing train corpus using longformer tokenizer...")
         longformer_train_corpus = data_util.remap_spans_document_level(
             train_corpus, model.tokenizer.tokenize)
         time_taken = util.convert_float_seconds_to_time_string(
             time.time() - start_time)
-        print(f"done. Time taken = {time_taken}\n")
+        logging.info("...Re-tokenization done. Time taken = {time_taken}")
 
         dev_jsonlines_path = os.path.join(FLAGS.conll_directory, 
             "dev.english.jsonlines")
         start_time = time.time()
-        print(f"Loading dev corpus...", end="")
+        logging.info("Loading dev corpus...")
         dev_corpus = data.CorefCorpus(dev_jsonlines_path,
             use_ascii_transliteration=True)
         time_taken = util.convert_float_seconds_to_time_string(
             time.time() - start_time)
-        print(f"done. Time taken = {time_taken}")
+        logging.info(f"...Loading done. Time taken = {time_taken}")
 
         start_time = time.time()
-        print(f"Re-tokenizing dev corpus using longformer tokenizer...",
-            end="")
+        logging.info("Re-tokenizing dev corpus using longformer tokenizer...")
         longformer_dev_corpus = data_util.remap_spans_document_level(
             dev_corpus, model.tokenizer.tokenize)
         time_taken = util.convert_float_seconds_to_time_string(
             time.time() - start_time)
-        print(f"done. Time taken = {time_taken}")
+        logging.info(f"... Re-tokenization done. Time taken = {time_taken}")
     
     train.train(model,
         train_dataset,
         dev_dataset,
         longformer_train_corpus,
         longformer_dev_corpus,
-        device=FLAGS.device,
+        use_gpu=use_gpu,
+        use_data_parallel=FLAGS.use_data_parallel,
         train_batch_size=FLAGS.train_batch_size,
         eval_batch_size=FLAGS.infer_batch_size,
         learning_rate=FLAGS.learning_rate,
@@ -181,9 +168,11 @@ def train_main():
         use_official_evaluation=FLAGS.use_official_evaluation,
         official_scorer=FLAGS.official_scorer_script,
         evaluate_on_train=FLAGS.evaluate_on_train,
-        use_dynamic_loading=FLAGS.use_dynamic_loading)
+        use_dynamic_loading=FLAGS.use_dynamic_loading,
+        evaluate_against_original=FLAGS.evaluate_against_original)
 
 def main(argv):
+    logging.get_absl_handler().use_absl_log_file()
     train_main()
 
 if __name__=="__main__":

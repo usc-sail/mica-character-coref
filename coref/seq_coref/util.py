@@ -3,6 +3,7 @@
 
 from mica_text_coref.coref.seq_coref import data
 
+from absl import logging
 import gpustat
 
 def find_mention_pair_relationship(
@@ -72,16 +73,16 @@ def convert_float_seconds_to_time_string(seconds: float) -> str:
     hours, minutes = minutes//60, minutes%60
     return f"{hours}h {minutes}m {seconds}s"
 
-def get_gpu_usage(user: str, device: int) -> tuple[int, int]:
-    """Find memory consumed on gpu by user processes, and available memory"""
+def print_gpu_usage(user: str, devices: list[int]):
+    """Print memory consumed on gpu by user processes, and available memory"""
     gpu_collection = gpustat.new_query()
     memory_consumed = 0
     memory_available = 0
     for gpu in gpu_collection.gpus:
-        if gpu.index == device:
+        if gpu.index in devices:
             for process in gpu.processes:
                 if process["username"] == user:
                     memory_consumed = process["gpu_memory_usage"]
             memory_available = gpu.memory_free
-            return memory_consumed, memory_available
-    assert False, f"GPU:{device} not found"
+            logging.info(f"GPU {gpu.index} = {memory_consumed} used, "
+                    f"{memory_available} free")
