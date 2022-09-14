@@ -1,6 +1,5 @@
 """Longformer model."""
 
-import numpy as np
 import torch
 from torch import nn
 from transformers import LongformerTokenizer, LongformerModel
@@ -36,14 +35,8 @@ class CorefLongformerModel(nn.Module):
                 token_ids: torch.LongTensor, 
                 mention_ids: torch.IntTensor, 
                 attn_mask: torch.FloatTensor, 
-                global_attn_mask: torch.FloatTensor, 
-                label_ids: torch.IntTensor | None = None) -> (
-                tuple[torch.IntTensor, torch.FloatTensor] | torch.IntTensor):
-        """Forward propagation. If label_ids is None, return predictions only.
-        Otherwise, return both predictions and loss, which is used for
-        backpropagation.
-        """
-        device = next(self.parameters()).device
+                global_attn_mask: torch.FloatTensor) -> torch.FloatTensor:
+        """Forward propagation"""
         longformer_output: (
             modeling_longformer.LongformerBaseModelOutputWithPooling) = (
                 self.longformer(token_ids, attn_mask, global_attn_mask))
@@ -51,21 +44,21 @@ class CorefLongformerModel(nn.Module):
             longformer_output.last_hidden_state)
         mention_embedding: torch.FloatTensor = self.label_embedding(mention_ids)
         gru_input: torch.FloatTensor = torch.cat(
-            (longformer_hidden, mention_embedding), dim=2)
+            (longformer_hidden, mention_embedding), dim=2).contiguous()
+        self.gru.flatten_parameters()
         gru_output: torch.FloatTensor = self.gru(gru_input)[0]
         logits: torch.FloatTensor = self.token_classifier(gru_output)
-        predictions: torch.IntTensor = logits.argmax(dim=2).int()
+        return logits
 
-        if label_ids is not None:
-            active_labels = label_ids[attn_mask == 1.]
-            active_logits = logits.flatten(0, 1)[attn_mask.flatten() == 1.]
-            label_distribution = np.bincount(active_labels.cpu(), 
-                                             minlength=self.n_labels)
-            class_weight = torch.FloatTensor(1/(1 + label_distribution)).to(
-                device)
-            cross_entrop_loss_fn = nn.CrossEntropyLoss(weight=class_weight, 
-                                                       reduction="mean")
-            loss = cross_entrop_loss_fn(active_logits, active_labels.long())
-            return predictions, loss
-        else:
-            return predictions 
+def compute_loss(logits: torch.FloatTensor, label_ids: torch.LongTensor,
+    attn_mask: torch.FloatTensor, n_labels: int) -> torch.FloatTensor:
+    """Compute cross entropy loss"""
+    active_labels = label_ids[attn_mask == 1.]
+    active_logits = logits.flatten(0, 1)[attn_mask.flatten() == 1.]
+    label_distribution = torch.bincount(active_labels,
+        minlength=n_labels)
+    class_weight = 1/(1 + label_distribution)
+    cross_entrop_loss_fn = nn.CrossEntropyLoss(weight=class_weight, 
+        reduction="mean")
+    loss = cross_entrop_loss_fn(active_logits, active_labels)
+    return loss
