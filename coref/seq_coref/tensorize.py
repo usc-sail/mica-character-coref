@@ -95,7 +95,7 @@ def create_tensors(
     mention_ids_pt = torch.IntTensor(sequence.pad_sequences(mention_ids_list,
         maxlen=max_sequence_length, dtype=int, padding="post",
         truncating="post", value=0))
-    label_ids_pt = torch.IntTensor(sequence.pad_sequences(label_ids_list,
+    label_ids_pt = torch.LongTensor(sequence.pad_sequences(label_ids_list,
         maxlen=max_sequence_length, dtype=int, padding="post", 
         truncating="post", value=0))
     attn_mask_pt = torch.FloatTensor(sequence.pad_sequences(attn_mask_list, 
