@@ -160,8 +160,8 @@ def evaluate_clusters_official(official_scorer: str,
         gold_conll_lines.extend(gold_document_conll_lines)
         pred_conll_lines.extend(pred_document_conll_lines)
     
-    with tempfile.NamedTemporaryFile(mode="w", delete=True) as gold_file, \
-        tempfile.NamedTemporaryFile(mode="w", delete=True) as pred_file:
+    with tempfile.NamedTemporaryFile(mode="w", delete=False) as gold_file, \
+        tempfile.NamedTemporaryFile(mode="w", delete=False) as pred_file:
         gold_file.writelines(gold_conll_lines)
         pred_file.writelines(pred_conll_lines)
 
@@ -257,7 +257,7 @@ def evaluate_tensors_official(official_scorer: str,
     
     coref_metric1 = evaluate_clusters_official(official_scorer, 
         groundtruth_doc_id_to_clusters, predictions_doc_id_to_clusters,
-        doc_id_to_doc_key, doc_id_to_sentences)
+        doc_id_to_doc_key, doc_id_to_sentences, verbose=True)
     
     if evaluate_against_corpus:
         for document in corpus.documents:
@@ -266,7 +266,7 @@ def evaluate_tensors_official(official_scorer: str,
                 corpus_doc_id_to_clusters[doc_id] = document.clusters
         coref_metric2 = evaluate_clusters_official(official_scorer, 
             corpus_doc_id_to_clusters, predictions_doc_id_to_clusters,
-            doc_id_to_doc_key, doc_id_to_sentences)
+            doc_id_to_doc_key, doc_id_to_sentences, verbose=True)
         return coref_metric1, coref_metric2
     else:
         return coref_metric1
@@ -397,6 +397,22 @@ def evaluate_tensors_scorch(groundtruth: torch.LongTensor,
     else:
         return coref_metric1
 
+def evaluate_sequence(
+    groundtruth: torch.LongTensor,
+    predictions: torch.LongTensor,
+    attn: torch.FloatTensor
+    ) -> Metric:
+    """"""
+    true = groundtruth[attn == 1]
+    pred = predictions[attn == 1]
+    x = ((true != 0) & (true == pred)).sum()
+    y = (true != 0).sum()
+    z = (pred != 0).sum()
+    recall = (x + 1)/(y + 1)
+    precision = (x + 1)/(z + 1)
+    metric = Metric(recall, precision)
+    return metric
+
 def evaluate_dataloader(model: coref_longformer.CorefLongformerModel,
     dataloader: tdata.DataLoader,
     corpus: data.CorefCorpus | None = None,
@@ -405,8 +421,12 @@ def evaluate_dataloader(model: coref_longformer.CorefLongformerModel,
     batch_size = 64,
     print_n_batches = 10,
     use_dynamic_loading = False,
-    evaluate_against_corpus = False
-    ) -> CoreferenceMetric | tuple[CoreferenceMetric, CoreferenceMetric]:
+    evaluate_against_corpus = False,
+    save_predictions = False,
+    predictions_directory: str | None = None,
+    evaluate_seq = False
+    ) -> (Metric | CoreferenceMetric |
+          tuple[CoreferenceMetric, CoreferenceMetric]):
     """
     Evaluate the trained coreference longformer model on the given dataloader,
     and return Coreference Metric.
@@ -417,6 +437,10 @@ def evaluate_dataloader(model: coref_longformer.CorefLongformerModel,
 
     if evaluate_against_corpus:    
         assert corpus is not None, "Corpus missing!"
+    
+    if save_predictions:
+        assert predictions_directory is not None, (
+            "Predictions directory missing!")
 
     model.eval()
     device = next(model.parameters()).device
@@ -483,8 +507,17 @@ def evaluate_dataloader(model: coref_longformer.CorefLongformerModel,
     predictions = torch.cat(prediction_ids_list, dim=0)
     doc_ids = torch.cat(doc_ids_list, dim=0)
     attn_mask = torch.cat(attn_mask_list, dim=0)
+
+    if save_predictions:
+        logging.info("Saving predictions")
+        util.save_predictions(groundtruth, predictions, doc_ids, attn_mask,
+            predictions_directory)
+
     start_time = time.time()
-    if use_official:
+    if evaluate_seq:
+        logging.info("Starting sequence evaluation...")
+        output = evaluate_sequence(groundtruth, predictions, attn_mask)
+    elif use_official:
         logging.info("Starting official evaluation...")
         output = evaluate_tensors_official(official_scorer, groundtruth,
                     predictions, doc_ids, attn_mask, corpus,
