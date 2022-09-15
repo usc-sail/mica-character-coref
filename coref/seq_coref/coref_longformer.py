@@ -57,7 +57,7 @@ def compute_loss(logits: torch.FloatTensor, label_ids: torch.LongTensor,
     active_logits = logits.flatten(0, 1)[attn_mask.flatten() == 1.]
     label_distribution = torch.bincount(active_labels,
         minlength=n_labels)
-    class_weight = 1/(1 + label_distribution)
+    class_weight = torch.sqrt(len(active_labels)/(1 + label_distribution))
     cross_entrop_loss_fn = nn.CrossEntropyLoss(weight=class_weight, 
         reduction="mean")
     loss = cross_entrop_loss_fn(active_logits, active_labels)
