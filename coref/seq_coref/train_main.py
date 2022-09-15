@@ -27,9 +27,9 @@ flags.DEFINE_string("tensors_directory", default=None,
 flags.DEFINE_bool("use_gpu", default=True, help="Set to use gpu")
 flags.DEFINE_bool("use_data_parallel", default=True,
     help="Set to use data parallelism")
-flags.DEFINE_integer("train_batch_size", default=64,
+flags.DEFINE_integer("train_batch_size", default=20,
     help="Batch size to use in training")
-flags.DEFINE_integer("infer_batch_size", default=64,
+flags.DEFINE_integer("infer_batch_size", default=20,
     help="Batch size to use in inference")
 flags.DEFINE_float("learning_rate", default=1e-5, help="learning rate")
 flags.DEFINE_float("weight_decay", default=1e-3,
@@ -61,6 +61,27 @@ flags.DEFINE_bool("use_large_longformer", default=False,
 flags.DEFINE_bool("use_dynamic_loading", default=True,
     help=("Set to dynamically load tensors onto GPU at each batch, otherwise"
             " load the full dataset of tensors before training"))
+flags.DEFINE_bool("save_model", default=True,
+    help="Set to save model's weights")
+flags.DEFINE_bool("save_model_after_every_epoch", default=True,
+    help=("Has no effect if save_model is False. Otherwise if save_model is"
+            " True, set save_model_after_every_epoch to True to save model's"
+            " weights after every epoch. If save_model is True but"
+            " save_model_after_every_epoch is False, only save the best "
+            "model's weights"))
+flags.DEFINE_bool("save_predictions", default=True,
+    help="Save the groundtruth, prediction, doc ids, and attn tensors")
+flags.DEFINE_bool("save_predictions_after_every_epoch", default=True,
+    help=("Similar to save_model_after_every_epoch, if"
+            " save_predictions_after_every_epoch is True (and save_predictions"
+            " is True), save the groundtruth, predictions, doc ids, and attn"
+            " tensors after every epoch"))
+flags.DEFINE_string("save_directory",
+    default="/home/sbaruah_usc_edu/mica_text_coref/data/results",
+    help="Directory to which model's weights and predictions will be saved")
+flags.DEFINE_bool("evaluate_seq", default=True, help=(
+    "Only set this if you are evaluating sequences, not sets of mentions. Set"
+    " this to do a simple per-token evaluation."))
 
 def train_main():
     for module_name, flag_items in FLAGS.flags_by_module_dict().items():
@@ -169,7 +190,15 @@ def train_main():
         official_scorer=FLAGS.official_scorer_script,
         evaluate_on_train=FLAGS.evaluate_on_train,
         use_dynamic_loading=FLAGS.use_dynamic_loading,
-        evaluate_against_original=FLAGS.evaluate_against_original)
+        evaluate_against_original=FLAGS.evaluate_against_original,
+        save_model=FLAGS.save_model,
+        save_model_after_every_epoch=FLAGS.save_model_after_every_epoch,
+        save_predictions=FLAGS.save_predictions,
+        save_predictions_after_every_epoch=(
+            FLAGS.save_predictions_after_every_epoch),
+        save_directory=FLAGS.save_directory,
+        evaluate_seq=FLAGS.evaluate_seq
+        )
 
 def main(argv):
     logging.get_absl_handler().use_absl_log_file()

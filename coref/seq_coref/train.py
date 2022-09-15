@@ -10,6 +10,7 @@ from mica_text_coref.coref.seq_coref import util
 from absl import logging
 import getpass
 import numpy as np
+import os
 import time
 import torch
 from torch.utils import data as tdata
@@ -37,7 +38,13 @@ def train(model: coref_longformer.CorefLongformerModel,
           official_scorer: str | None = None,
           evaluate_on_train = False,
           use_dynamic_loading = False,
-          evaluate_against_original = False
+          evaluate_against_original = False,
+          save_model = False,
+          save_model_after_every_epoch = False,
+          save_predictions = False,
+          save_predictions_after_every_epoch = False,
+          save_directory: str | None = None,
+          evaluate_seq = False
           ) -> coref_longformer.CorefLongformerModel:
     """Train model on train dataset until performance no longer improves
     on dev dataset. Return the trained model.
@@ -73,6 +80,27 @@ def train(model: coref_longformer.CorefLongformerModel,
     
     if use_dynamic_loading:
       logging.info("Config = Using dynamic loading")
+    
+    if evaluate_seq:
+      logging.info("Config = Evaluating sequence")
+    
+    if save_model:
+      logging.info("Config = Saving best model")
+      assert save_directory is not None, "Save directory missing!"
+      best_save_directory = os.path.join(save_directory, "best")
+      os.makedirs(best_save_directory, exist_ok=True)
+    
+    if save_predictions:
+      logging.info("Config = Saving best predictions")
+      assert save_directory is not None, "Save directory missing!"
+    
+    if save_model_after_every_epoch:
+      logging.info("Config = Saving model after every epoch")
+      assert save_model, "Set save_model!"
+    
+    if save_predictions_after_every_epoch:
+      logging.info("Config = Saving predictions after every epoch")
+      assert save_predictions, "Set save_predictions!"
 
     train_dataloader = tdata.DataLoader(
       train_dataset, batch_size=train_batch_size, shuffle=True)
@@ -169,11 +197,33 @@ def train(model: coref_longformer.CorefLongformerModel,
       logging.info(f"Epoch {epoch + 1} done")
       logging.info(f"Total time taken = {epoch_time_taken}")
 
+      if save_model_after_every_epoch:
+        logging.info(f"Saving model after epoch {epoch + 1}")
+        epoch_save_directory = os.path.join(
+          save_directory, f"epoch_{epoch + 1}")
+        os.makedirs(epoch_save_directory, exist_ok=True)
+        _model = model.module if use_data_parallel else model
+        util.save_model(_model, epoch_save_directory)
+      
+      epoch_save_directory_train = None
+      epoch_save_directory_dev = None
+      if save_predictions_after_every_epoch:
+        epoch_save_directory_train = os.path.join(save_directory,
+          f"epoch_{epoch + 1}/train")
+        epoch_save_directory_dev = os.path.join(save_directory,
+          f"epoch_{epoch + 1}/dev")
+        os.makedirs(epoch_save_directory_train, exist_ok=True)
+        os.makedirs(epoch_save_directory_dev, exist_ok=True)
+
       dev_metric = None
-      args = [("dev", dev_corpus, dev_dataloader)]
+      args = [("dev", dev_corpus, dev_dataloader, epoch_save_directory_dev,
+                save_predictions_after_every_epoch)]
       if evaluate_on_train:
-        args = [("train", train_corpus, train_dataloader)] + args
-      for name, corpus, dataloader in args:
+        args = [("train", train_corpus, train_dataloader,
+                  epoch_save_directory_train,
+                  save_predictions_after_every_epoch)] + args
+      
+      for name, corpus, dataloader, directory, save_flag in args:
         logging.info("================================================")
         logging.info(f"Inference and Evaluation on {name} dataset started")
         logging.info("================================================")
@@ -186,7 +236,10 @@ def train(model: coref_longformer.CorefLongformerModel,
           batch_size=eval_batch_size,
           print_n_batches=print_n_batches,
           use_dynamic_loading=use_dynamic_loading,
-          evaluate_against_corpus=evaluate_against_original
+          evaluate_against_corpus=evaluate_against_original,
+          save_predictions=save_flag,
+          predictions_directory=directory,
+          evaluate_seq=evaluate_seq
         )
         if evaluate_against_original:
           coref_metric, coref_metric2 = output
@@ -214,6 +267,10 @@ def train(model: coref_longformer.CorefLongformerModel,
         epochs_left = patience
         best_epoch = epoch + 1
         best_dev_F1 = dev_F1
+        # TODO: implement saving best model and best predictions
+        # You might have to separate inference and evaluation
+        # infer(trained_model, dataloader) -> predictions
+        # evaluate(predictions, groundtruth) -> CorefMetric
       else:
         logging.info(f"Dev F1 is {-delta:.1f} lower than best Dev F1 "
               f"({100*best_dev_F1:.1f})")

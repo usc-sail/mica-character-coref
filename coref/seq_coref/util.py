@@ -5,6 +5,9 @@ from mica_text_coref.coref.seq_coref import data
 
 from absl import logging
 import gpustat
+import os
+import torch
+from torch import nn
 
 def find_mention_pair_relationship(
     first_mention: data.Mention, second_mention: data.Mention) -> (
@@ -86,3 +89,20 @@ def print_gpu_usage(user: str, devices: list[int]):
             memory_available = gpu.memory_free
             logging.info(f"GPU {gpu.index} = {memory_consumed} used, "
                     f"{memory_available} free")
+
+def save_model(model: nn.Module, directory: str):
+    """Save model's weights to directory"""
+    torch.save(model.state_dict(), os.path.join(directory, "model.pt"))
+
+def save_predictions(label_ids: torch.LongTensor,
+    prediction_ids: torch.LongTensor,
+    doc_ids: torch.IntTensor,
+    attn_mask: torch.FloatTensor,
+    directory: str):
+    """Save label_ids, prediction_ids, doc_ids, and attn_mask tensors to
+    directory
+    """
+    torch.save(label_ids, os.path.join(directory, "labels.pt"))
+    torch.save(prediction_ids, os.path.join(directory, "predictions.pt"))
+    torch.save(attn_mask, os.path.join(directory, "attn_mask.pt"))
+    torch.save(doc_ids, os.path.join(directory, "doc_ids.pt"))
