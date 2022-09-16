@@ -256,11 +256,13 @@ def train(model: coref_longformer.CorefLongformerModel,
       logging.info("================================================")
       logging.info("Checking for early-stopping")
       logging.info("================================================")
-      dev_F1 = np.mean(dev_metric.muc.f1 + dev_metric.b3.f1 +
-        dev_metric.ceafe.f1)
+      if evaluate_seq:
+        dev_F1 = dev_metric.f1
+      else:
+        dev_F1 = np.mean(dev_metric.muc.f1 + dev_metric.b3.f1 +
+                         dev_metric.ceafe.f1)
       delta = 100*(dev_F1 - best_dev_F1)
-      logging.info("Average (1/3 x (MUC + B3 + CEAFe)) dev F1 ="
-                    f" {100*dev_F1:.1f}")
+      logging.info(f"Dev F1 = {100*dev_F1:.1f}")
       if dev_F1 > best_dev_F1:
         if epoch:
           logging.info(f"Dev F1 improved by {delta:.1f}")
