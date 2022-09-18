@@ -3,11 +3,11 @@ were created from coreference corpus. The training terminates when performance
 no longer improves on the development set.
 """
 
-from mica_text_coref.coref.seq_coref import coref_longformer
-from mica_text_coref.coref.seq_coref import data
-from mica_text_coref.coref.seq_coref import data_util
-from mica_text_coref.coref.seq_coref import train
-from mica_text_coref.coref.seq_coref import util
+from mica_text_coref.coref.seq_coref.models import coref_longformer
+from mica_text_coref.coref.seq_coref.data import data
+from mica_text_coref.coref.seq_coref.data import data_util
+from mica_text_coref.coref.seq_coref.training import train
+from mica_text_coref.coref.seq_coref.utils import util
 
 from absl import app
 from absl import flags

@@ -77,7 +77,13 @@ def convert_float_seconds_to_time_string(seconds: float) -> str:
     return f"{hours}h {minutes}m {seconds}s"
 
 def print_gpu_usage(user: str, devices: list[int]):
-    """Print memory consumed on gpu by user processes, and available memory"""
+    """Print memory consumed on gpus by user processes, and the
+    available memory in the gpus.
+
+    Args:
+        user: username
+        devices: list of gpu device ids
+    """
     gpu_collection = gpustat.new_query()
     memory_consumed = 0
     memory_available = 0
@@ -91,7 +97,12 @@ def print_gpu_usage(user: str, devices: list[int]):
                     f"{memory_available} free")
 
 def save_model(model: nn.Module, directory: str):
-    """Save model's weights to directory"""
+    """Save model's weights to directory with filename `model.pt`.
+
+    Args:
+        model: Torch nn.Module
+        directory: filepath to directory where model's weights will be saved
+    """
     torch.save(model.state_dict(), os.path.join(directory, "model.pt"))
 
 def save_predictions(label_ids: torch.LongTensor,
@@ -100,7 +111,15 @@ def save_predictions(label_ids: torch.LongTensor,
     attn_mask: torch.FloatTensor,
     directory: str):
     """Save label_ids, prediction_ids, doc_ids, and attn_mask tensors to
-    directory
+    directory with name labels.pt, predictions.pt, attn_mask.pt, and doc_ids.pt
+    respectively.
+
+    Args:
+        label_ids: torch longtensor
+        prediction_ids: torch longtensor
+        attn_mask: torch float tensor
+        doc_ids: torch int tensor
+        directory: filepath of directory where the tensors will be saved
     """
     torch.save(label_ids, os.path.join(directory, "labels.pt"))
     torch.save(prediction_ids, os.path.join(directory, "predictions.pt"))

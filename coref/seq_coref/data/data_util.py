@@ -202,7 +202,15 @@ def remap_spans_document_level(
 
     return new_corpus
 
-def load_tensors(directory: str, device: str) -> tdata.TensorDataset:
+def load_tensors(directory: str, device = "cpu") -> tdata.TensorDataset:
+    """Load tensors from the directory to device, wrap it up in a torch
+    TensorDataset, and return it. The directory should have tokens.pt,
+    mentions.pt, labels.pt, attn.pt, global_attn.pt, and docs.pt.
+
+    Args:
+        directory: filepath of the directory from which to load tensors.
+        device: "cpu" or "cuda:x", where x is the gpu index.
+    """
     token_ids = torch.load(
         os.path.join(directory, "tokens.pt"), map_location=device)
     mention_ids = torch.load(

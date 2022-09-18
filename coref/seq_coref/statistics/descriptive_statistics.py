@@ -1,9 +1,9 @@
 """Functions to compute descriptive statistics of coreference documents.
 """
 
-from mica_text_coref.coref.seq_coref import data
-from mica_text_coref.coref.seq_coref import mention_tree
-from mica_text_coref.coref.seq_coref import util
+from mica_text_coref.coref.seq_coref.data import data
+from mica_text_coref.coref.seq_coref.data import mention_tree
+from mica_text_coref.coref.seq_coref.utils import util
 
 import collections
 import numpy as np

@@ -1,7 +1,7 @@
 """Functions to run inference"""
 
-from mica_text_coref.coref.seq_coref import coref_longformer
-from mica_text_coref.coref.seq_coref import util
+from mica_text_coref.coref.seq_coref.models import coref_longformer
+from mica_text_coref.coref.seq_coref.utils import util
 
 import logging
 import numpy as np

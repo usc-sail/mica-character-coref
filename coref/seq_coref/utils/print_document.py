@@ -1,7 +1,7 @@
 """Function to pretty format a coreference document"""
 
-from mica_text_coref.coref.seq_coref import data
-from mica_text_coref.coref.seq_coref import util
+from mica_text_coref.coref.seq_coref.data import data
+from mica_text_coref.coref.seq_coref.utils import util
 
 def pretty_format_coref_document(document: data.CorefDocument) -> str:
     """Pretty-format coreference document"""

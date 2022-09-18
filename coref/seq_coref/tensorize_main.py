@@ -2,10 +2,10 @@
 longformer sequence coreference model, and save the tensors.
 """
 
-from mica_text_coref.coref.seq_coref import data
-from mica_text_coref.coref.seq_coref import data_util
-from mica_text_coref.coref.seq_coref import tensorize
-from mica_text_coref.coref.seq_coref import representatives
+from mica_text_coref.coref.seq_coref.data import data
+from mica_text_coref.coref.seq_coref.data import data_util
+from mica_text_coref.coref.seq_coref.data import tensorize
+from mica_text_coref.coref.seq_coref.data import representatives
 
 from absl import flags
 from absl import app

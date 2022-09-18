@@ -2,9 +2,9 @@
 conll-2012 perl scorer.
 """
 
-from mica_text_coref.coref.seq_coref import coref_longformer
-from mica_text_coref.coref.seq_coref import data
-from mica_text_coref.coref.seq_coref import util
+from mica_text_coref.coref.seq_coref.models import coref_longformer
+from mica_text_coref.coref.seq_coref.data import data
+from mica_text_coref.coref.seq_coref.utils import util
 
 from absl import logging
 import numpy as np

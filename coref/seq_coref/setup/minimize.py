@@ -5,7 +5,6 @@ import collections
 from absl import flags
 from absl import app
 
-
 FLAGS = flags.FLAGS
 flags.DEFINE_string("conll_directory", None, "Path to the conll-2012 gold directory",
  required=True)
