@@ -1,9 +1,9 @@
 """Functions to compute descriptive statistics of coreference documents.
 """
 
-from mica_text_coref.coref.seq_coref.data import data
-from mica_text_coref.coref.seq_coref.data import mention_tree
-from mica_text_coref.coref.seq_coref.utils import util
+from mica_text_coref.coref.seq_coref import data
+from mica_text_coref.coref.seq_coref import mention_tree
+from mica_text_coref.coref.seq_coref import utils
 
 import collections
 import numpy as np
@@ -24,7 +24,7 @@ def find_mention_pair_relationships_in_cluster(
     cluster = list(cluster)
     for i in range(len(cluster)):
         for j in range(i + 1, len(cluster)):
-            mention_pair_relationship = util.find_mention_pair_relationship(
+            mention_pair_relationship = utils.find_mention_pair_relationship(
                 cluster[i], cluster[j])
             mention_pair_relationships.append(mention_pair_relationship)
     distribution = dict(collections.Counter(mention_pair_relationships))

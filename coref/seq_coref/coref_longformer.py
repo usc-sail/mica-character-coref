@@ -31,11 +31,14 @@ class CorefLongformerModel(nn.Module):
         self.token_classifier = nn.Linear(2 * self.gru_hidden_size, 
                                           self.n_labels)
     
-    def forward(self, 
-                token_ids: torch.LongTensor, 
-                mention_ids: torch.IntTensor, 
-                attn_mask: torch.FloatTensor, 
-                global_attn_mask: torch.FloatTensor) -> torch.FloatTensor:
+    def forward(
+        self, 
+        token_ids: torch.LongTensor, 
+        mention_ids: torch.IntTensor, 
+        attn_mask: torch.FloatTensor, 
+        global_attn_mask: torch.FloatTensor,
+        label_ids: torch.LongTensor | None = None
+        ) -> tuple[torch.FloatTensor, torch.FloatTensor] | torch.FloatTensor:
         """Forward propagation"""
         longformer_output: (
             modeling_longformer.LongformerBaseModelOutputWithPooling) = (
@@ -48,9 +51,14 @@ class CorefLongformerModel(nn.Module):
         self.gru.flatten_parameters()
         gru_output: torch.FloatTensor = self.gru(gru_input)[0]
         logits: torch.FloatTensor = self.token_classifier(gru_output)
-        return logits
+        if label_ids is not None:
+            loss = compute_loss(logits, label_ids, attn_mask, self.n_labels)
+            return loss, logits
+        else:
+            return logits
 
-def compute_loss(logits: torch.FloatTensor, label_ids: torch.LongTensor,
+def compute_loss(
+    logits: torch.FloatTensor, label_ids: torch.LongTensor,
     attn_mask: torch.FloatTensor, n_labels: int) -> torch.FloatTensor:
     """Compute cross entropy loss"""
     active_labels = label_ids[attn_mask == 1.]

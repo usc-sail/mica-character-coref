@@ -1,7 +1,7 @@
 """Function to pretty format a coreference document"""
 
-from mica_text_coref.coref.seq_coref.data import data
-from mica_text_coref.coref.seq_coref.utils import util
+from mica_text_coref.coref.seq_coref import data
+from mica_text_coref.coref.seq_coref import utils
 
 def pretty_format_coref_document(document: data.CorefDocument) -> str:
     """Pretty-format coreference document"""
@@ -16,7 +16,7 @@ def pretty_format_coref_document(document: data.CorefDocument) -> str:
     for sentence_speakers, sentence_words in zip(document.speakers,
     document.sentences):
         speaker = sentence_speakers[0]
-        block = util.indent_block(sentence_words, 20, 80)
+        block = utils.indent_block(sentence_words, 20, 80)
         desc += f"{speaker:17s} : " + block + "\n"
 
     desc += "\n"
@@ -30,6 +30,6 @@ def pretty_format_coref_document(document: data.CorefDocument) -> str:
             mention = "[" + " ".join(
                 document_words[mention.begin: mention.end + 1]) + "]"
             mentions.append(mention)
-        block = util.indent_block(mentions, 20, 80)
+        block = utils.indent_block(mentions, 20, 80)
         desc += f"{cluster_index:17s} : " + block + "\n"
     return desc

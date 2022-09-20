@@ -13,8 +13,8 @@ The output is formatted as follows:
     python print_document --doc_key=<doc_key>
 """
 
-from mica_text_coref.coref.seq_coref.data import data
-from mica_text_coref.coref.seq_coref.utils import print_document
+from mica_text_coref.coref.seq_coref import data
+from mica_text_coref.coref.seq_coref import print_document
 
 from absl import flags
 from absl import app

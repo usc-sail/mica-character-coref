@@ -8,8 +8,8 @@ The descriptive statistics we find are:
     entity
 """
 
-from mica_text_coref.coref.seq_coref.data import data
-from mica_text_coref.coref.seq_coref.statistics import descriptive_statistics
+from mica_text_coref.coref.seq_coref import data
+from mica_text_coref.coref.seq_coref import descriptive_statistics
 
 from absl import flags
 from absl import app

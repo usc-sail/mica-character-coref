@@ -1,7 +1,7 @@
 """Functions to run inference"""
 
-from mica_text_coref.coref.seq_coref.models import coref_longformer
-from mica_text_coref.coref.seq_coref.utils import util
+from mica_text_coref.coref.seq_coref import coref_longformer
+from mica_text_coref.coref.seq_coref import utils
 
 import logging
 import numpy as np
@@ -10,75 +10,74 @@ import torch
 from torch.utils import data as tdata
 
 def infer(dataloader: tdata.DataLoader,
-    model: coref_longformer.CorefLongformerModel,
-    batch_size: int,
-    use_dynamic_loading = False,
-    print_n_batches = 10
-    ) -> tuple[torch.LongTensor, torch.LongTensor, torch.FloatTensor,
-               torch.IntTensor]:
+          model: coref_longformer.CorefLongformerModel,
+          print_n_batches=10
+          ) -> tuple[torch.LongTensor, torch.LongTensor, torch.FloatTensor,
+                     torch.IntTensor]:
     """Run inference on the dataloader.
+
+    Args:
+        dataloader: PyTorch dataloader.
+        model: Longformer coreference model.
+        print_n_batches: Number of batches after which to log.
+    
+    Returns:
+        A tuple of four tensors, as follows:
+            label_ids: LongTensor of label ids.
+            prediction_ids: LongTensor of prediction ids.
+            attn_mask: FloatTensor of attention mask.
+            doc_ids: IntTensor of document ids.
     """
+    # Initialize variables
     model.eval()
-    device = next(model.parameters()).device
     label_ids_list: list[torch.LongTensor] = []
     prediction_ids_list: list[torch.LongTensor] = []
     doc_ids_list: list[torch.IntTensor] = []
     attn_mask_list: list[torch.FloatTensor] = []
     n_batches = len(dataloader)
-    eval_start_time = time.time()
-    logging.info(f"Inference batch size = {batch_size}")
     logging.info(f"Number of inference batches = {n_batches}")
-    logging.info("Starting inference...")
 
-    with torch.no_grad():
+    # Inference Loop
+    with utils.timer(), torch.no_grad():
+        logging.info("Inference started")
         running_batch_times = []
         for i, batch in enumerate(dataloader):
+
+            # One inference step
             (batch_token_ids, batch_mention_ids, batch_label_ids,
              batch_attn_mask, batch_global_attn_mask, batch_doc_ids) = batch
-
-            if use_dynamic_loading:
-                batch_token_ids = batch_token_ids.to(device)
-                batch_mention_ids = batch_mention_ids.to(device)
-                batch_attn_mask = batch_attn_mask.to(device)
-                batch_global_attn_mask = batch_global_attn_mask.to(device)
-
             start_time = time.time()
             batch_logits = model(batch_token_ids, batch_mention_ids,
                                  batch_attn_mask, batch_global_attn_mask)
             batch_prediction_ids = batch_logits.argmax(dim=2)
-            label_ids_list.append(batch_label_ids.cpu())
-            prediction_ids_list.append(batch_prediction_ids.detach().cpu())
-            doc_ids_list.append(batch_doc_ids.cpu())
-            attn_mask_list.append(batch_attn_mask.cpu())
+            label_ids_list.append(batch_label_ids)
+            prediction_ids_list.append(batch_prediction_ids)
+            doc_ids_list.append(batch_doc_ids)
+            attn_mask_list.append(batch_attn_mask)
             time_taken = time.time() - start_time
             running_batch_times.append(time_taken)
 
+            # Log after print_n_batches
             if (i + 1) % print_n_batches == 0:
                 average_time_per_batch = np.mean(running_batch_times)
                 estimated_time_remaining = (n_batches - i - 1) * (
                                             average_time_per_batch)
                 average_time_per_batch_str = (
-                    util.convert_float_seconds_to_time_string(
+                    utils.convert_float_seconds_to_time_string(
                         average_time_per_batch))
                 estimated_time_remaining_str = (
-                    util.convert_float_seconds_to_time_string(
+                    utils.convert_float_seconds_to_time_string(
                         estimated_time_remaining))
-                time_elapsed_str = util.convert_float_seconds_to_time_string(
-                    time.time() - eval_start_time)
                 running_batch_times = []
 
                 logging.info(f"Batch {i + 1}")
-                logging.info(f"Time elapsed in inference = {time_elapsed_str}")
                 logging.info("Average inference time @ batch = "
                              f"{average_time_per_batch_str}")
                 logging.info("Estimated inference time remaining = "
                              f"{estimated_time_remaining_str}")
+        logging.info("Inference ended")
 
-    time_taken = time.time() - eval_start_time
-    time_taken_str = util.convert_float_seconds_to_time_string(time_taken)
-    logging.info("...Inference done.")
-    logging.info(f"Total time taken in inference = {time_taken_str}")
-
+    # Concat batch outputs
     groundtruth = torch.cat(label_ids_list, dim=0)
     predictions = torch.cat(prediction_ids_list, dim=0)
     doc_ids = torch.cat(doc_ids_list, dim=0)

@@ -4,8 +4,10 @@
 from mica_text_coref.coref.seq_coref import data
 
 from absl import logging
+import contextlib
 import gpustat
 import os
+import time
 import torch
 from torch import nn
 
@@ -125,3 +127,11 @@ def save_predictions(label_ids: torch.LongTensor,
     torch.save(prediction_ids, os.path.join(directory, "predictions.pt"))
     torch.save(attn_mask, os.path.join(directory, "attn_mask.pt"))
     torch.save(doc_ids, os.path.join(directory, "doc_ids.pt"))
+
+@contextlib.contextmanager
+def timer():
+    start_time = time.time()
+    yield
+    time_taken = time.time() - start_time
+    time_taken_str = convert_float_seconds_to_time_string(time_taken)
+    logging.info(f"Time taken = {time_taken_str}")

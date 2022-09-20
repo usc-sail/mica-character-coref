@@ -2,10 +2,10 @@
 longformer sequence coreference model, and save the tensors.
 """
 
-from mica_text_coref.coref.seq_coref.data import data
-from mica_text_coref.coref.seq_coref.data import data_util
-from mica_text_coref.coref.seq_coref.data import tensorize
-from mica_text_coref.coref.seq_coref.data import representatives
+from mica_text_coref.coref.seq_coref import data
+from mica_text_coref.coref.seq_coref import data_utils
+from mica_text_coref.coref.seq_coref import tensorize
+from mica_text_coref.coref.seq_coref import representatives
 
 from absl import flags
 from absl import app
@@ -41,7 +41,7 @@ def create_and_save_tensors():
                                   use_ascii_transliteration=True, verbose=True)
         n_clusters = sum(len(document.clusters) for document in 
                             corpus.documents)
-        seq_corpus = data_util.remove_overlaps(corpus, keep_singletons=False,
+        seq_corpus = data_utils.remove_overlaps(corpus, keep_singletons=False,
             verbose=True)
         n_seq_clusters = sum(len(document.clusters) for document in
                                 seq_corpus.documents)
@@ -55,7 +55,7 @@ def create_and_save_tensors():
                 document_mentions.append(mention)
             mentions.append(document_mentions)
 
-        longformer_seq_corpus = data_util.remap_spans_document_level(
+        longformer_seq_corpus = data_utils.remap_spans_document_level(
             seq_corpus, tokenizer.tokenize, verbose=True)
         dataset = tensorize.create_tensors(longformer_seq_corpus, mentions, tokenizer,
                                             FLAGS.max_sequence_length)

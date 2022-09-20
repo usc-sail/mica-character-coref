@@ -3,7 +3,7 @@ non overlapping sequence.
 """
 
 from mica_text_coref.coref.seq_coref import data
-from mica_text_coref.coref.seq_coref import util
+from mica_text_coref.coref.seq_coref import utils
 
 class MentionNode:
     """Data structure to represent a mention in a tree/forest of mentions.
@@ -40,7 +40,7 @@ def create_mention_forest(cluster: set[data.Mention]) -> list[MentionNode]:
     while i < len(sorted_cluster):
         j = i + 1
         contained_cluster: set[data.Mention] = set()
-        while j < len(sorted_cluster) and util.find_mention_pair_relationship(
+        while j < len(sorted_cluster) and utils.find_mention_pair_relationship(
             sorted_cluster[i], sorted_cluster[j]) == (
                 data.MentionPairRelationship.SUBSPAN):
             contained_cluster.add(sorted_cluster[j])
