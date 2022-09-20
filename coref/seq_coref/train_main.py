@@ -16,18 +16,17 @@ proj_dir = os.getcwd()
 # directories and files
 flags.DEFINE_string(
     "conll_dir",
-    default=os.path.join(proj_dir, "mica_text_coref/data/conll-2012/gold"),
+    default=os.path.join(proj_dir, "data/conll-2012/gold"),
     help="Directory containing English conll gold jsonlines files.")
 flags.DEFINE_string(
     "tensors_dir",
     default=os.path.join(proj_dir, "data/tensors/longformer_seq_tensors_512"),
     help="Directory containing English coreference tensors.")
 flags.DEFINE_string(
-    "output_dir", default=os.path.join(proj_dir, "mica_text_coref/data/results"),
+    "output_dir", default=os.path.join(proj_dir, "data/results"),
     help="Directory to which model's weights and predictions will be saved")
 flags.DEFINE_string("perl_scorer",
-    default=(os.path.join(proj_dir, "mica_text_coref/coref/seq_coref/"
-             "scorer/v8.01/scorer.pl")),
+    default=(os.path.join(proj_dir, "coref/seq_coref/scorer/v8.01/scorer.pl")),
     help="Path to the official perl scorer script")
 
 # model

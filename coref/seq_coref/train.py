@@ -42,11 +42,13 @@ def train(tensors_dir:str,
     best_dev_F1 = -np.inf
     best_epoch = np.nan
     epochs_left = patience
+    device = torch.device("cuda:0")
 
     # Initialize model
     with utils.timer():
       logging.info("Initializing Coreference Longformer model...")
       model = coref_longformer.CorefLongformerModel(use_large=large_longformer)
+      model.to(device)
 
     # Load train and dev tensors
     with utils.timer():
@@ -100,6 +102,11 @@ def train(tensors_dir:str,
                     # One training step
                     (batch_token_ids, batch_mention_ids, batch_label_ids,
                     batch_attn_mask, batch_global_attn_mask, _) = batch
+                    batch_token_ids = batch_token_ids.to(device)
+                    batch_mention_ids = batch_mention_ids.to(device)
+                    batch_label_ids = batch_label_ids.to(device)
+                    batch_attn_mask = batch_attn_mask.to(device)
+                    batch_global_attn_mask = batch_global_attn_mask.to(device)
                     batch_start_time = time.time()
                     optimizer.zero_grad()
                     batch_loss, _ = model(
@@ -152,7 +159,7 @@ def train(tensors_dir:str,
                         train_dataloader, model, print_n_batches=print_n_batches)
                     train_metric = evaluation.evaluate(
                         train_label_ids, train_predictions, train_attn_mask,
-                        train_doc_ids, evaluation_strategy)
+                        train_doc_ids, perl_scorer, evaluation_strategy)
                     logging.info(f"Training Performance = {train_metric.score}")
                     logging.info(f"Epoch {epoch + 1} Inference & Evaluation on"
                                  " training set ended")
@@ -170,7 +177,7 @@ def train(tensors_dir:str,
                     dev_dataloader, model, print_n_batches=print_n_batches)
                 dev_metric = evaluation.evaluate(
                     dev_label_ids, dev_predictions, dev_attn_mask,
-                    dev_doc_ids, evaluation_strategy)
+                    dev_doc_ids, perl_scorer, evaluation_strategy)
                 logging.info(f"Dev Performance = {dev_metric.score}")
                 logging.info(f"Epoch {epoch + 1} Inference & Evaluation on"
                              " dev set ended")
