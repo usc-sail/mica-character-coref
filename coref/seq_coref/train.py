@@ -2,13 +2,13 @@
 no longer improves on development dataset.
 """
 
+from mica_text_coref.coref.seq_coref import acceleration
 from mica_text_coref.coref.seq_coref import coref_longformer
 from mica_text_coref.coref.seq_coref import evaluation
 from mica_text_coref.coref.seq_coref import utils
 from mica_text_coref.coref.seq_coref import data_utils
 from mica_text_coref.coref.seq_coref import inference
 
-from absl import logging
 import numpy as np
 import os
 import time
@@ -21,15 +21,16 @@ def train(tensors_dir:str,
           perl_scorer:str,
           output_dir:str,
           large_longformer=False,
-          train_batch_size=64,
-          infer_batch_size=64,
+          train_batch_size=16,
+          infer_batch_size=16,
           learning_rate=1e-5,
           weight_decay=1e-3,
-          print_n_batches=10,
+          use_scheduler=False,
+          warmup_ratio=0.1,
           max_epochs=10,
           max_grad_norm=0.1,
           patience=3,
-          warmup_ratio=0.1,
+          print_n_batches=10,
           evaluation_strategy="perl",
           evaluate_train=False,
           save_model=False,
@@ -38,50 +39,60 @@ def train(tensors_dir:str,
     """Train model on train dataset until performance no longer improves
     on dev dataset.
     """
+    # Get accelerator and logger
+    accelerator, logger = acceleration.accelerator, acceleration.logger
+
     # Early stopping counters and other variables
     best_dev_F1 = -np.inf
     best_epoch = np.nan
     epochs_left = patience
-    device = torch.device("cuda:0")
+    # device = torch.device("cuda:0")
 
     # Initialize model
-    with utils.timer():
-      logging.info("Initializing Coreference Longformer model...")
+    with utils.timer("model initialization"):
       model = coref_longformer.CorefLongformerModel(use_large=large_longformer)
-      model.to(device)
+    #   model.to(device)
 
     # Load train and dev tensors
-    with utils.timer():
-      logging.info(f"Loading train tensors...")
-      train_dataset = data_utils.load_tensors(
-        os.path.join(tensors_dir, "train"))
-      logging.info(f"Loading dev tensors...")
-      dev_dataset = data_utils.load_tensors(os.path.join(tensors_dir, "dev"))
+    with utils.timer("data loading"):
+      train_dataset = data_utils.load_tensors(os.path.join(tensors_dir,"train"))
+      dev_dataset = data_utils.load_tensors(os.path.join(tensors_dir,"dev"))
 
-    # Create dataloaders
+    # Create dataloaders, optimizer, and scheduler
     train_dataloader = tdata.DataLoader(
       train_dataset, batch_size=train_batch_size, shuffle=True)
     dev_dataloader = tdata.DataLoader(dev_dataset, batch_size=infer_batch_size)
-    n_train_batches = len(train_dataloader)
-    n_dev_batches = len(dev_dataloader)
-    logging.info(f"Number of training batches = {n_train_batches}")
-    logging.info(f"Number of inference batches = {n_dev_batches}")
-
-    # Create optimizer and scheduler
     optimizer = optim.AdamW(model.parameters(), lr=learning_rate,
                             weight_decay=weight_decay)
+    
+    # Accelerate model, dataloaders, and optimizer
+    model, train_dataloader, dev_dataloader, optimizer = accelerator.prepare(
+        model, train_dataloader, dev_dataloader, optimizer)
+
+    # Log number of training and inference batches, and number of training steps
+    n_train_batches = len(train_dataloader)
+    n_dev_batches = len(dev_dataloader)
     n_training_steps = max_epochs * n_train_batches
-    n_warmup_steps = int(warmup_ratio * n_training_steps)
-    scheduler = get_linear_schedule_with_warmup(
-      optimizer, num_warmup_steps=n_warmup_steps,
-      num_training_steps=n_training_steps)
-    logging.info(f"Number of warmup steps = {n_warmup_steps}")
-    logging.info(f"Number of training steps = {n_training_steps}")
+    logger.info(f"Train batch size = {train_dataloader.batch_size}")
+    logger.info(f"Dev batch size = {dev_dataloader.batch_size}")
+    logger.info(f"Number of training batches = {n_train_batches}")
+    logger.info(f"Number of inference batches = {n_dev_batches}")
+    logger.info(f"Number of training steps = {n_training_steps}")
+
+    # Initialize and accelerate scheduler
+    if use_scheduler:
+        n_warmup_steps = int(warmup_ratio * n_training_steps)
+        scheduler = get_linear_schedule_with_warmup(
+            optimizer, num_warmup_steps=n_warmup_steps,
+            num_training_steps=n_training_steps)
+        scheduler = accelerator.prepare_scheduler(scheduler)
+        logger.info(f"Number of warmup steps = {n_warmup_steps}")
     
     # Training and evaluation loop
-    with utils.timer():
-        logging.info("Training started")
+    with utils.timer("training"):
         for epoch in range(max_epochs):
+            
+            # Create epoch directories
             epoch_dir = os.path.join(output_dir, f"epoch_{epoch + 1}")
             epoch_train_dir = os.path.join(epoch_dir, "train")
             epoch_dev_dir = os.path.join(epoch_dir, "dev")
@@ -90,8 +101,7 @@ def train(tensors_dir:str,
             os.makedirs(epoch_dev_dir, exist_ok=True)
 
             # Training for one epoch
-            with utils.timer():
-                logging.info(f"Epoch {epoch + 1} training started")
+            with utils.timer(f"epoch {epoch + 1} training"):
                 model.train()
                 running_batch_loss = []
                 running_batch_train_time = []
@@ -102,19 +112,22 @@ def train(tensors_dir:str,
                     # One training step
                     (batch_token_ids, batch_mention_ids, batch_label_ids,
                     batch_attn_mask, batch_global_attn_mask, _) = batch
-                    batch_token_ids = batch_token_ids.to(device)
-                    batch_mention_ids = batch_mention_ids.to(device)
-                    batch_label_ids = batch_label_ids.to(device)
-                    batch_attn_mask = batch_attn_mask.to(device)
-                    batch_global_attn_mask = batch_global_attn_mask.to(device)
+                    # batch_token_ids = batch_token_ids.to(device)
+                    # batch_mention_ids = batch_mention_ids.to(device)
+                    # batch_label_ids = batch_label_ids.to(device)
+                    # batch_attn_mask = batch_attn_mask.to(device)
+                    # batch_global_attn_mask = batch_global_attn_mask.to(device)
                     batch_start_time = time.time()
                     optimizer.zero_grad()
-                    batch_loss, _ = model(
+                    batch_loss = model(
                         batch_token_ids, batch_mention_ids, batch_attn_mask,
                         batch_global_attn_mask, batch_label_ids)
-                    batch_loss.backward()
-                    torch.nn.utils.clip_grad.clip_grad_norm_(
-                    model.parameters(), max_grad_norm)
+                    # batch_loss.backward()
+                    accelerator.backward(batch_loss)
+                    # torch.nn.utils.clip_grad.clip_grad_norm_(
+                    # model.parameters(), max_grad_norm)
+                    accelerator.clip_grad_norm_(model.parameters(),
+                                                max_grad_norm)
                     optimizer.step()
                     scheduler.step()
                     batch_time_taken = time.time() - batch_start_time
@@ -132,82 +145,81 @@ def train(tensors_dir:str,
                         average_batch_train_time_str = (
                             utils.convert_float_seconds_to_time_string(
                             average_batch_train_time))
-                        logging.info(f"Batch {i + 1}")
-                        logging.info("Average training loss @ batch = "
+                        logger.info(f"Batch {i + 1}")
+                        logger.info("Average training loss @ batch = "
                                      f"{average_batch_loss:.4f}")
-                        logging.info("Average training time taken @ batch = "
+                        logger.info("Average training time taken @ batch = "
                                      f"{average_batch_train_time_str}")
-                        logging.info("Estimated training time remaining for "
+                        logger.info("Estimated training time remaining for "
                                      f"epoch {epoch + 1} = "
                                      f"{estimated_time_remaining}")
                         running_batch_loss = []
                         running_batch_train_time = []
-                logging.info(f"Epoch {epoch + 1} training ended")            
+
+            # Wait for all process to complete
+            accelerator.wait_for_everyone()
 
             # Save model
             if save_model:
-                logging.info(f"Saving model after epoch {epoch + 1}")
-                utils.save_model(model, epoch_dir)
+                logger.info(f"Saving model after epoch {epoch + 1}")
+                unwrapped_model = accelerator.unwrap_model(model)
+                utils.save_model(unwrapped_model, epoch_dir)
 
             # Inference and evaluation on training set
             if evaluate_train:
-                with utils.timer():
-                    logging.info(f"Epoch {epoch + 1} Inference & Evaluation on"
-                                 " training set started")
+                with utils.timer(f"epoch {epoch + 1} training inference and evaluation"):
                     (train_predictions, train_label_ids, train_attn_mask, 
                     train_doc_ids) = inference.infer(
-                        train_dataloader, model, print_n_batches=print_n_batches)
+                        train_dataloader, model,
+                        print_n_batches=print_n_batches)
                     train_metric = evaluation.evaluate(
                         train_label_ids, train_predictions, train_attn_mask,
                         train_doc_ids, perl_scorer, evaluation_strategy)
-                    logging.info(f"Training Performance = {train_metric.score}")
-                    logging.info(f"Epoch {epoch + 1} Inference & Evaluation on"
-                                 " training set ended")
+                    logger.info(f"Training Performance = {train_metric.score}")
+                accelerator.wait_for_everyone()
                 if save_predictions:
+                    logger.info(f"Saving train predictions after epoch {epoch + 1}")
                     utils.save_predictions(
                         train_label_ids, train_predictions, train_doc_ids,
                         train_attn_mask, epoch_train_dir)
         
             # Inference and evaluation on dev set
-            with utils.timer():
-                logging.info(f"Epoch {epoch + 1} Inference & Evaluation on "
-                              "dev set started")
+            with utils.timer(f"epoch {epoch + 1} dev inference and evaluation"):
                 (dev_predictions, dev_label_ids, dev_attn_mask, 
                 dev_doc_ids) = inference.infer(
                     dev_dataloader, model, print_n_batches=print_n_batches)
                 dev_metric = evaluation.evaluate(
                     dev_label_ids, dev_predictions, dev_attn_mask,
                     dev_doc_ids, perl_scorer, evaluation_strategy)
-                logging.info(f"Dev Performance = {dev_metric.score}")
-                logging.info(f"Epoch {epoch + 1} Inference & Evaluation on"
-                             " dev set ended")
+                logger.info(f"Dev Performance = {dev_metric.score}")
+            accelerator.wait_for_everyone()
             if save_predictions:
+                logger.info(f"Saving dev predictions after epoch {epoch + 1}")
                 utils.save_predictions(
                     dev_label_ids, dev_predictions, dev_doc_ids,
                     dev_attn_mask, epoch_dev_dir)
 
             # Early-stopping
-            logging.info("Checking for early-stopping")
+            logger.info("Checking for early-stopping")
             dev_F1 = dev_metric.score.f1
             if epoch == 0 or dev_F1 > best_dev_F1:
                 epochs_left = patience
                 best_epoch = epoch + 1
                 if epoch > 0:
                     delta = 100 * (dev_F1 - best_dev_F1)
-                    logging.info(f"Dev F1 improved by {delta:.1f}")
+                    logger.info(f"Dev F1 improved by {delta:.1f}")
                 best_dev_F1 = dev_F1
             else:
                 epochs_left -= 1
-                logging.info(f"Dev F1 is {-delta:.1f} lower than best Dev F1 "
+                logger.info(f"Dev F1 is {-delta:.1f} lower than best Dev F1 "
                              f"({100*best_dev_F1:.1f})")
-                logging.info(f"{epochs_left} epochs left until Dev F1 to"
+                logger.info(f"{epochs_left} epochs left until Dev F1 to"
                              " improve to avoid early-stopping!")
             if epochs_left == 0:
-                logging.info("Early stopping!")
+                logger.info("Early stopping!")
                 break
 
-            logging.info(f"Epoch {epoch + 1} done")
-        logging.info("Training ended")
+            logger.info(f"Epoch {epoch + 1} done")
 
-    logging.info(f"Best Dev F1 = {100*best_dev_F1:.1f}")
-    logging.info(f"Best epoch = {best_epoch}")
+    logger.info(f"Best Dev F1 = {100*best_dev_F1:.1f}")
+    logger.info(f"Best epoch = {best_epoch}")

@@ -2,7 +2,7 @@
 
 import torch
 from torch import nn
-from transformers import LongformerTokenizer, LongformerModel
+from transformers import LongformerModel, LongformerConfig
 from transformers.models.longformer import modeling_longformer
 
 class CorefLongformerModel(nn.Module):
@@ -12,12 +12,11 @@ class CorefLongformerModel(nn.Module):
     def __init__(self, use_large: bool = False) -> None:
         super().__init__()
 
-        model_size = "large" if use_large else "base"
-        self.tokenizer: LongformerTokenizer = (
-            LongformerTokenizer.from_pretrained(
-                f"allenai/longformer-{model_size}-4096"))
-        self.longformer: LongformerModel = LongformerModel.from_pretrained(
-            f"allenai/longformer-{model_size}-4096")
+        self.model_size = "large" if use_large else "base"
+        self.model_name = f"allenai/longformer-{self.model_size}-4096"
+        config = LongformerConfig.from_pretrained(self.model_name)
+        self.longformer: LongformerModel = LongformerModel(
+            config, add_pooling_layer=False)
 
         self.longformer_hidden_size: int = self.longformer.config.hidden_size
         self.n_labels = 3
@@ -38,7 +37,7 @@ class CorefLongformerModel(nn.Module):
         attn_mask: torch.FloatTensor, 
         global_attn_mask: torch.FloatTensor,
         label_ids: torch.LongTensor | None = None
-        ) -> tuple[torch.FloatTensor, torch.FloatTensor] | torch.FloatTensor:
+        ) -> torch.FloatTensor:
         """Forward propagation"""
         longformer_output: (
             modeling_longformer.LongformerBaseModelOutputWithPooling) = (
@@ -53,7 +52,7 @@ class CorefLongformerModel(nn.Module):
         logits: torch.FloatTensor = self.token_classifier(gru_output)
         if label_ids is not None:
             loss = compute_loss(logits, label_ids, attn_mask, self.n_labels)
-            return loss, logits
+            return loss
         else:
             return logits
 

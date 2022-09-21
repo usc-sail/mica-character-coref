@@ -1,9 +1,9 @@
 """Functions to run inference"""
 
+from mica_text_coref.coref.seq_coref import acceleration
 from mica_text_coref.coref.seq_coref import coref_longformer
 from mica_text_coref.coref.seq_coref import utils
 
-import logging
 import numpy as np
 import time
 import torch
@@ -29,33 +29,35 @@ def infer(dataloader: tdata.DataLoader,
             doc_ids: IntTensor of document ids.
     """
     # Initialize variables
-    device = torch.device("cuda:0")
+    # device = torch.device("cuda:0")
+    accelerator, logger = acceleration.accelerator, acceleration.logger
     model.eval()
     label_ids_list: list[torch.LongTensor] = []
     prediction_ids_list: list[torch.LongTensor] = []
     doc_ids_list: list[torch.IntTensor] = []
     attn_mask_list: list[torch.FloatTensor] = []
     n_batches = len(dataloader)
-    logging.info(f"Number of inference batches = {n_batches}")
+    logger.info(f"Number of inference batches = {n_batches}")
 
     # Inference Loop
-    with utils.timer(), torch.no_grad():
-        logging.info("Inference started")
+    with utils.timer("inference"), torch.no_grad():
         running_batch_times = []
         for i, batch in enumerate(dataloader):
 
             # One inference step
             (batch_token_ids, batch_mention_ids, batch_label_ids,
              batch_attn_mask, batch_global_attn_mask, batch_doc_ids) = batch
-            batch_token_ids = batch_token_ids.to(device)
-            batch_mention_ids = batch_mention_ids.to(device)
-            batch_label_ids = batch_label_ids.to(device)
-            batch_attn_mask = batch_attn_mask.to(device)
-            batch_global_attn_mask = batch_global_attn_mask.to(device)
-            batch_doc_ids = batch_doc_ids.to(device)
+            # batch_token_ids = batch_token_ids.to(device)
+            # batch_mention_ids = batch_mention_ids.to(device)
+            # batch_label_ids = batch_label_ids.to(device)
+            # batch_attn_mask = batch_attn_mask.to(device)
+            # batch_global_attn_mask = batch_global_attn_mask.to(device)
+            # batch_doc_ids = batch_doc_ids.to(device)
             start_time = time.time()
             batch_logits = model(batch_token_ids, batch_mention_ids,
                                  batch_attn_mask, batch_global_attn_mask)
+            batch_logits, batch_label_ids = accelerator.gather_for_metrics(
+                (batch_logits, batch_label_ids))
             batch_prediction_ids = batch_logits.argmax(dim=2)
             label_ids_list.append(batch_label_ids)
             prediction_ids_list.append(batch_prediction_ids)
@@ -77,12 +79,11 @@ def infer(dataloader: tdata.DataLoader,
                         estimated_time_remaining))
                 running_batch_times = []
 
-                logging.info(f"Batch {i + 1}")
-                logging.info("Average inference time @ batch = "
+                logger.info(f"Batch {i + 1}")
+                logger.info("Average inference time @ batch = "
                              f"{average_time_per_batch_str}")
-                logging.info("Estimated inference time remaining = "
+                logger.info("Estimated inference time remaining = "
                              f"{estimated_time_remaining_str}")
-        logging.info("Inference ended")
 
     # Concat batch outputs
     groundtruth = torch.cat(label_ids_list, dim=0)

@@ -3,11 +3,13 @@ were created from coreference corpus. The training terminates when performance
 no longer improves on the development set.
 """
 
+from mica_text_coref.coref.seq_coref import acceleration
 from mica_text_coref.coref.seq_coref import train
 
 from absl import app
 from absl import flags
-from absl import logging
+import datetime
+import logging
 import os
 
 FLAGS = flags.FLAGS
@@ -25,6 +27,10 @@ flags.DEFINE_string(
 flags.DEFINE_string(
     "output_dir", default=os.path.join(proj_dir, "data/results"),
     help="Directory to which model's weights and predictions will be saved")
+flags.DEFINE_string(
+    "logs_dir",
+    default=os.path.join(proj_dir, "data/logs"),
+    help="Logs directory. A new log file with current timestamp will be created")
 flags.DEFINE_string("perl_scorer",
     default=(os.path.join(proj_dir, "coref/seq_coref/scorer/v8.01/scorer.pl")),
     help="Path to the official perl scorer script")
@@ -43,22 +49,23 @@ flags.DEFINE_float(
 flags.DEFINE_float(
     "weight_decay", default=1e-3, lower_bound=0,
     help="L2 regularization coefficient.")
+flags.DEFINE_bool("use_scheduler", default=True, help="Use linear scheduler.")
+flags.DEFINE_float(
+    "warmup_ratio", default=0.1, lower_bound=0, upper_bound=1,
+    help="Fraction of training steps used in warmup of a linear scheduler.")
 flags.DEFINE_integer(
     "patience", default=3, lower_bound=1,
     help=("Number of epochs to wait until performance improves on dev set "
           "before early stopping."))
-flags.DEFINE_float(
-    "warmup_ratio", default=0.1, lower_bound=0, upper_bound=1,
-    help="Fraction of training steps used in warmup.")
-flags.DEFINE_integer(
-    "print_n_batches", default=20, lower_bound=1,
-    help="Number of batches after which to log.")
 flags.DEFINE_integer(
     "max_epochs", default=10, lower_bound=1,
     help="Maximum number of epochs to train.")
 flags.DEFINE_float(
     "max_grad_norm", default=0.1, lower_bound=0,
     help="Maximum norm of gradients to which they get clipped.")
+flags.DEFINE_integer(
+    "print_n_batches", default=20, lower_bound=1,
+    help="Number of batches after which to log.")
 
 # evaluation
 flags.DEFINE_enum(
@@ -80,12 +87,19 @@ flags.DEFINE_bool(
     help="Save the groundtruth, prediction, doc ids, and attn tensors.")
 
 def train_main():
+    # Initialize accelerator
+    logger = acceleration.logger
+    time = datetime.datetime.now().strftime("%Y-%m-%d-%H:%M:%s")
+    file_handler = logging.FileHandler(
+        os.path.join(FLAGS.logs_dir, f"{time}.log"))
+    logger.logger.addHandler(file_handler)
+
     # Log command-line arguments
     for module_name, flag_items in FLAGS.flags_by_module_dict().items():
         if os.path.join(os.getcwd(), module_name) == __file__:
             for flag_item in flag_items:
-                logging.info(f"FLAGS: {flag_item.name:<25s} = "
-                             f"{flag_item._value}")
+                logger.info(f"FLAGS: {flag_item.name:<25s} = "
+                            f"{flag_item._value}")
     
     # Call train
     train.train(tensors_dir=FLAGS.tensors_dir,
@@ -96,11 +110,12 @@ def train_main():
                 infer_batch_size=FLAGS.infer_batch_size,
                 learning_rate=FLAGS.learning_rate,
                 weight_decay=FLAGS.weight_decay,
-                print_n_batches=FLAGS.print_n_batches,
+                use_scheduler=FLAGS.use_scheduler,
+                warmup_ratio=FLAGS.warmup_ratio,
                 max_epochs=FLAGS.max_epochs,
                 max_grad_norm=FLAGS.max_grad_norm,
                 patience=FLAGS.patience,
-                warmup_ratio=FLAGS.warmup_ratio,
+                print_n_batches=FLAGS.print_n_batches,
                 evaluation_strategy=FLAGS.evaluation_strategy,
                 evaluate_train=FLAGS.evaluate_train,
                 save_model=FLAGS.save_model,
@@ -108,7 +123,6 @@ def train_main():
                 )
 
 def main(argv):
-    logging.get_absl_handler().use_absl_log_file()
     train_main()
 
 if __name__=="__main__":

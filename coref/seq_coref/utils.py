@@ -1,6 +1,7 @@
 """Contains utility functions.
 """
 
+from mica_text_coref.coref.seq_coref import acceleration
 from mica_text_coref.coref.seq_coref import data
 
 from absl import logging
@@ -105,7 +106,8 @@ def save_model(model: nn.Module, directory: str):
         model: Torch nn.Module
         directory: filepath to directory where model's weights will be saved
     """
-    torch.save(model.state_dict(), os.path.join(directory, "model.pt"))
+    accelerator = acceleration.accelerator
+    accelerator.save(model.state_dict(), os.path.join(directory, "model.pt"))
 
 def save_predictions(label_ids: torch.LongTensor,
     prediction_ids: torch.LongTensor,
@@ -123,15 +125,17 @@ def save_predictions(label_ids: torch.LongTensor,
         doc_ids: torch int tensor
         directory: filepath of directory where the tensors will be saved
     """
-    torch.save(label_ids, os.path.join(directory, "labels.pt"))
-    torch.save(prediction_ids, os.path.join(directory, "predictions.pt"))
-    torch.save(attn_mask, os.path.join(directory, "attn_mask.pt"))
-    torch.save(doc_ids, os.path.join(directory, "doc_ids.pt"))
+    accelerator = acceleration.accelerator
+    accelerator.save(label_ids, os.path.join(directory, "labels.pt"))
+    accelerator.save(prediction_ids, os.path.join(directory, "predictions.pt"))
+    accelerator.save(attn_mask, os.path.join(directory, "attn_mask.pt"))
+    accelerator.save(doc_ids, os.path.join(directory, "doc_ids.pt"))
 
 @contextlib.contextmanager
-def timer():
-    start_time = time.time()
+def timer(message):
+    logger, start_time = acceleration.logger, time.time()
+    logger.info(f"Starting {message}")
     yield
     time_taken = time.time() - start_time
     time_taken_str = convert_float_seconds_to_time_string(time_taken)
-    logging.info(f"Time taken = {time_taken_str}")
+    logger.info(f"{message} done, time taken = {time_taken_str}")

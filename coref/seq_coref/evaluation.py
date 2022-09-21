@@ -1,10 +1,10 @@
 """Data structures and functions to evaluate the output of a coreference system.
 """
 
+from mica_text_coref.coref.seq_coref import acceleration
 from mica_text_coref.coref.seq_coref import data
 from mica_text_coref.coref.seq_coref import utils
 
-from absl import logging
 from scorch import scores
 import subprocess
 import re
@@ -167,6 +167,7 @@ def evaluate_coreference_perl(
         CoreferenceMetric. This contains scores for MUC, B3, CEAFe, CEAFm, and
         mention.
     """
+    logger = acceleration.logger
     gold_conll_lines, pred_conll_lines = [], []
     
     for doc_id, gold_clusters in groundtruth.items():
@@ -182,10 +183,10 @@ def evaluate_coreference_perl(
         pred_file.writelines(pred_conll_lines)
 
         if verbose:
-            logging.info(f"Gold file = {gold_file.name}")
-            logging.info(f"Pred file = {pred_file.name}")
+            logger.info(f"Gold file = {gold_file.name}")
+            logger.info(f"Pred file = {pred_file.name}")
 
-        logging.info("Running the official perl conll-2012 evaluation script")
+        logger.info("Running the official perl conll-2012 evaluation script")
         cmd = [perl_scorer, "all", gold_file.name, pred_file.name,
                 "none"]
         process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
@@ -195,10 +196,10 @@ def evaluate_coreference_perl(
 
         if verbose:
             if stderr is not None:
-                logging.info(stderr)
+                logger.info(stderr)
             if stdout:
-                logging.info("Official result")
-                logging.info(stdout)
+                logger.info("Official result")
+                logger.info(stdout)
 
         matched_tuples = re.findall(
             r"Coreference: Recall: \([0-9.]+ / [0-9.]+\) ([0-9.]+)%\s+"
@@ -240,6 +241,7 @@ def evaluate_coreference_scorch(
         CoreferenceMetric. 
         This contains scores for MUC, B3, CEAFe, CEAFm, and mention.
     """
+    logger = acceleration.logger
     gold_clusters: list[set[tuple[int, data.Mention]]] = []
     pred_clusters: list[set[tuple[int, data.Mention]]] = []
     gold_mentions: set[tuple[int, data.Mention]] = set()
@@ -264,14 +266,14 @@ def evaluate_coreference_scorch(
                     pred_mentions.add((doc_key, mention))
                 pred_clusters.append(pred_cluster)
 
-    logging.info("Calculating scorch:MUC")
+    logger.info("Calculating scorch:MUC")
     muc_recall, muc_precision, _ = scores.muc(gold_clusters, pred_clusters)
-    logging.info("Calculating scorch:B3")
+    logger.info("Calculating scorch:B3")
     b3_recall, b3_precision, _ = scores.b_cubed(gold_clusters, pred_clusters)
-    logging.info("Calculating scorch:CEAFe")
+    logger.info("Calculating scorch:CEAFe")
     ceafe_recall, ceafe_precision, _ = scores.ceaf_e(gold_clusters,
                                                      pred_clusters)
-    logging.info("Calculating scorch:CEAFm")
+    logger.info("Calculating scorch:CEAFm")
     ceafm_recall, ceafm_precision, _ = scores.ceaf_m(gold_clusters,
                                                      pred_clusters)
     n_common_mentions = len(gold_mentions.intersection(pred_mentions))
@@ -313,8 +315,7 @@ def evaluate_coreference(
     groundtruth_doc_id_to_clusters: dict[int, list[set[data.Mention]]] = {}
     predictions_doc_id_to_clusters: dict[int, list[set[data.Mention]]] = {}
 
-    with utils.timer():
-        logging.info("Converting tensors to clusters")
+    with utils.timer("tensor to cluster conversion"):
         for doc_id, gt_tensor, pred_tensor, attn in zip(
             doc_ids, groundtruth, predictions, attn_mask):
             gt_cluster = convert_tensor_to_cluster(gt_tensor[attn == 1.])
@@ -328,7 +329,6 @@ def evaluate_coreference(
                 if doc_id not in predictions_doc_id_to_clusters:
                     predictions_doc_id_to_clusters[doc_id] = []
                 predictions_doc_id_to_clusters[doc_id].append(pred_cluster)
-        logging.info("Conversion done")
     
     if backend == "scorch":
         coref_metric = evaluate_coreference_scorch(
