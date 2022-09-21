@@ -29,7 +29,6 @@ def infer(dataloader: tdata.DataLoader,
             doc_ids: IntTensor of document ids.
     """
     # Initialize variables
-    # device = torch.device("cuda:0")
     accelerator, logger = acceleration.accelerator, acceleration.logger
     model.eval()
     label_ids_list: list[torch.LongTensor] = []
@@ -47,17 +46,12 @@ def infer(dataloader: tdata.DataLoader,
             # One inference step
             (batch_token_ids, batch_mention_ids, batch_label_ids,
              batch_attn_mask, batch_global_attn_mask, batch_doc_ids) = batch
-            # batch_token_ids = batch_token_ids.to(device)
-            # batch_mention_ids = batch_mention_ids.to(device)
-            # batch_label_ids = batch_label_ids.to(device)
-            # batch_attn_mask = batch_attn_mask.to(device)
-            # batch_global_attn_mask = batch_global_attn_mask.to(device)
-            # batch_doc_ids = batch_doc_ids.to(device)
             start_time = time.time()
             batch_logits = model(batch_token_ids, batch_mention_ids,
                                  batch_attn_mask, batch_global_attn_mask)
-            batch_logits, batch_label_ids = accelerator.gather_for_metrics(
-                (batch_logits, batch_label_ids))
+            batch_logits, batch_label_ids, batch_doc_ids, batch_attn_mask = (
+                accelerator.gather_for_metrics((batch_logits, batch_label_ids,
+                                                batch_doc_ids, batch_attn_mask)))
             batch_prediction_ids = batch_logits.argmax(dim=2)
             label_ids_list.append(batch_label_ids)
             prediction_ids_list.append(batch_prediction_ids)

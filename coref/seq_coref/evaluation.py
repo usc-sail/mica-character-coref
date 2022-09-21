@@ -306,7 +306,7 @@ def evaluate_coreference(
         attn_mask: FloatTensor of attention mask.
         doc_ids: IntTensor of document ids.
         perl_scorer: Filepath to the perl scorer script.
-        evaluation_strategy: A string indicating which backend to use for
+        backend: A string indicating which backend to use for
             evaluation. It can be "perl" or "scorch".
     
     Return:

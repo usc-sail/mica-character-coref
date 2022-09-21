@@ -12,7 +12,6 @@ from mica_text_coref.coref.seq_coref import inference
 import numpy as np
 import os
 import time
-import torch
 from torch.utils import data as tdata
 from torch import optim
 from transformers import get_linear_schedule_with_warmup
@@ -46,12 +45,10 @@ def train(tensors_dir:str,
     best_dev_F1 = -np.inf
     best_epoch = np.nan
     epochs_left = patience
-    # device = torch.device("cuda:0")
 
     # Initialize model
     with utils.timer("model initialization"):
       model = coref_longformer.CorefLongformerModel(use_large=large_longformer)
-    #   model.to(device)
 
     # Load train and dev tensors
     with utils.timer("data loading"):
@@ -110,26 +107,20 @@ def train(tensors_dir:str,
                 for i, batch in enumerate(train_dataloader):
                     
                     # One training step
-                    (batch_token_ids, batch_mention_ids, batch_label_ids,
-                    batch_attn_mask, batch_global_attn_mask, _) = batch
-                    # batch_token_ids = batch_token_ids.to(device)
-                    # batch_mention_ids = batch_mention_ids.to(device)
-                    # batch_label_ids = batch_label_ids.to(device)
-                    # batch_attn_mask = batch_attn_mask.to(device)
-                    # batch_global_attn_mask = batch_global_attn_mask.to(device)
-                    batch_start_time = time.time()
-                    optimizer.zero_grad()
-                    batch_loss = model(
-                        batch_token_ids, batch_mention_ids, batch_attn_mask,
-                        batch_global_attn_mask, batch_label_ids)
-                    # batch_loss.backward()
-                    accelerator.backward(batch_loss)
-                    # torch.nn.utils.clip_grad.clip_grad_norm_(
-                    # model.parameters(), max_grad_norm)
-                    accelerator.clip_grad_norm_(model.parameters(),
-                                                max_grad_norm)
-                    optimizer.step()
-                    scheduler.step()
+                    with accelerator.accumulate(model):
+                        (batch_token_ids, batch_mention_ids, batch_label_ids,
+                        batch_attn_mask, batch_global_attn_mask, _) = batch
+                        batch_start_time = time.time()
+                        optimizer.zero_grad()
+                        batch_loss = model(
+                            batch_token_ids, batch_mention_ids, batch_attn_mask,
+                            batch_global_attn_mask, batch_label_ids)
+                        accelerator.backward(batch_loss)
+                        accelerator.clip_grad_norm_(model.parameters(),
+                                                    max_grad_norm)
+                        optimizer.step()
+                        if use_scheduler:
+                            scheduler.step()
                     batch_time_taken = time.time() - batch_start_time
                     running_batch_loss.append(batch_loss.detach().item())
                     running_batch_train_time.append(batch_time_taken)
@@ -178,7 +169,8 @@ def train(tensors_dir:str,
                     logger.info(f"Training Performance = {train_metric.score}")
                 accelerator.wait_for_everyone()
                 if save_predictions:
-                    logger.info(f"Saving train predictions after epoch {epoch + 1}")
+                    logger.info("Saving train predictions after epoch"
+                                f" {epoch + 1}")
                     utils.save_predictions(
                         train_label_ids, train_predictions, train_doc_ids,
                         train_attn_mask, epoch_train_dir)

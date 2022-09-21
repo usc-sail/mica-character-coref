@@ -3,9 +3,6 @@ were created from coreference corpus. The training terminates when performance
 no longer improves on the development set.
 """
 
-from mica_text_coref.coref.seq_coref import acceleration
-from mica_text_coref.coref.seq_coref import train
-
 from absl import app
 from absl import flags
 import datetime
@@ -22,7 +19,7 @@ flags.DEFINE_string(
     help="Directory containing English conll gold jsonlines files.")
 flags.DEFINE_string(
     "tensors_dir",
-    default=os.path.join(proj_dir, "data/tensors/longformer_seq_tensors_512"),
+    default=os.path.join(proj_dir, "data/tensors/longformer_seq_tensors_4096"),
     help="Directory containing English coreference tensors.")
 flags.DEFINE_string(
     "output_dir", default=os.path.join(proj_dir, "data/results"),
@@ -49,6 +46,9 @@ flags.DEFINE_float(
 flags.DEFINE_float(
     "weight_decay", default=1e-3, lower_bound=0,
     help="L2 regularization coefficient.")
+flags.DEFINE_integer(
+    "grad_accumulation_steps", default=1, lower_bound=1,
+    help="Number of training steps to accumulate gradients for.")
 flags.DEFINE_bool("use_scheduler", default=True, help="Use linear scheduler.")
 flags.DEFINE_float(
     "warmup_ratio", default=0.1, lower_bound=0, upper_bound=1,
@@ -87,7 +87,11 @@ flags.DEFINE_bool(
     help="Save the groundtruth, prediction, doc ids, and attn tensors.")
 
 def train_main():
-    # Initialize accelerator
+    # Import modules
+    from mica_text_coref.coref.seq_coref import acceleration
+    from mica_text_coref.coref.seq_coref import train
+
+    # Get logger
     logger = acceleration.logger
     time = datetime.datetime.now().strftime("%Y-%m-%d-%H:%M:%s")
     file_handler = logging.FileHandler(
