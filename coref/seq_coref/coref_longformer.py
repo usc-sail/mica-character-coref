@@ -1,5 +1,7 @@
 """Longformer model."""
 
+from mica_text_coref.coref.seq_coref import acceleration
+
 import torch
 from torch import nn
 from transformers import LongformerModel, LongformerConfig
@@ -9,7 +11,8 @@ class CorefLongformerModel(nn.Module):
     """Coreference Resolution Model for English using the Longformer model.
     """
 
-    def __init__(self, use_large: bool = False) -> None:
+    def __init__(self, use_large: bool = False,
+                 grad_checkpointing: bool = False) -> None:
         super().__init__()
 
         self.model_size = "large" if use_large else "base"
@@ -17,6 +20,8 @@ class CorefLongformerModel(nn.Module):
         config = LongformerConfig.from_pretrained(self.model_name)
         self.longformer: LongformerModel = LongformerModel(
             config, add_pooling_layer=False)
+        if grad_checkpointing:
+            self.longformer.gradient_checkpointing_enable()
 
         self.longformer_hidden_size: int = self.longformer.config.hidden_size
         self.n_labels = 3

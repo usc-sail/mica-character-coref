@@ -24,6 +24,7 @@ def train(tensors_dir:str,
           infer_batch_size=16,
           learning_rate=1e-5,
           weight_decay=1e-3,
+          grad_checkpointing=False,
           use_scheduler=False,
           warmup_ratio=0.1,
           max_epochs=10,
@@ -48,7 +49,8 @@ def train(tensors_dir:str,
 
     # Initialize model
     with utils.timer("model initialization"):
-      model = coref_longformer.CorefLongformerModel(use_large=large_longformer)
+      model = coref_longformer.CorefLongformerModel(
+        use_large=large_longformer, grad_checkpointing=grad_checkpointing)
 
     # Load train and dev tensors
     with utils.timer("data loading"):
@@ -70,8 +72,6 @@ def train(tensors_dir:str,
     n_train_batches = len(train_dataloader)
     n_dev_batches = len(dev_dataloader)
     n_training_steps = max_epochs * n_train_batches
-    logger.info(f"Train batch size = {train_dataloader.batch_size}")
-    logger.info(f"Dev batch size = {dev_dataloader.batch_size}")
     logger.info(f"Number of training batches = {n_train_batches}")
     logger.info(f"Number of inference batches = {n_dev_batches}")
     logger.info(f"Number of training steps = {n_training_steps}")
@@ -105,22 +105,28 @@ def train(tensors_dir:str,
                 
                 # Batch training loop
                 for i, batch in enumerate(train_dataloader):
+                    batch_start_time = time.time()
                     
                     # One training step
                     with accelerator.accumulate(model):
-                        (batch_token_ids, batch_mention_ids, batch_label_ids,
-                        batch_attn_mask, batch_global_attn_mask, _) = batch
-                        batch_start_time = time.time()
                         optimizer.zero_grad()
-                        batch_loss = model(
-                            batch_token_ids, batch_mention_ids, batch_attn_mask,
-                            batch_global_attn_mask, batch_label_ids)
+                        with accelerator.autocast():
+                            (batch_token_ids, batch_mention_ids,
+                            batch_label_ids, batch_attn_mask,
+                            batch_global_attn_mask, _) = batch
+                            batch_loss = model(
+                                batch_token_ids, batch_mention_ids,
+                                batch_attn_mask, batch_global_attn_mask,
+                                batch_label_ids)
                         accelerator.backward(batch_loss)
-                        accelerator.clip_grad_norm_(model.parameters(),
-                                                    max_grad_norm)
+                        if optimizer.gradient_state.sync_gradients:
+                            accelerator.clip_grad_norm_(model.parameters(),
+                                                        max_grad_norm)
                         optimizer.step()
-                        if use_scheduler:
+                        if use_scheduler and (
+                           not accelerator.optimizer_step_was_skipped):
                             scheduler.step()
+
                     batch_time_taken = time.time() - batch_start_time
                     running_batch_loss.append(batch_loss.detach().item())
                     running_batch_train_time.append(batch_time_taken)

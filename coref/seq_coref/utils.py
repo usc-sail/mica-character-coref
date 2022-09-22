@@ -4,7 +4,6 @@
 from mica_text_coref.coref.seq_coref import acceleration
 from mica_text_coref.coref.seq_coref import data
 
-from absl import logging
 import contextlib
 import gpustat
 import os
@@ -87,6 +86,7 @@ def print_gpu_usage(user: str, devices: list[int]):
         user: username
         devices: list of gpu device ids
     """
+    logger = acceleration.logger
     gpu_collection = gpustat.new_query()
     memory_consumed = 0
     memory_available = 0
@@ -96,7 +96,7 @@ def print_gpu_usage(user: str, devices: list[int]):
                 if process["username"] == user:
                     memory_consumed = process["gpu_memory_usage"]
             memory_available = gpu.memory_free
-            logging.info(f"GPU {gpu.index} = {memory_consumed} used, "
+            logger.info(f"GPU {gpu.index} = {memory_consumed} used, "
                     f"{memory_available} free")
 
 def save_model(model: nn.Module, directory: str):

@@ -8,6 +8,7 @@ from absl import flags
 import datetime
 import logging
 import os
+import pytz
 
 FLAGS = flags.FLAGS
 proj_dir = os.getcwd()
@@ -49,6 +50,11 @@ flags.DEFINE_float(
 flags.DEFINE_integer(
     "grad_accumulation_steps", default=1, lower_bound=1,
     help="Number of training steps to accumulate gradients for.")
+flags.DEFINE_bool(
+    "use_grad_checkpointing", default=False,
+    help="Enable gradient checkpointing.")
+flags.DEFINE_bool(
+    "use_mixed_precision", default=False, help="Enable mixed-precision training.")
 flags.DEFINE_bool("use_scheduler", default=True, help="Use linear scheduler.")
 flags.DEFINE_float(
     "warmup_ratio", default=0.1, lower_bound=0, upper_bound=1,
@@ -92,11 +98,13 @@ def train_main():
     from mica_text_coref.coref.seq_coref import train
 
     # Get logger
-    logger = acceleration.logger
-    time = datetime.datetime.now().strftime("%Y-%m-%d-%H:%M:%s")
-    file_handler = logging.FileHandler(
-        os.path.join(FLAGS.logs_dir, f"{time}.log"))
-    logger.logger.addHandler(file_handler)
+    accelerator, logger = acceleration.accelerator, acceleration.logger
+    if accelerator.is_local_main_process:
+        time = (datetime.datetime.now(pytz.timezone("America/Los_Angeles"))
+                    .strftime("%b%d_%I:%M:%S%p"))
+        file_handler = logging.FileHandler(
+            os.path.join(FLAGS.logs_dir, f"{time}.log"))
+        logger.logger.addHandler(file_handler)
 
     # Log command-line arguments
     for module_name, flag_items in FLAGS.flags_by_module_dict().items():
@@ -114,6 +122,7 @@ def train_main():
                 infer_batch_size=FLAGS.infer_batch_size,
                 learning_rate=FLAGS.learning_rate,
                 weight_decay=FLAGS.weight_decay,
+                grad_checkpointing=FLAGS.use_grad_checkpointing,
                 use_scheduler=FLAGS.use_scheduler,
                 warmup_ratio=FLAGS.warmup_ratio,
                 max_epochs=FLAGS.max_epochs,
