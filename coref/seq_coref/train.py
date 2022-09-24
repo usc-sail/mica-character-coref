@@ -56,7 +56,9 @@ def train(tensors_dir:str,
     with utils.timer("data loading"):
       train_dataset = data_utils.load_tensors(os.path.join(tensors_dir,"train"))
       dev_dataset = data_utils.load_tensors(os.path.join(tensors_dir,"dev"))
-
+      train_size = len(train_dataset)
+      dev_size = len(dev_dataset)
+    
     # Create dataloaders, optimizer, and scheduler
     train_dataloader = tdata.DataLoader(
       train_dataset, batch_size=train_batch_size, shuffle=True)
@@ -71,7 +73,11 @@ def train(tensors_dir:str,
     # Log number of training and inference batches, and number of training steps
     n_train_batches = len(train_dataloader)
     n_dev_batches = len(dev_dataloader)
+    effective_train_batch_size = round(train_size/n_train_batches)
+    effective_dev_batch_size = round(dev_size/n_dev_batches)
     n_training_steps = max_epochs * n_train_batches
+    logger.info(f"Effective train batch size = {effective_train_batch_size}")
+    logger.info(f"Effective dev batch size = {effective_dev_batch_size}")
     logger.info(f"Number of training batches = {n_train_batches}")
     logger.info(f"Number of inference batches = {n_dev_batches}")
     logger.info(f"Number of training steps = {n_training_steps}")
