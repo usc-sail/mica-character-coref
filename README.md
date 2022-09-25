@@ -49,17 +49,43 @@ conda create --name py2 python=2
   `data/ontonotes-release-5.0`.
 
 3. Activate the python 2 conda environment, and run 
-  `coref/seq_coref/prepare_data.sh` script which downloads the conll-2012 data
+  `coref/seq_coref/setup.sh` script which downloads the conll-2012 data
     and creates gold conll files. <br>
     ```
     conda activate py2
-    sh coref/seq_coref/prepare_data.sh data data/ontonotes-release-5.0 coref/seq_coref
+    sh coref/seq_coref/setup.sh data data/ontonotes-release-5.0 coref/seq_coref
     ```
 
-5. Activate the python 3 conda environment, convert the gold conll files to
+4. Activate the python 3 conda environment, convert the gold conll files to
   jsonlines, and create tensors from the jsonlines files.<br>
     ```
     conda activate coreference
     python coref/seq_coref/minimize.py --conll_directory=data/conll-2012/gold
     python coref/seq_coref/tensorize_main.py --conll_directory=data/conll-2012/gold --longformer_tensors_directory=data/tensors/longformer_seq_tensors
     ```
+
+# Movie Coreference Resolution
+
+We are going to fine-tune the 
+[Word-Level Coreference Model](https://aclanthology.org/2021.emnlp-main.605/)
+using their their repository
+[vdobrovolskii/wl-coref](https://github.com/vdobrovolskii/wl-coref).
+
+## Citation
+
+We use the following work
+
+```
+@inproceedings{dobrovolskii-2021-word,
+    title = "Word-Level Coreference Resolution",
+    author = "Dobrovolskii, Vladimir",
+    booktitle = "Proceedings of the 2021 Conference on Empirical Methods in Natural Language Processing",
+    month = nov,
+    year = "2021",
+    address = "Online and Punta Cana, Dominican Republic",
+    publisher = "Association for Computational Linguistics",
+    url = "https://aclanthology.org/2021.emnlp-main.605",
+    doi = "10.18653/v1/2021.emnlp-main.605",
+    pages = "7670--7675",
+}
+```
