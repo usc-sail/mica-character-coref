@@ -14,7 +14,7 @@ import os
 import time
 from torch.utils import data as tdata
 from torch import optim
-from transformers import get_linear_schedule_with_warmup
+from transformers import get_linear_schedule_with_warmup, Adafactor
 
 def train(tensors_dir:str,
           perl_scorer:str,
@@ -24,6 +24,7 @@ def train(tensors_dir:str,
           infer_batch_size=16,
           learning_rate=1e-5,
           weight_decay=1e-3,
+          use_adafactor=False,
           grad_checkpointing=False,
           use_scheduler=False,
           warmup_ratio=0.1,
@@ -63,8 +64,13 @@ def train(tensors_dir:str,
     train_dataloader = tdata.DataLoader(
       train_dataset, batch_size=train_batch_size, shuffle=True)
     dev_dataloader = tdata.DataLoader(dev_dataset, batch_size=infer_batch_size)
-    optimizer = optim.AdamW(model.parameters(), lr=learning_rate,
-                            weight_decay=weight_decay)
+    if use_adafactor:
+        optimizer = Adafactor(model.parameters(), lr=learning_rate,
+                              weight_decay=weight_decay, scale_parameter=False,
+                              relative_step=False, warmup_init=False)
+    else:
+        optimizer = optim.AdamW(model.parameters(), lr=learning_rate,
+                                weight_decay=weight_decay)
     
     # Accelerate model, dataloaders, and optimizer
     model, train_dataloader, dev_dataloader, optimizer = accelerator.prepare(

@@ -47,6 +47,8 @@ flags.DEFINE_float(
 flags.DEFINE_float(
     "weight_decay", default=1e-3, lower_bound=0,
     help="L2 regularization coefficient.")
+flags.DEFINE_bool(
+    "use_adafactor", default=False, help="Use Adafactor optimizer.")
 flags.DEFINE_integer(
     "grad_accumulation_steps", default=1, lower_bound=1,
     help="Number of training steps to accumulate gradients for.")
@@ -122,6 +124,7 @@ def train_main():
                 infer_batch_size=FLAGS.infer_batch_size,
                 learning_rate=FLAGS.learning_rate,
                 weight_decay=FLAGS.weight_decay,
+                use_adafactor=FLAGS.use_adafactor,
                 grad_checkpointing=FLAGS.use_grad_checkpointing,
                 use_scheduler=FLAGS.use_scheduler,
                 warmup_ratio=FLAGS.warmup_ratio,
