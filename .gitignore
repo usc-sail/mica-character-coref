@@ -134,4 +134,8 @@ dmypy.json
 # coreference scorer downloaded from conll-2012 scripts
 coref/seq_coref/scorer/
 
+# run file
 /run.sh
+
+# slurm jobs
+/carc
