@@ -9,36 +9,42 @@ import pandas as pd
 import re
 import spacy
 import tqdm
+import unidecode
 
 def convert_screenplay_and_coreference_annotation_to_json(
     screenplay_parse_file: str, movie_and_raters_file: str,
     screenplays_dir: str, annotations_dir: str, output_dir: str,
-    spacy_model = "en_core_web_sm"):
+    spacy_model = "en_core_web_sm", spacy_gpu_device = -1):
     '''
     Converts coreference annotations, text screenplays, and
     screenplay parsing tags to json objects for further processing. Each json
     object contains the following:
 
-        `rater`       = name of the student worker who annotated the coreference
-        `movie`       = name of the movie
-        `token`       = list of tokens
-        `pos`         = list of part-of-speech tags
-        `ne`          = list of named entity tags
-        `parse`       = list of movieparser tags
-        `sentid`      = list of sentence ids
-        `begin`       = list of starting token index of mentions
-        `end`         = list of ending token index of mentions
-        `character`   = list of character names of mentions
+        `rater`       = Name of the student worker who annotated the coreference
+        `movie`       = Name of the movie 
+        `token`       = List of tokens 
+        `pos`         = List of part-of-speech tags 
+        `ner`         = List of named entity tags 
+        `parse`       = List of movieparser tags 
+        `speaker`     = List of speakers 
+        `sent_offset` = List of sentence offsets. 
+                        Each sentence offset is a list of two integers: start and 
+                        end. The end is excluded, therefore you can get the 
+                        sentence text as tokens[start: end]
+        `clusters`    = Dictionary of character to list of mentions. Each 
+                        mention is a list of three integers: start, end, and head. 
+                        The head is the index of the mention's head word, 
+                        therefore start <= head <= end. The end is inclusive, 
+                        therefore you can get the mention text as 
+                        tokens[start: end + 1]
 
-    `token`, `pos`, `ne`, `parse`, and `sentid` are of equal length. `begin`,
-     `end`, and `character` are of equal length. Each json object is further
-     converted to conll format and a different jsonlines format used as
-    input to train/infer word-level coreference model.
+    `token`, `pos`, `ner`, `parse`, and `speaker` are of equal length. Each 
+    json object is further converted to a different json format used as input
+    to a pre-trained wl-RoBERTa for inference.
 
     The function creates three sets of file, each set containing the json
-    object, conll, and word-level coreference model json object. The first
-    set is saved to `output_dir/regular` and the
-    format of the json object is as described above.
+    files. The first set of files is saved to `output_dir/regular` and the
+    format of the json file is as described above.
 
     The second set removes character names (and possible corresponding
      annotated mentions) that precede an utterance. The second set is saved to
@@ -59,12 +65,15 @@ def convert_screenplay_and_coreference_annotation_to_json(
             json object formatted for word-level coref model, for all three
             sets) is saved.
         spacy_model: name of the english spacy_model
+        spacy_gpu_device: GPU to use for spacy
     '''
-    # Initialize spacy model and movie data jsonlines
+    # Initialize spacy model
+    if spacy_gpu_device >= 0:
+        spacy.require_gpu(gpu_id=spacy_gpu_device)
     nlp = spacy.load(spacy_model)
     movie_data = []
 
-    # Read screenplay parse and movie names
+    # Read screenplay parse, movie names, and raters
     movies, raters = [], []
     parse_df = pd.read_csv(screenplay_parse_file, index_col=None)
     with open(movie_and_raters_file) as fr:
@@ -78,13 +87,13 @@ def convert_screenplay_and_coreference_annotation_to_json(
     for movie, rater in tbar:
         tbar.set_description(movie)
 
-        # Read movie script, movie parse, and movie coreference annotations
+        # Read movie script and annotations
         script_filepath = os.path.join(screenplays_dir, f"{movie}.txt")
         annotation_filepath = os.path.join(annotations_dir, f"{movie}.csv")
         with open(script_filepath, encoding="utf-8") as fr:
             script = fr.read()
         lines = script.splitlines()
-        tags = parse_df[parse_df["movie"] == movie]["robust"].tolist()
+        parsetags = parse_df[parse_df["movie"] == movie]["robust"].tolist()
         annotation_df = pd.read_csv(annotation_filepath, index_col=None)
         items = []
         for _, row in annotation_df.iterrows():
@@ -92,106 +101,130 @@ def convert_screenplay_and_coreference_annotation_to_json(
             items.append((begin, end, character))
         items = sorted(items)
 
-        # Find non-whitespace offset of coreference annotations
+        # Find non-whitespace offset of annotated mentions
         begins, ends, characters, wsbegins, wsends = [], [], [], [], []
-        for begin, end, character in items:
-            wsbegin = len(re.sub("\s+", "", script[:begin]))
-            wsend = wsbegin + len(re.sub("\s+", "", script[begin: end]))
+        prev_begin, prev_wsbegin = 0, 0
+        for i, (begin, end, character) in enumerate(items):
+            if i == 0:
+                wsbegin = len(re.sub("\s", "", script[:begin]))
+            else:
+                wsbegin = prev_wsbegin + len(
+                    re.sub("\s", "", script[prev_begin: begin]))
+            prev_begin, prev_wsbegin = begin, wsbegin
+            wsend = wsbegin + len(re.sub("\s", "", script[begin: end]))
             begins.append(begin)
             ends.append(end)
             characters.append(character)
             wsbegins.append(wsbegin)
             wsends.append(wsend)
 
-        # Find segments (blocks of adjacent lines with same movieparser tags)
-        i, c, s = 0, 0, 0
-        tokens, tkbegins, tkends, tktags, tksentids, segments, segment_tags = (
-            [], [], [], [], [], [], [])
-        postags, nertags = [], []
+        # Extract segments from script lines (adjacent lines with same 
+        # movieparser tags)
+        i = 0
+        segment_texts, segment_tags = [], []
         while i < len(lines):
             j = i + 1
-            while j < len(lines) and tags[j] == tags[i]:
+            while j < len(lines) and parsetags[j] == parsetags[i]:
                 j += 1
-            segment = re.sub("\s+", " ", "\n".join(lines[i: j]).strip())
+            segment = re.sub("\s+", " ", " ".join(lines[i: j]).strip())
+            segment = (" ".join(nltk.wordpunct_tokenize(segment))).strip()
+            segment = re.sub("\s+", " ", segment.strip())
             if segment:
-                segments.append(segment)
-                segment_tags.append(tags[i])
+                segment_texts.append(segment)
+                segment_tags.append(parsetags[i])
             i = j
 
-        # Run each segment through spacy pipeline
-        docs = nlp.pipe(segments, batch_size=10200)
+        # Process each segment through spacy pipeline
+        docs = nlp.pipe(segment_texts, batch_size=10200)
 
-        # Tokenize each spacy token using nltk.wordpunct_tokenizer
-        # Find tokens, token sentence ids, and token movieparser tags
+        # Extract tokens, and the head index, part-of-speech tag, named entity
+        # tag, offsets, parse tag, and sentence id of each token
+        (tokens, token_heads, token_postags, token_nertags, token_begins,
+            token_ends, token_tags, token_sentids) = ([], [], [], [], [], [],
+                                                      [], [])
+        c, s, n = 0, 0, 0
         for i, doc in enumerate(docs):
             for sent in doc.sents:
                 for stoken in sent:
                     text = stoken.text
+                    ascii_text = unidecode.unidecode(text, errors="strict")
+                    assert ascii_text != "", (
+                        f"token='{text}', Empty ascii text")
                     postag = stoken.tag_
                     nertag = stoken.ent_type_
                     if not nertag:
                         nertag = "-"
-                    for token in nltk.wordpunct_tokenize(text):
-                        tkbegin = c
-                        c += len(re.sub("\s+", "", token))
-                        tkend = c
-                        tksentid = s
-                        tokens.append(token)
-                        tkbegins.append(tkbegin)
-                        tkends.append(tkend)
-                        tksentids.append(tksentid)
-                        tktags.append(segment_tags[i])
-                        postags.append(postag)
-                        nertags.append(nertag)
+                    token_begin = c
+                    c += len(re.sub("\s+", "", text))
+                    token_end = c
+                    token_sentid = s
+                    tokens.append(ascii_text)
+                    token_heads.append(n + stoken.head.i)
+                    token_begins.append(token_begin)
+                    token_ends.append(token_end)
+                    token_sentids.append(token_sentid)
+                    token_tags.append(segment_tags[i])
+                    token_postags.append(postag)
+                    token_nertags.append(nertag)
+                n += len(sent)
                 s += 1
 
-        # Match mentions to tokens
-        matchbegins, matchends = [], []
-        for begin in wsbegins:
+        # Match mention offsets to token offsets
+        # Unmatched mentions will printed
+        mention_begins, mention_ends, mention_characters = [], [], []
+        n_unmatched = 0
+        for wsbegin, wsend, begin, end, character in zip(
+            wsbegins, wsends, begins, ends, characters):
             try:
-                i = tkbegins.index(begin)
+                i = token_begins.index(wsbegin)
             except Exception:
                 i = None
-            matchbegins.append(i)
-
-        for begin, end, wsbegin, wsend in zip(begins, ends, wsbegins, wsends):
             try:
-                i = tkends.index(wsend)
+                j = token_ends.index(wsend)
             except Exception:
                 mention = script[begin: end].rstrip()
                 right_context = script[end:].lstrip()
                 if mention.endswith(".") and right_context.startswith(".."):
                     wsend -= 1
                     try:
-                        i = tkends.index(wsend)
+                        j = token_ends.index(wsend)
                     except Exception:
-                        i = None
+                        j = None
                 else:
-                    i = None
-            matchends.append(i)
-
-        # Find unmatched mentions and print
-        n_unmatched_begin_indices = sum(i is None for i in matchbegins)
-        n_unmatched_end_indices = sum(i is None for i in matchends)
-        if n_unmatched_begin_indices:
-            print(f"{movie:20s} {n_unmatched_begin_indices:2d} mention begin"
-                   " indexes unmatched")
-        if n_unmatched_end_indices:
-            print(f"{movie:20s} {n_unmatched_end_indices:2d} mention begin"
-                   " indexes unmatched")
+                    j = None
+            if i is None or j is None:
+                mention = script[begin: end]
+                context = script[begin-10: end+10]
+                print(f"mention = '{mention}'")
+                print(f"context = '{context}'")
+                if i is None:
+                    print("Could not token-map start of mention")
+                if j is None:
+                    print("Could not token-map end of mention")
+                print()
+            if i is not None and j is not None:
+                mention_begins.append(i)
+                mention_ends.append(j)
+                mention_characters.append(character)
+            else:
+                n_unmatched += 1
+        
+        if n_unmatched > 0:
+            print(f"{n_unmatched} mentions could not be token-mapped!")
+            print("If this number is (>10), annotations might have too many errors")
 
         # Create speakers array
         speakers = np.full(len(tokens), fill_value="-", dtype=object)
         i = 0
         while i < len(tokens):
-            if tktags[i] == "C":
+            if token_tags[i] == "C":
                 j = i + 1
-                while j < len(tokens) and tktags[j] == tktags[i]:
+                while j < len(tokens) and token_tags[j] == token_tags[i]:
                     j += 1
                 k = j
                 utterance_token_indices = []
-                while k < len(tokens) and tktags[k] not in "SC":
-                    if tktags[k] in "DE":
+                while k < len(tokens) and token_tags[k] not in "SC":
+                    if token_tags[k] in "DE":
                         utterance_token_indices.append(k)
                     k += 1
                 if utterance_token_indices:
@@ -205,19 +238,44 @@ def convert_screenplay_and_coreference_annotation_to_json(
                 i += 1
         speakers = speakers.tolist()
 
+        # Create character to mention offsets and head
+        clusters: dict[str, list[list[int]]] = {}
+        for character, mention_begin, mention_end in zip(
+            mention_characters, mention_begins, mention_ends):
+            if character not in clusters:
+                clusters[character] = []
+            token_indexes_with_outside_head = []
+            for i in range(mention_begin, mention_end + 1):
+                head_index = token_heads[i]
+                if (head_index == i or head_index < mention_begin or
+                    head_index > mention_end):
+                    token_indexes_with_outside_head.append(i)
+            mention_head = mention_end
+            if len(token_indexes_with_outside_head) == 1:
+                mention_head = token_indexes_with_outside_head[0]
+            clusters[character].append([mention_begin, mention_end, mention_head])
+        
+        # Find sentence offsets
+        sentence_offsets: list[list[int]] = []
+        i = 0
+        while i < len(token_sentids):
+            j = i + 1
+            while j < len(token_sentids) and token_sentids[i] == token_sentids[j]:
+                j += 1
+            sentence_offsets.append([i, j])
+            i = j
+
         # Create movie json
         movie_data.append({
             "movie": movie,
             "rater": rater,
             "token": tokens,
-            "pos": postags,
-            "ne": nertags,
-            "parse": tktags,
-            "sentid": tksentids,
+            "pos": token_postags,
+            "ner": token_nertags,
+            "parse": token_tags,
             "speaker": speakers,
-            "begin": matchbegins,
-            "end": matchends,
-            "character": characters,
+            "sent_offset": sentence_offsets,
+            "clusters": clusters
         })
 
     # Remove tokens with movieparse tag = "C"
@@ -234,24 +292,18 @@ def convert_screenplay_and_coreference_annotation_to_json(
         format_dir = os.path.join(output_dir, input_format)
         os.makedirs(format_dir, exist_ok=True)
         jsonlines_file = os.path.join(format_dir, "movie.jsonlines")
-        conll_file = os.path.join(format_dir, "movie.conll")
         wl_jsonlines_file = os.path.join(format_dir, "movie_wl.jsonlines")
-
-        conll = convert_movie_coref_json_to_conll(data)
         wl_data = prepare_for_wlcoref(data)
 
         with jsonlines.open(jsonlines_file, "w") as writer:
             for d in data:
                 writer.write(d)
-        conll.to_csv(conll_file, sep="\t", index=False)
         with jsonlines.open(wl_jsonlines_file, "w") as writer:
             for d in wl_data:
                 writer.write(d)
 
 def remove_characters(movie_data: list[dict[str, any]]) -> list[dict[str, any]]:
-    '''
-    Removes character names preceding an utterance and modifies the mention
-    indexes.
+    '''Removes character names preceding an utterance.
     '''
     # Initialize new movie data
     new_movie_data = []
@@ -259,29 +311,30 @@ def remove_characters(movie_data: list[dict[str, any]]) -> list[dict[str, any]]:
     # Loop over movies
     tbar = tqdm.tqdm(movie_data, total=len(movie_data), unit="movie")
     for mdata in tbar:
-        movie = mdata["movie"]
+        (movie, rater, tokens, postags, nertags, parsetags, sentence_offsets,
+         speakers, clusters) = (
+            mdata["movie"], mdata["rater"], mdata["token"], mdata["pos"],
+            mdata["ner"], mdata["parse"], mdata["sent_offset"], 
+            mdata["speaker"], mdata["clusters"])
         tbar.set_description(movie)
-        (rater, tokens, tags, sentids, speakers, begins, ends, characters) = (
-            mdata["rater"], mdata["token"], mdata["parse"], mdata["sentid"],
-            mdata["speaker"], mdata["begin"], mdata["end"], mdata["character"])
-        postags, nertags = mdata["pos"], mdata["ne"]
-        removed = np.zeros(len(tokens), dtype=int)
 
+        # removed[x] is the number of tokens to remove from tokens[:x]
         # if tags[i: j] == "C" and is followed by some utterance, 
         # then we should remove tokens[i: j]
         # removed[: i] remains unchanged
         # removed[i: j] = -1
-        # removed[j:] -= j - i
+        # removed[j:] += j - i
+        removed = np.zeros(len(tokens), dtype=int)
         i = 0
         while i < len(tokens):
-            if tags[i] == "C":
+            if parsetags[i] == "C":
                 j = i + 1
-                while j < len(tokens) and tags[j] == tags[i]:
+                while j < len(tokens) and parsetags[j] == parsetags[i]:
                     j += 1
                 k = j
                 utterance_token_indices = []
-                while k < len(tokens) and tags[k] not in "SC":
-                    if tags[k] in "DE":
+                while k < len(tokens) and parsetags[k] not in "SC":
+                    if parsetags[k] in "DE":
                         utterance_token_indices.append(k)
                     k += 1
                 if utterance_token_indices:
@@ -290,60 +343,59 @@ def remove_characters(movie_data: list[dict[str, any]]) -> list[dict[str, any]]:
                 i = k
             else:
                 i += 1
-        removed = removed.tolist()
 
-        # Find the new tokens, tags, sentence ids, pos tags, and ner tags
-        (newtokens, newtags, newsentids, newspeakers, newbegins, newends, 
-         newcharacters) = [], [], [], [], [], [], []
-        newpostags, newnertags = [], []
+        # Skip the tokens marked for removal
+        newtokens, newpostags, newnertags, newparsetags, newspeakers = (
+            [], [], [], [], [])
         i = 0
         while i < len(tokens):
             if removed[i] != -1:
                 newtokens.append(tokens[i])
-                newtags.append(tags[i])
-                newspeakers.append(speakers[i])
-                newsentids.append(sentids[i])
                 newpostags.append(postags[i])
                 newnertags.append(nertags[i])
+                newparsetags.append(parsetags[i])
+                newspeakers.append(speakers[i])
             i += 1
 
-        # Process sent ids so that adjacent sent ids differ by atmost one
-        i, s = 0, 0
-        while i < len(newsentids):
-            j = i + 1
-            while j < len(newsentids) and newsentids[j] == newsentids[i]:
-                j += 1
-            for k in range(i, j):
-                newsentids[k] = s
-            s += 1
-            i = j
+        # Find new sentence offsets
+        new_sentence_offsets = []
+        for i, j in sentence_offsets:
+            assert all(removed[i: j] == -1) or all(removed[i: j] != -1), (
+                "All tokens or none of the tokens of a sentence should be "
+                "removed")
+            if all(removed[i: j] != -1):
+                i = i - int(removed[i])
+                j = j - int(removed[i])
+                new_sentence_offsets.append([i, j])
 
-        # Modify mention indexes a/c removed
-        # Assert that if mention contains any tokens that needs to be
-        # removed, then all mention tags are C
-        for begin, end, character in zip(begins, ends, characters):
-            if all(removed[i] != -1 for i in range(begin, end + 1)):
-                newbegin = begin - removed[begin]
-                newend = end - removed[end]
-                newbegins.append(newbegin)
-                newends.append(newend)
-                newcharacters.append(character)
-            else:
-                assert all(tags[i] == "C" for i in range(begin, end + 1))
+        # Find new clusters
+        new_clusters: dict[str, list[list[int]]] = {}
+        for character, mentions in clusters.items():
+            new_mentions = []
+            for begin, end, head in mentions:
+                assert (all(removed[begin: end + 1] == -1) or
+                        all(removed[begin: end + 1] != -1)), (
+                            "All tokens or none of the tokens of a mention"
+                            f" should be removed, mention = [{begin},{end},{head}]")
+                if all(removed[begin: end + 1] != -1):
+                    begin = begin - int(removed[begin])
+                    end = end - int(removed[end])
+                    head = head - int(removed[head])
+                    new_mentions.append([begin, end, head])
+            if new_mentions:
+                new_clusters[character] = new_mentions
 
         # Create movie json
         new_movie_data.append({
             "movie": movie,
             "rater": rater,
             "token": newtokens,
-            "parse": newtags,
             "pos": newpostags,
-            "ne": newnertags,
-            "sentid": newsentids,
+            "ner": newnertags,
+            "parse": newparsetags,
             "speaker": newspeakers,
-            "begin": newbegins,
-            "end": newends,
-            "character": newcharacters
+            "sent_offset": new_sentence_offsets,
+            "clusters": new_clusters
         })
 
     return new_movie_data
@@ -351,9 +403,7 @@ def remove_characters(movie_data: list[dict[str, any]]) -> list[dict[str, any]]:
 def add_says(movie_data: list[dict[str, any]]) -> list[dict[str, any]]:
     '''
     Inserts 'says' between character name and utterance block. Give the token
-    'says' a unique tag `A`. The function also equalizes the sentence ids of
-    the character, 'says', and the first sentence of the immediately succeeding
-    utterance block (`D` or `E`).
+    'says' a unique tag `A`.
     '''
     # Initialize new movie data
     new_movie_data = []
@@ -361,87 +411,74 @@ def add_says(movie_data: list[dict[str, any]]) -> list[dict[str, any]]:
     # Loop over each movie
     tbar = tqdm.tqdm(movie_data, total=len(movie_data), unit="movie")
     for mdata in tbar:
-        movie = mdata["movie"]
+        (movie, rater, tokens, postags, nertags, parsetags, sentence_offsets,
+         speakers, clusters) = (
+            mdata["movie"], mdata["rater"], mdata["token"], mdata["pos"],
+            mdata["ner"], mdata["parse"], mdata["sent_offset"], 
+            mdata["speaker"], mdata["clusters"])
         tbar.set_description(movie)
-        rater, tokens, tags, sentids, speakers, begins, ends, characters = (
-            mdata["rater"], mdata["token"], mdata["parse"], mdata["sentid"],
-            mdata["speaker"], mdata["begin"], mdata["end"], mdata["character"])
-        postags, nertags = mdata["pos"], mdata["ne"]
 
+        # added[x] is the number of 'says' added in tokens[:x]
         added = np.zeros(len(tokens), dtype=int)
         i = 0
         while i < len(tokens):
-            if tags[i] == "C":
+            if parsetags[i] == "C":
                 j = i + 1
-                while j < len(tokens) and tags[j] == tags[i]:
+                while j < len(tokens) and parsetags[j] == parsetags[i]:
                     j += 1
                 k = j
                 utterance_token_indices = []
-                while k < len(tokens) and tags[k] not in "SC":
-                    if tags[k] in "DE":
+                while k < len(tokens) and parsetags[k] not in "SC":
+                    if parsetags[k] in "DE":
                         utterance_token_indices.append(k)
                     k += 1
                 if utterance_token_indices:
-                    added[j - 1] = -1
                     added[j:] += 1
                 i = k
             else:
                 i += 1
-        added = added.tolist()
 
-        # Find new tokens, tags, sentids, begins, ends array
-        newtokens, newtags, newsentids, newspeakers, newbegins, newends = (
-            [], [], [], [], [], [])
-        newpostags, newnertags = [], []
-
-        # Add 'says' in newtokens
+        # Find new tokens, pos tags, ner tags, parse tags, and speakers
+        newtokens, newpostags, newnertags, newparsetags, newspeakers = (
+            [], [], [], [], [])
         i = 0
         while i < len(tokens):
             newtokens.append(tokens[i])
-            newtags.append(tags[i])
-            newsentids.append(sentids[i])
-            newspeakers.append(speakers[i])
             newpostags.append(postags[i])
             newnertags.append(nertags[i])
-            if added[i] == -1:
+            newparsetags.append(parsetags[i])
+            newspeakers.append(speakers[i])
+            if i < len(tokens) - 1 and added[i] < added[i + 1]:
                 newtokens.append("says")
-                newtags.append("A")
-                newsentids.append(sentids[i])
-                newspeakers.append("-")
                 newpostags.append("VBZ")
                 newnertags.append("-")
+                newparsetags.append("A")
+                newspeakers.append("-")
             i += 1
 
-        # Equalize sentence id of character, 'says' and first utterance sentence
-        i = 0
-        while i < len(newtokens):
-            if newtags[i] == "A" and i < len(newtokens) - 1 and newtags[i + 1] in "DE":
-                j = i + 1
-                sentid = newsentids[j]
-                while j < len(newtokens) and newtags[j] in "DE" and newsentids[j] == sentid:
-                    newsentids[j] = newsentids[i]
-                    j += 1
-                i = j
-            else:
-                i += 1
+        # Find new sentence offsets
+        new_sentence_offsets = []
+        while k < len(sentence_offsets):
+            i, j = sentence_offsets[k]
+            if k < len(sentence_offsets) - 1 and added[j - 1] < added[j] and (
+                parsetags[j] in "DE"):
+                k = k + 1
+                j = sentence_offsets[k][1]
+            i = i + int(added[i])
+            j = j + int(added[j])
+            k = k + 1
+            new_sentence_offsets.append([i, j])
 
-        # Process sent ids so that adjacent sent ids differ by atmost once
-        i, s = 0, 0
-        while i < len(newsentids):
-            j = i + 1
-            while j < len(newsentids) and newsentids[j] == newsentids[i]:
-                j += 1
-            for k in range(i, j):
-                newsentids[k] = s
-            s += 1
-            i = j
-
-        # Modify mention indexes a/c added
-        for begin, end in zip(begins, ends):
-            newbegin = begin + added[begin]
-            newend = end + added[end]
-            newbegins.append(newbegin)
-            newends.append(newend)
+        # Find new clusters
+        new_clusters: dict[str, list[list[int]]] = {}
+        for character, mentions in clusters.items():
+            new_mentions = []
+            for begin, end, head in mentions:
+                begin = begin + int(added[begin])
+                end = end + int(added[end])
+                head = head + int(added[head])
+                new_mentions.append([begin, end, head])
+            new_clusters[character] = new_mentions
 
         # Create the new movie json
         new_movie_data.append({
@@ -449,91 +486,20 @@ def add_says(movie_data: list[dict[str, any]]) -> list[dict[str, any]]:
             "rater": rater,
             "token": newtokens,
             "pos": newpostags,
-            "ne": newnertags,
-            "parse": newtags,
-            "sentid": newsentids,
+            "ner": newnertags,
+            "parse": newparsetags,
             "speaker": newspeakers,
-            "begin": newbegins,
-            "end": newends,
-            "character": characters
+            "sent_offset": new_sentence_offsets,
+            "clusters": new_clusters
         })
 
     return new_movie_data
 
-def convert_movie_coref_json_to_conll(movie_data: list[dict[str, any]]) -> (
-    pd.DataFrame):
-    '''
-    Convert movie json coreference to conll format dataframe. The dataframe
-    contains the following columns:
-
-        - rater
-        - movie
-        - token
-        - sentence_id
-        - parse
-        - pos
-        - ne
-        - speaker
-        - character_coreference
-
-    Sentences are separated by 1 newline. Movies are separated by 2 newlines.
-    '''
-    # Initialize dataframe columns
-    (rater_col, movie_col, token_col, tag_col, sentid_col, character_col,
-     speaker_col) = [], [], [], [], [], [], []
-    postag_col, nertag_col = [], []
-
-    # Loop over movies
-    for mdata in movie_data:
-        (movie, rater, tokens, tags, sentids, speakers, begins, ends,
-         characters) = (mdata["movie"], mdata["rater"], mdata["token"],
-                        mdata["parse"], mdata["sentid"], mdata["speaker"],
-                        mdata["begin"], mdata["end"], mdata["character"])
-        postags, nertags = mdata["pos"], mdata["ne"]
-        start = len(rater_col)
-
-        # Populate columns
-        for i in range(len(tokens)):
-            rater_col.append(rater)
-            movie_col.append(movie)
-            token_col.append(tokens[i])
-            tag_col.append(tags[i])
-            sentid_col.append(sentids[i])
-            character_col.append([])
-            speaker_col.append(speakers[i])
-            postag_col.append(postags[i])
-            nertag_col.append(nertags[i])
-
-        for begin, end, character in zip(begins, ends, characters):
-            for i in range(begin, end + 1):
-                character_col[start + i].append(character)
-
-        for i in range(len(tokens)):
-            if character_col[start + i]:
-                character_col[start + i] = ",".join(sorted(character_col[start + i]))
-            else:
-                character_col[start + i] = "-"
-
-    # Create conll dataframe
-    records = []
-    i = 0
-    while i < len(rater_col):
-        if i and movie_col[i] != movie_col[i - 1]:
-            records.append(["" for _ in range(7)])
-            records.append(["" for _ in range(7)])
-        elif i and sentid_col[i] != sentid_col[i - 1]:
-            records.append(["" for _ in range(7)])
-        records.append([rater_col[i], movie_col[i], token_col[i], sentid_col[i],
-                        postag_col[i], nertag_col[i], tag_col[i],
-                        speaker_col[i], character_col[i]])
-        i += 1
-
-    movie_coref_df = pd.DataFrame(records,
-                                  columns=["rater", "movie", "token",
-                                           "sentence_id", "pos", "named_entity",
-                                           "parse", "speaker",
-                                           "character_coreference"])
-    return movie_coref_df
+def convert_offsets_to_list(offsets: list[list[int]]) -> list[int]:
+    ids = []
+    for i, j in offsets:
+        ids.append([k for k in range(j - i)])
+    return ids
 
 def prepare_for_wlcoref(movie_data: list[dict[str, any]]) -> (
     list[dict[str, any]]):
@@ -545,7 +511,7 @@ def prepare_for_wlcoref(movie_data: list[dict[str, any]]) -> (
         new_movie_data.append({
             "document_id": f"wb/{mdata['movie']}",
             "cased_words": mdata["token"],
-            "sent_id": mdata["sentid"],
+            "sent_id": convert_offsets_to_list(mdata["sent_offset"]),
             "speaker": mdata["speaker"]
         })
     return new_movie_data
