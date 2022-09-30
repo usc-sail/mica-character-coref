@@ -18,11 +18,11 @@ flags.DEFINE_enum(
                  "basterds"],
     help="Movie to print.", required=True)
 
-def print(argv):
+def main(argv):
     corpus = data.CorefCorpus(FLAGS.jsonlines)
     movie = [document for document in corpus.documents
                       if document.movie == FLAGS.movie][0]
-    print(movie.movie)
+    print(movie)
 
 if __name__=="__main__":
-    app.run(print)
+    app.run(main)
