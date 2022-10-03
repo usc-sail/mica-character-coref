@@ -2,6 +2,7 @@
 models
 """
 
+import collections
 import jsonlines
 import math
 import numpy as np
@@ -44,7 +45,7 @@ class CorefDocument:
         self.pos: list[str] = json["pos"]
         self.ner: list[str] = json["ner"]
         self.speaker: list[str] = json["speaker"]
-        self.sentence_offsets: list[tuple[int, int]] = json["sent_offset"]
+        self.sentence_offsets: list[list[int]] = json["sent_offset"]
         self.clusters: dict[str, set[Mention]] = {}
         for character, mentions in json["clusters"].items():
             mentions = set([Mention(*x) for x in mentions])
@@ -90,8 +91,11 @@ class CorefCorpus:
     def __getitem__(self, i) -> CorefDocument:
         return self.documents[i]
 
-class CharacterRecognitionModel(Dataset):
-    """PyTorch dataset for the character recognition model.
+class CharacterRecognitionDataset(Dataset):
+    """PyTorch dataset for the character recognition model. It contains the
+    following attributes: `subtoken_ids` tensor, `attention_mask` tensor,
+    `token_offset` tensor, `parse_tag_ids` tensor, `label_ids` tensor, and
+    `parse_tag_to_id` dictionary.
     """
     def __init__(self, corpus: CorefCorpus, tokenizer: PreTrainedTokenizer,
                  seq_length: int, obey_scene_boundaries: bool) -> None:
@@ -106,9 +110,11 @@ class CharacterRecognitionModel(Dataset):
         """
         super().__init__()
         tokens_list: list[list[str]] = []
-        labels_list: list[torch.IntTensor] = []
-        parse_tags_list: list[torch.IntTensor] = []
-        parse_tag_set = ["S", "N", "C", "D"]
+        labels_list: list[torch.Tensor] = []
+        parse_tags_list: list[torch.Tensor] = []
+        self.parse_tag_to_id = collections.defaultdict(int)
+        for i, parse_tag in enumerate("SNCDE"):
+            self.parse_tag_to_id[parse_tag] = i + 1
 
         for document in corpus:
             tokens = document.token
@@ -127,7 +133,7 @@ class CharacterRecognitionModel(Dataset):
                     if parse_tags[i] == "S":
                         if found_content_tag:
                             scene_boundaries[i] = 1
-                        found_content_tag = False
+                            found_content_tag = False
                         while i < len(tokens) and parse_tags[i] == "S":
                             i += 1
                     else:
@@ -135,21 +141,19 @@ class CharacterRecognitionModel(Dataset):
                             found_content_tag = True
                         i += 1
 
-            # Create movie parse tensors
+            # Create movie parse tensor
             parse_tag_tensor = torch.zeros(len(tokens), dtype=int)
             for i, tag in enumerate(parse_tags):
-                try:
-                    parse_tag_tensor[i] = parse_tag_set.index(tag) + 1
-                except Exception:
-                    pass
+                parse_tag_tensor[i] = self.parse_tag_to_id[tag]
 
             # Segment document into sequences
             i = 0
             while i < len(tokens):
                 end = i + seq_length
                 if obey_scene_boundaries and (
-                   np.any(scene_boundaries[i : end] == 1)):
-                    end = np.nonzero(scene_boundaries == 1)[0][0]
+                   np.any(scene_boundaries[i: end] == 1)):
+                    end = (i + np.nonzero(scene_boundaries[i: end] == 1)[0][0]
+                           + 1)
                 tokens_list.append(tokens[i: end])
                 labels_list.append(labels[i: end])
                 parse_tags_list.append(parse_tag_tensor[i : end])
@@ -186,16 +190,23 @@ class CharacterRecognitionModel(Dataset):
             while j < n_subtokens and k < len(token_char_offset):
                 if subtoken_char_offset[j, 0] == subtoken_char_offset[j, 1]:
                     j += 1
-                elif subtoken_char_offset[j, 0] == token_char_offset[k][0]:
+                else:
+                    assert (subtoken_char_offset[j, 0] == 
+                            token_char_offset[k][0]), (
+                                "Begin char offset of token and subtoken "
+                                "don't match")
                     l = j
                     while l < n_subtokens and (
                         subtoken_char_offset[l, 1] != token_char_offset[k][1]):
                         l += 1
-                    token_offset[i, k] = [j, l]
+                    assert (subtoken_char_offset[l, 1] == 
+                            token_char_offset[k][1]), (
+                                "End char offset of token and subtoken "
+                                "don't match")
+                    token_offset[i, k, 0] = j
+                    token_offset[i, k, 1] = l
                     k += 1
                     j = l + 1
-                else:
-                    assert False, "Something went wrong!"
 
         self.subtoken_ids = encoding["input_ids"]
         self.attention_mask = encoding["attention_mask"]
@@ -209,7 +220,7 @@ class CharacterRecognitionModel(Dataset):
         return len(self.subtoken_ids)
     
     def __getitem__(self, i: int) -> (
-        tuple[torch.LongTensor, torch.FloatTensor, torch.LongTensor,
-              torch.LongTensor, torch.LongTensor]):
+        tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor,
+              torch.Tensor]):
         return (self.subtoken_ids[i], self.attention_mask[i],
                 self.token_offset[i], self.parse_tag_ids[i], self.label_ids[i])

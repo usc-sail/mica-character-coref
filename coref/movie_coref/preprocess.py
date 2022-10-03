@@ -20,38 +20,37 @@ def convert_screenplay_and_coreference_annotation_to_json(
     screenplay parsing tags to json objects for further processing. Each json
     object contains the following:
 
-        `rater`       = Name of the student worker who annotated the coreference
-        `movie`       = Name of the movie 
-        `token`       = List of tokens 
-        `pos`         = List of part-of-speech tags 
-        `ner`         = List of named entity tags 
-        `parse`       = List of movieparser tags 
-        `speaker`     = List of speakers 
-        `sent_offset` = List of sentence offsets. 
-                        Each sentence offset is a list of two integers: start and 
-                        end. The end is excluded, therefore you can get the 
-                        sentence text as tokens[start: end]
-        `clusters`    = Dictionary of character to list of mentions. Each 
-                        mention is a list of three integers: start, end, and head. 
-                        The head is the index of the mention's head word, 
-                        therefore start <= head <= end. The end is inclusive, 
-                        therefore you can get the mention text as 
-                        tokens[start: end + 1]
+    Attributes:
+        rater: Name of the student worker who annotated the coreference
+        movie: Name of the movie 
+        token: List of tokens 
+        pos: List of part-of-speech tags 
+        ner: List of named entity tags 
+        parse: List of movieparser tags 
+        speaker: List of speakers 
+        sent_offset: List of sentence offsets. Each sentence offset is a list of
+            two integers: start and end. The end is included, therefore you can
+            get the sentence text as tokens[start: end]
+        clusters : Dictionary of character to list of mentions. Each mention is
+            a list of three integers: start, end, and head. The head is the 
+            index of the mention's head word, therefore start <= head <= end. 
+            The end is inclusive, therefore you can get the mention text as 
+            tokens[start: end + 1]
 
-    `token`, `pos`, `ner`, `parse`, and `speaker` are of equal length. Each 
+    token, pos, ner, parse, and speaker are of equal length. Each 
     json object is further converted to a different json format used as input
     to a pre-trained wl-RoBERTa for inference.
 
     The function creates three sets of file, each set containing the json
-    files. The first set of files is saved to `output_dir/regular` and the
+    files. The first set of files is saved to output_dir/regular and the
     format of the json file is as described above.
 
     The second set removes character names (and possible corresponding
      annotated mentions) that precede an utterance. The second set is saved to
-    `output_dir/nocharacters`.
+    output_dir/nocharacters.
 
-    The third set adds the word `says` between character names and their
-    utterances. It is saved to `output_dir/addsays`.
+    The third set adds the word "says" between character names and their
+    utterances. It is saved to output_dir/addsays.
 
     Args:
         screenplay_parse_file: csv file containing screenplay parsing tags.
@@ -262,7 +261,7 @@ def convert_screenplay_and_coreference_annotation_to_json(
             j = i + 1
             while j < len(token_sentids) and token_sentids[i] == token_sentids[j]:
                 j += 1
-            sentence_offsets.append([i, j])
+            sentence_offsets.append([i, j - 1])
             i = j
 
         # Create movie json
@@ -360,12 +359,12 @@ def remove_characters(movie_data: list[dict[str, any]]) -> list[dict[str, any]]:
         # Find new sentence offsets
         new_sentence_offsets = []
         for i, j in sentence_offsets:
-            assert all(removed[i: j] == -1) or all(removed[i: j] != -1), (
+            assert all(removed[i: j + 1] == -1) or all(removed[i: j + 1] != -1), (
                 "All tokens or none of the tokens of a sentence should be "
                 "removed")
-            if all(removed[i: j] != -1):
+            if all(removed[i: j + 1] != -1):
                 i = i - int(removed[i])
-                j = j - int(removed[i])
+                j = j - int(removed[j])
                 new_sentence_offsets.append([i, j])
 
         # Find new clusters
@@ -418,7 +417,8 @@ def add_says(movie_data: list[dict[str, any]]) -> list[dict[str, any]]:
             mdata["speaker"], mdata["clusters"])
         tbar.set_description(movie)
 
-        # added[x] is the number of 'says' added in tokens[:x]
+        # added[x] is the number of 'says' added in tokens[0...x] or tokens[:x + 1]
+        # Therefore the token at position x is mapped to x + added[x]
         added = np.zeros(len(tokens), dtype=int)
         i = 0
         while i < len(tokens):
@@ -458,14 +458,18 @@ def add_says(movie_data: list[dict[str, any]]) -> list[dict[str, any]]:
 
         # Find new sentence offsets
         new_sentence_offsets = []
+        k = 0
         while k < len(sentence_offsets):
             i, j = sentence_offsets[k]
-            if k < len(sentence_offsets) - 1 and added[j - 1] < added[j] and (
-                parsetags[j] in "DE"):
-                k = k + 1
-                j = sentence_offsets[k][1]
+            offset = 0
+            if k < len(sentence_offsets) - 1 and added[j] < added[j + 1]:
+                if parsetags[j + 1] in "DE":
+                    k = k + 1
+                    j = sentence_offsets[k][1]
+                else:
+                    offset = 1
             i = i + int(added[i])
-            j = j + int(added[j])
+            j = j + int(added[j]) + offset
             k = k + 1
             new_sentence_offsets.append([i, j])
 
