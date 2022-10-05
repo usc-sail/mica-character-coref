@@ -94,11 +94,12 @@ class CorefCorpus:
 class CharacterRecognitionDataset(Dataset):
     """PyTorch dataset for the character recognition model. It contains the
     following attributes: `subtoken_ids` tensor, `attention_mask` tensor,
-    `token_offset` tensor, `parse_tag_ids` tensor, `label_ids` tensor, and
-    `parse_tag_to_id` dictionary.
+    `token_offset` tensor, `parse_tag_ids` tensor, `label_ids` tensor,
+    `parse_tag_to_id` dictionary, and `num_labels`.
     """
     def __init__(self, corpus: CorefCorpus, tokenizer: PreTrainedTokenizer,
-                 seq_length: int, obey_scene_boundaries: bool) -> None:
+                 seq_length: int, obey_scene_boundaries: bool,
+                 label_type = "head") -> None:
         """Initializer for the character recognition model data.
 
         Args:
@@ -107,8 +108,12 @@ class CharacterRecognitionDataset(Dataset):
             seq_length: maximum number of tokens (not sub-tokens) in a sequence
             obey_scene_boundaries: if true, sequences do not cross scene
             boundaries
+            label_type: "head" or "span"
         """
         super().__init__()
+        assert label_type in ["head", "span"], (
+            f"label_type should be 'head' or 'span'. Given '{label_type}'")
+        self.num_labels = 2 + int(label_type == "span")
         tokens_list: list[list[str]] = []
         labels_list: list[torch.Tensor] = []
         parse_tags_list: list[torch.Tensor] = []
@@ -120,9 +125,15 @@ class CharacterRecognitionDataset(Dataset):
             tokens = document.token
             labels = torch.zeros(len(tokens), dtype=int)
             parse_tags = document.parse
+
+            # Create labels
             for mentions in document.clusters.values():
                 for mention in mentions:
-                    labels[mention.head] = 1
+                    if label_type == "head":
+                        labels[mention.head] = 1
+                    else:
+                        labels[mention.begin] = 1
+                        labels[mention.begin + 1: mention.end + 1] = 2
 
             # Find token-level scene boundaries
             if obey_scene_boundaries:
@@ -151,9 +162,8 @@ class CharacterRecognitionDataset(Dataset):
             while i < len(tokens):
                 end = i + seq_length
                 if obey_scene_boundaries and (
-                   np.any(scene_boundaries[i: end] == 1)):
-                    end = (i + np.nonzero(scene_boundaries[i: end] == 1)[0][0]
-                           + 1)
+                   np.any(scene_boundaries[i + 1: end] == 1)):
+                    end = i + np.nonzero(scene_boundaries[i + 1: end] == 1)[0][0] + 1
                 tokens_list.append(tokens[i: end])
                 labels_list.append(labels[i: end])
                 parse_tags_list.append(parse_tag_tensor[i : end])
