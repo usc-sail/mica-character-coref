@@ -90,7 +90,7 @@ class CharacterRecognition(nn.Module):
         # gru_input = batch_size x max_n_tokens x (encoder_hidden_size +
         # parse_tag_embedding_size)
         parse_input = self.parse_embedding(parse_ids)
-        gru_input = torch.cat((token_embedding, parse_input), dim=0).contiguous()
+        gru_input = torch.cat((token_embedding, parse_input), dim=2).contiguous()
 
         # logits = batch_size x max_n_tokens x num_labels
         gru_output, _ = self.gru(gru_input)
