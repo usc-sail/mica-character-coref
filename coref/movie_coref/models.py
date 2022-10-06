@@ -57,7 +57,7 @@ class CharacterRecognition(nn.Module):
     
     def forward(self, subtoken_ids: torch.Tensor, attention_mask: torch.Tensor,
                 token_offset: torch.Tensor, parse_ids: torch.Tensor,
-                labels: torch.Tensor | None = None) -> torch.Tensor:
+                labels: torch.Tensor) -> torch.Tensor:
         """Forward propagation for the Character Recognition Model.
 
         Args:
@@ -65,10 +65,10 @@ class CharacterRecognition(nn.Module):
             attention_mask: `batch_size x max_n_subtokens` Float/Long Tensor
             token_offset: `batch_size x max_n_tokens x 2` Long Tensor
             parse_ids: `batch_size x max_n_tokens` Long Tensor
-            labels: `batch_size x max_n_tokens` Long Tensor or None
+            labels: `batch_size x max_n_tokens` Long Tensor
         
         Returns:
-            The loss value if labels are given, else the logits 
+            Return the loss value if model is begin trained, else the logits 
             `batch_size x max_n_tokens x num_labels` Float Tensor
         """
         batch_size = len(subtoken_ids)
@@ -96,14 +96,14 @@ class CharacterRecognition(nn.Module):
         gru_output, _ = self.gru(gru_input)
         logits = self.output(gru_output)
 
-        if labels is None:
-            return logits
-        else:
+        if self.training:
             token_attention_mask = torch.any(subtoken_attn > 0, dim=1).reshape(
                 batch_size, -1)
             loss = compute_loss(logits, labels, token_attention_mask,
                                 self.num_labels)
             return loss
+        else:
+            return logits
 
     def _attn_scores(self,
                      subtoken_embeddings: torch.FloatTensor,

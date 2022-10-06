@@ -232,5 +232,8 @@ class CharacterRecognitionDataset(Dataset):
     def __getitem__(self, i: int) -> (
         tuple[torch.Tensor, torch.Tensor, torch.Tensor, torch.Tensor,
               torch.Tensor]):
-        return (self.subtoken_ids[i], self.attention_mask[i],
-                self.token_offset[i], self.parse_tag_ids[i], self.label_ids[i])
+        return dict(subtoken_ids=self.subtoken_ids[i],
+                    attention_mask=self.attention_mask[i],
+                    token_offset=self.token_offset[i],
+                    parse_ids=self.parse_tag_ids[i],
+                    labels=self.label_ids[i])
