@@ -46,14 +46,17 @@ class CharacterRecognition(nn.Module):
                           num_layers=gru_num_layers, batch_first=True,
                           dropout=gru_dropout, bidirectional=gru_bidirectional)
         self.output = nn.Linear(self.gru_output_size, num_labels)
+        self._device = "cpu"
     
     @property
     def device(self) -> torch.device:
-        """A workaround to get current device (which is assumed to be the
-        device of the first parameter of one of the submodules).
-        TODO: sabyasachee accelerator
-        """
-        return next(self.parameters()).device
+        """Getter for model device."""
+        return self._device
+    
+    @device.setter
+    def device(self, device):
+        """Setter for model device. Used by accelerate."""
+        self._device = device
     
     def forward(self, subtoken_ids: torch.Tensor, attention_mask: torch.Tensor,
                 token_offset: torch.Tensor, parse_ids: torch.Tensor,
@@ -154,7 +157,7 @@ def compute_loss(
     active_logits = logits.flatten(0, 1)[attn_mask.flatten() == 1.]
     label_distribution = torch.bincount(active_labels,
         minlength=n_labels)
-    class_weight = torch.sqrt(len(active_labels)/(1 + label_distribution))
+    class_weight = len(active_labels)/(1 + label_distribution)
     cross_entrop_loss_fn = nn.CrossEntropyLoss(weight=class_weight, 
         reduction="mean")
     loss = cross_entrop_loss_fn(active_logits, active_labels)

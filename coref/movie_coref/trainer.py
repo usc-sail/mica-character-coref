@@ -85,6 +85,7 @@ class Trainer:
         self.train_dataloader = train_dataloader
         self.dev_dataloader = dev_dataloader
         self.optimizer = optimizer
+        self.scheduler = None
         self.use_scheduler = use_scheduler
         self.warmup_ratio = warmup_ratio
         self.warmup_steps = warmup_steps
@@ -111,16 +112,21 @@ class Trainer:
         self.n_training_samples = len(self.train_dataloader.dataset)
         self.n_dev_samples = len(self.dev_dataloader.dataset)
         self.model.eval()
+        self.model.device = self.accelerator.device
+    
+    def _log(self, message):
+        """Log in distributed setting"""
+        self.logger.info(message)
     
     @contextlib.contextmanager
     def _timer(self, message):
         """Context manager for timing a codeblock"""
         start_time = time.time()
-        self.logger.info(f"Starting {message}")
+        self._log(f"Starting {message}")
         yield
         time_taken = time.time() - start_time
         time_taken_str = self._convert_float_seconds_to_time_string(time_taken)
-        self.logger.info(f"{message} done, time taken = {time_taken_str}")
+        self._log(f"{message} done, time taken = {time_taken_str}")
 
     def _convert_float_seconds_to_time_string(self, seconds: float) -> str:
         """Convert seconds to h m s format"""
@@ -150,6 +156,30 @@ class Trainer:
             if self.save_tensors_name is None or name in self.save_tensors_name:
                 self.accelerator.save(pt, os.path.join(directory, f"{name}.pt"))
     
+    def _training_step(self, batch: dict[str, torch.Tensor]) -> float:
+        """Trains the model for a single batch.
+
+        Args:
+            batch: Dictionary of tensor name to tensor
+        
+        Returns:
+            Loss value
+        """
+        with self.accelerator.accumulate(self.model):
+            self.optimizer.zero_grad()
+            with self.accelerator.autocast():
+                batch_loss = self.model(**batch)
+            self.accelerator.backward(batch_loss)
+            if self.optimizer.gradient_state.sync_gradients and (
+               self.max_grad_norm is not None):
+                self.accelerator.clip_grad_norm_(
+                    self.model.parameters(), self.max_grad_norm)
+            self.optimizer.step()
+            if self.use_scheduler and (
+               not self.accelerator.optimizer_step_was_skipped):
+                self.scheduler.step()
+        return batch_loss.detach().item()
+
     def run(self):
         best_dev_score = None
         best_epoch = None
@@ -170,24 +200,24 @@ class Trainer:
             self.n_training_samples/n_train_batches)
         effective_dev_batch_size = round(self.n_dev_samples/n_dev_batches)
         n_training_steps = self.max_epochs * n_train_batches
-        self.logger.info("Effective train batch size = "
+        self._log("Effective train batch size = "
                         f"{effective_train_batch_size}")
-        self.logger.info("Effective dev batch size = "
+        self._log("Effective dev batch size = "
                         f"{effective_dev_batch_size}")
-        self.logger.info(f"Number of training batches = {n_train_batches}")
-        self.logger.info(f"Number of inference batches = {n_dev_batches}")
-        self.logger.info(f"Number of training steps = {n_training_steps}")
+        self._log(f"Number of training batches = {n_train_batches}")
+        self._log(f"Number of inference batches = {n_dev_batches}")
+        self._log(f"Number of training steps = {n_training_steps}")
 
         # Initialize and accelerate scheduler
         if self.use_scheduler:
             n_warmup_steps = self.warmup_steps if (
                 self.warmup_steps is not None) else (
                     int(self.warmup_ratio * n_training_steps))
-            scheduler = get_linear_schedule_with_warmup(
+            self.scheduler = get_linear_schedule_with_warmup(
                 self.optimizer, num_warmup_steps=n_warmup_steps,
                 num_training_steps=n_training_steps)
-            scheduler = self.accelerator.prepare_scheduler(scheduler)
-            self.logger.info(f"Number of warmup steps = {n_warmup_steps}")
+            self.scheduler = self.accelerator.prepare_scheduler(self.scheduler)
+            self._log(f"Number of warmup steps = {n_warmup_steps}")
         
         # Training and evaluation loop
         with self._timer("training"):
@@ -210,23 +240,10 @@ class Trainer:
                     # Batch training loop
                     for i, batch in enumerate(self.train_dataloader):
                         batch_start_time = time.time()
-                        
                         # One training step
-                        with self.accelerator.accumulate(self.model):
-                            self.optimizer.zero_grad()
-                            with self.accelerator.autocast():
-                                batch_loss = self.model(**batch)
-                            self.accelerator.backward(batch_loss)
-                            if self.optimizer.gradient_state.sync_gradients:
-                                self.accelerator.clip_grad_norm_(
-                                    self.model.parameters(), self.max_grad_norm)
-                            self.optimizer.step()
-                            if self.use_scheduler and (
-                            not self.accelerator.optimizer_step_was_skipped):
-                                scheduler.step()
-
+                        batch_loss = self._training_step(batch)
                         batch_time_taken = time.time() - batch_start_time
-                        running_batch_loss.append(batch_loss.detach().item())
+                        running_batch_loss.append(batch_loss)
                         running_batch_train_time.append(batch_time_taken)
 
                         # Log after log_batch_frequency batches
@@ -241,14 +258,14 @@ class Trainer:
                             average_batch_train_time_str = (
                                 self._convert_float_seconds_to_time_string(
                                 average_batch_train_time))
-                            self.logger.info(f"Batch {i + 1}")
-                            self.logger.info(
+                            self._log(f"Batch {i + 1}")
+                            self._log(
                                 "Average training loss @ batch = "
                                 f"{average_batch_loss:.4f}")
-                            self.logger.info(
+                            self._log(
                                 "Average training time taken @ batch = "
                                 f"{average_batch_train_time_str}")
-                            self.logger.info(
+                            self._log(
                                 "Estimated training time remaining for epoch "
                                 f"{epoch + 1} = {estimated_time_remaining}")
                             running_batch_loss = []
@@ -259,7 +276,7 @@ class Trainer:
 
                 # Save model
                 if self.save_model:
-                    self.logger.info(f"Saving model after epoch {epoch + 1}")
+                    self._log(f"Saving model after epoch {epoch + 1}")
                     unwrapped_model = self.accelerator.unwrap_model(self.model)
                     self._save_model(unwrapped_model, epoch_dir)
 
@@ -270,7 +287,7 @@ class Trainer:
                         train_inference_output = self._infer(
                             self.train_dataloader, self.model)
                         train_metric = self.evaluate(**train_inference_output)
-                        self.logger.info(
+                        self._log(
                             f"Training Performance = {train_metric.score}")
                     self.accelerator.wait_for_everyone()
             
@@ -280,39 +297,40 @@ class Trainer:
                     dev_inference_output = self._infer(
                         self.dev_dataloader, self.model)
                     dev_metric = self.evaluate(**dev_inference_output)
-                    self.logger.info(f"Dev Performance = {dev_metric.score}")
+                    self._log(f"Dev Performance = {dev_metric.score}")
                 self.accelerator.wait_for_everyone()
                 if self.save_tensors:
-                    self.logger.info(
+                    self._log(
                         f"Saving dev tensors after epoch {epoch + 1}")
                     self._save_tensors(epoch_dev_dir, **dev_inference_output)
 
                 # Early-stopping
-                self.logger.info("Checking for early-stopping")
+                self._log("Checking for early-stopping")
                 dev_score = dev_metric.score
                 if best_dev_score is None or dev_score > best_dev_score:
                     epochs_left = self.patience
                     best_epoch = epoch + 1
-                    if epoch > 0:
+                    if best_dev_score is not None:
                         delta = 100 * (dev_score - best_dev_score)
-                        self.logger.info(f"Dev score improved by {delta:.1f}")
+                        self._log(f"Dev score improved by {delta:.1f}")
                     best_dev_score = dev_score
                 else:
                     epochs_left -= 1
-                    self.logger.info(
-                        f"Dev score is {-delta:.1f} lower than best Dev score "
+                    delta = 100 * (best_dev_score - dev_score)
+                    self._log(
+                        f"Dev score is {delta:.1f} lower than best Dev score "
                         f"({100*best_dev_score:.1f})")
-                    self.logger.info(
+                    self._log(
                         f"{epochs_left} epochs left until Dev score to improve to"
                         " avoid early-stopping!")
                 if epochs_left == 0:
-                    self.logger.info("Early stopping!")
+                    self._log("Early stopping!")
                     break
 
-                self.logger.info(f"Epoch {epoch + 1} done")
+                self._log(f"Epoch {epoch + 1} done")
 
-        self.logger.info(f"Best Dev score = {100*best_dev_score:.1f}")
-        self.logger.info(f"Best epoch = {best_epoch}")
+        self._log(f"Best Dev score = {100*best_dev_score:.1f}")
+        self._log(f"Best epoch = {best_epoch}")
     
     def _infer(self, dataloader: DataLoader, model: nn.Module) -> (
         dict[str, torch.Tensor]):
@@ -328,7 +346,7 @@ class Trainer:
         model.eval()
         tensors: dict[str, list[torch.Tensor]] = collections.defaultdict(list)
         n_batches = len(dataloader)
-        self.logger.info(f"Number of inference batches = {n_batches}")
+        self._log(f"Number of inference batches = {n_batches}")
 
         # Inference Loop
         with self._timer("inference"), torch.no_grad():
@@ -338,8 +356,9 @@ class Trainer:
                 # One inference step
                 start_time = time.time()
                 batch_logits = model(**batch)
-                batch["logits"] = batch_logits
+                batch_logits = self.accelerator.gather_for_metrics(batch_logits)
                 batch = self.accelerator.gather_for_metrics(batch)
+                batch["logits"] = batch_logits
                 for name, tensor in batch.items():
                     tensors[name].append(tensor)
                 time_taken = time.time() - start_time
@@ -358,10 +377,10 @@ class Trainer:
                             estimated_time_remaining))
                     running_batch_times = []
 
-                    self.logger.info(f"Batch {i + 1}")
-                    self.logger.info("Average inference time @ batch = "
+                    self._log(f"Batch {i + 1}")
+                    self._log("Average inference time @ batch = "
                                 f"{average_time_per_batch_str}")
-                    self.logger.info("Estimated inference time remaining = "
+                    self._log("Estimated inference time remaining = "
                                 f"{estimated_time_remaining_str}")
 
         # Concat tensors
