@@ -43,7 +43,7 @@ class Trainer:
                 evaluate_train: bool = False,
                 save_model: bool = False,
                 save_tensors: bool = False,
-                save_tensors_name: list[str] = None,
+                save_tensors_names: list[str] = None,
                 save_dir: str = None
                 ) -> None:
         """Initializer for the general trainer class that uses accelerate to
@@ -74,7 +74,7 @@ class Trainer:
             save_model: Whether to save model after every epoch.
             save_tensors: Whether to save the tensors of development set, along
                 with the logits.
-            save_tensors_name: List of tensor names which are to be saved. If
+            save_tensors_names: List of tensor names which are to be saved. If
                 none, all tensors are saved.
             save_dir: Directory to which the model weights, ground truth, and
                 predictions will be saved.
@@ -96,7 +96,7 @@ class Trainer:
         self.evaluate_train = evaluate_train
         self.save_model = save_model
         self.save_tensors = save_tensors
-        self.save_tensors_name = save_tensors_name
+        self.save_tensors_names = save_tensors_names
         self.save_dir = save_dir
 
         if self.use_scheduler:
@@ -105,7 +105,7 @@ class Trainer:
                     "Set warmup_ratio or warmup_steps "
                     "if you are using scheduler")
         
-        if self.save_model or self.save_predictions:
+        if self.save_model or self.save_tensors:
             assert self.save_dir is not None, (
                 "Set save_dir if you are saving model and/or predictions")
         
@@ -153,7 +153,7 @@ class Trainer:
             tensors: Dictionary of tensor name to tensor.
         """
         for name, pt in tensors.items():
-            if self.save_tensors_name is None or name in self.save_tensors_name:
+            if self.save_tensors_names is None or name in self.save_tensors_names:
                 self.accelerator.save(pt, os.path.join(directory, f"{name}.pt"))
     
     def _training_step(self, batch: dict[str, torch.Tensor]) -> float:
@@ -297,7 +297,7 @@ class Trainer:
                     dev_inference_output = self._infer(
                         self.dev_dataloader, self.model)
                     dev_metric = self.evaluate(**dev_inference_output)
-                    self._log(f"Dev Performance = {dev_metric.score}")
+                    self._log(f"Dev Performance = {dev_metric}")
                 self.accelerator.wait_for_everyone()
                 if self.save_tensors:
                     self._log(

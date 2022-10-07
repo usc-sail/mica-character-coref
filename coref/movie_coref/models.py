@@ -7,6 +7,7 @@ from transformers import AutoModel
 
 class CharacterRecognition(nn.Module):
     """Character Recognition Model.
+    TODO: remove class weights out of the model
     """
 
     def __init__(self, 
@@ -17,7 +18,9 @@ class CharacterRecognition(nn.Module):
                  gru_num_layers: int,
                  gru_dropout: float,
                  gru_bidirectional: bool,
-                 num_labels: int) -> None:
+                 num_labels: int,
+                 gradient_checkpointing: bool,
+                 class_weights: list[float] = None) -> None:
         """Initializer for Character Recognition Model.
 
         Args:
@@ -31,10 +34,17 @@ class CharacterRecognition(nn.Module):
             gru_bidirectional: If true, the GRU is bidirectional
             num_labels: Number of labels in the label set. 2 if label_type =
                 "head" or 3 if label_type = "span"
+            gradient_checkpointing: If true, enable gradient checkpointing in
+                encoder
+            class_weights: List of class weights to use in cross entropy loss.
+                If none, class weight is batch_samples/class_samples
         """
         super().__init__()
         self.num_labels = num_labels
-        self.encoder = AutoModel.from_pretrained(encoder_name)
+        self.encoder = AutoModel.from_pretrained(
+            encoder_name, add_pooling_layer=False)
+        if gradient_checkpointing:
+            self.encoder.gradient_checkpointing_enable()
         self.encoder_hidden_size = self.encoder.config.hidden_size
         self.subtoken = nn.Linear(self.encoder_hidden_size, 1)
         self.parse_embedding = nn.Embedding(
@@ -46,7 +56,8 @@ class CharacterRecognition(nn.Module):
                           num_layers=gru_num_layers, batch_first=True,
                           dropout=gru_dropout, bidirectional=gru_bidirectional)
         self.output = nn.Linear(self.gru_output_size, num_labels)
-        self._device = "cpu"
+        self._device = torch.device("cpu")
+        self._class_weights = class_weights
     
     @property
     def device(self) -> torch.device:
@@ -103,7 +114,8 @@ class CharacterRecognition(nn.Module):
             token_attention_mask = torch.any(subtoken_attn > 0, dim=1).reshape(
                 batch_size, -1)
             loss = compute_loss(logits, labels, token_attention_mask,
-                                self.num_labels)
+                                self.num_labels, self._class_weights,
+                                self.device)
             return loss
         else:
             return logits
@@ -151,13 +163,20 @@ class CharacterRecognition(nn.Module):
     
 def compute_loss(
     logits: torch.FloatTensor, label_ids: torch.LongTensor,
-    attn_mask: torch.FloatTensor, n_labels: int) -> torch.FloatTensor:
+    attn_mask: torch.FloatTensor, n_labels: int,
+    class_weights: list[float] = None,
+    device: torch.device = torch.device("cpu")) -> torch.FloatTensor:
     """Compute cross entropy loss"""
     active_labels = label_ids[attn_mask == 1.]
     active_logits = logits.flatten(0, 1)[attn_mask.flatten() == 1.]
-    label_distribution = torch.bincount(active_labels,
-        minlength=n_labels)
-    class_weight = len(active_labels)/(1 + label_distribution)
+    if class_weights is None:
+        label_distribution = torch.bincount(active_labels,
+            minlength=n_labels)
+        class_weight = len(active_labels)/(1 + label_distribution)
+    else:
+        assert len(class_weights) == n_labels, (
+            "Length of the list of class weights should equal number of labels")
+        class_weight = torch.FloatTensor(class_weights).to(device)
     cross_entrop_loss_fn = nn.CrossEntropyLoss(weight=class_weight, 
         reduction="mean")
     loss = cross_entrop_loss_fn(active_logits, active_labels)

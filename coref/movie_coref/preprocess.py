@@ -288,18 +288,25 @@ def convert_screenplay_and_coreference_annotation_to_json(
     for input_format, data in [("regular", movie_data), 
                                ("nocharacters", movie_nocharacters_data), 
                                ("addsays", movie_addsays_data)]:
-        format_dir = os.path.join(output_dir, input_format)
-        os.makedirs(format_dir, exist_ok=True)
-        jsonlines_file = os.path.join(format_dir, "movie.jsonlines")
-        wl_jsonlines_file = os.path.join(format_dir, "movie_wl.jsonlines")
-        wl_data = prepare_for_wlcoref(data)
+        for partition in ["train", "dev"]:
+            for wl in [False, True]:
+                format_dir = os.path.join(output_dir, input_format)
+                os.makedirs(format_dir, exist_ok=True)
+                if partition == "train":
+                    write_data = [d for d in data if d["rater"] != "expert"]
+                else:
+                    write_data = [d for d in data if d["rater"] != "expert"]
+                if wl:
+                    write_data = prepare_for_wlcoref(write_data)
+                    jsonlines_file = os.path.join(
+                        format_dir, f"{partition}_wl.jsonlines")
+                else:
+                    jsonlines_file = os.path.join(
+                        format_dir, f"{partition}.jsonlines")
 
-        with jsonlines.open(jsonlines_file, "w") as writer:
-            for d in data:
-                writer.write(d)
-        with jsonlines.open(wl_jsonlines_file, "w") as writer:
-            for d in wl_data:
-                writer.write(d)
+                with jsonlines.open(jsonlines_file, "w") as writer:
+                    for d in write_data:
+                        writer.write(d)
 
 def remove_characters(movie_data: list[dict[str, any]]) -> list[dict[str, any]]:
     '''Removes character names preceding an utterance.
