@@ -97,6 +97,8 @@ class AnaphoricityScorer(torch.nn.Module):
         n_ants = pw_batch.shape[1]
 
         a_mentions = mentions_batch.unsqueeze(1).expand(-1, n_ants, emb_size)
+        # If E = n x d and I = u x v, then E[I] = u x v x d where I is integer
+        # matrix with all elements in [0, n)
         b_mentions = all_mentions[top_indices_batch]
         similarity = a_mentions * b_mentions
 

@@ -295,7 +295,7 @@ def convert_screenplay_and_coreference_annotation_to_json(
                 if partition == "train":
                     write_data = [d for d in data if d["rater"] != "expert"]
                 else:
-                    write_data = [d for d in data if d["rater"] != "expert"]
+                    write_data = [d for d in data if d["rater"] == "expert"]
                 if wl:
                     write_data = prepare_for_wlcoref(write_data)
                     jsonlines_file = os.path.join(

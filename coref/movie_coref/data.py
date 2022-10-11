@@ -2,10 +2,10 @@
 models
 """
 
-import collections
 import jsonlines
 import math
 import numpy as np
+import string
 import torch
 from torch.utils.data import Dataset
 from torch.nn.utils.rnn import pad_sequence
@@ -38,6 +38,8 @@ class CorefDocument:
     of Mention objects.
     """
     def __init__(self, json: dict[str, any]) -> None:
+        pronouns = "you i he my him me his yourself mine your her she".split()
+        punctuation = list(string.punctuation)
         self.movie: str = json["movie"]
         self.rater: str = json["rater"]
         self.token: list[str] = json["token"]
@@ -50,6 +52,8 @@ class CorefDocument:
         for character, mentions in json["clusters"].items():
             mentions = set([Mention(*x) for x in mentions])
             self.clusters[character] = mentions
+        self.is_pronoun: list[bool] = [t.lower() in pronouns for t in self.token]
+        self.is_punctuation: list[bool] = [t in punctuation for t in self.token]
     
     def __repr__(self) -> str:
         desc = "Script\n=====\n\n"
@@ -91,11 +95,82 @@ class CorefCorpus:
     def __getitem__(self, i) -> CorefDocument:
         return self.documents[i]
 
+class LabelSet:
+
+    def __init__(self, labels: list[str], add_other: bool = True) -> None:
+        """Initializer for label sets.
+
+        Args:
+            labels: list of class label names.
+            add_other: If true, add a other class.
+        """
+        self._add_other = add_other
+        self._labels = labels
+        self._other_label = "<O>"
+        assert self._other_label not in self._labels, (
+            f"{self._other_label} cannot be a label")
+        if add_other:
+            self._labels.append(self._other_label)
+        self._label_to_id: dict[str, int] = {}
+        self._id_to_label: dict[int, str] = {}
+        for i, label in enumerate(self._labels):
+            self._label_to_id[label] = i
+            self._id_to_label[i] = label
+    
+    def __len__(self) -> int:
+        return len(self._labels)
+
+    def __getitem__(self, key: int | str) -> int | str:
+        """Get the label (label_id) from label_id (label)"""
+        if isinstance(key, str):
+            key = self.convert_label_to_key(key)
+            return self._label_to_id[key]
+        elif isinstance(key, int):
+            return self._id_to_label[key]
+        else:
+            raise TypeError
+    
+    def convert_label_to_key(self, label: str) -> str:
+        """Convert label to label key"""
+        if label not in self._labels:
+            if self._add_other:
+                return self.other_label
+            else:
+                raise KeyError(f"label={label} not found in label set")
+        else:
+            return label
+    
+    @property
+    def other_id(self) -> int:
+        """Return label_id of other_label"""
+        return self.__getitem__(self._other_label)
+    
+    @property
+    def other_label(self) -> str:
+        """Return other_label"""
+        return self._other_label
+
+    def __repr__(self) -> str:
+        desc_list = []
+        for i, l in self._id_to_label.items():
+            desc_list.append(f"{i}:{l}")
+        return " ".join(desc_list)
+
+class PosLabelSet(LabelSet):
+    def convert_label_to_key(self, label: str) -> str:
+        if label.startswith("NN"):
+            return "NOUN"
+        elif label.startswith("VB"):
+            return "VERB"
+        elif label.startswith("JJ"):
+            return "ADJECTIVE"
+        elif label.startswith("RB"):
+            return "ADVERB"
+        else:
+            return self.other_label
+
 class CharacterRecognitionDataset(Dataset):
-    """PyTorch dataset for the character recognition model. It contains the
-    following attributes: `subtoken_ids` tensor, `attention_mask` tensor,
-    `token_offset` tensor, `parse_tag_ids` tensor, `label_ids` tensor,
-    `parse_tag_to_id` dictionary, and `num_labels`.
+    """PyTorch dataset for the character recognition model.
     """
     def __init__(self, corpus: CorefCorpus, tokenizer: PreTrainedTokenizer,
                  seq_length: int, obey_scene_boundaries: bool,
@@ -113,27 +188,65 @@ class CharacterRecognitionDataset(Dataset):
         super().__init__()
         assert label_type in ["head", "span"], (
             f"label_type should be 'head' or 'span'. Given '{label_type}'")
-        self.num_labels = 2 + int(label_type == "span")
+        
+        # Label sets
+        if label_type == "head":
+            self.label_set = LabelSet(["HEAD"])
+        else:
+            self.label_set = LabelSet(["B-SPAN", "I-SPAN"])
+        self.parse_tag_set = LabelSet(list("SNCDE"))
+        self.pos_tag_set = PosLabelSet(["NOUN", "VERB", "ADJECTIVE", "ADVERB"])
+        self.ner_tag_set = LabelSet(["PERSON", "ORG", "GPE", "LOC"])
+
+        # Tensors list
         tokens_list: list[list[str]] = []
         labels_list: list[torch.Tensor] = []
         parse_tags_list: list[torch.Tensor] = []
-        self.parse_tag_to_id = collections.defaultdict(int)
-        for i, parse_tag in enumerate("SNCDE"):
-            self.parse_tag_to_id[parse_tag] = i + 1
+        pos_tags_list: list[torch.Tensor] = []
+        ner_tags_list: list[torch.Tensor] = []
+        is_pronoun_list: list[torch.Tensor] = []
+        is_punctuation_list: list[torch.Tensor] = []
 
         for document in corpus:
             tokens = document.token
-            labels = torch.zeros(len(tokens), dtype=int)
             parse_tags = document.parse
+            pos_tags = document.pos
+            ner_tags = document.ner
+            is_pronoun = document.is_pronoun
+            is_punctuation = document.is_punctuation
 
-            # Create labels
+            # Create labels tensor
+            labels = torch.full(
+                (len(tokens),), self.label_set.other_id, dtype=int)
             for mentions in document.clusters.values():
                 for mention in mentions:
                     if label_type == "head":
-                        labels[mention.head] = 1
+                        labels[mention.head] = self.label_set["HEAD"]
                     else:
-                        labels[mention.begin] = 1
-                        labels[mention.begin + 1: mention.end + 1] = 2
+                        labels[mention.begin] = self.label_set["B-SPAN"]
+                        labels[mention.begin + 1: mention.end + 1] = (
+                            self.label_set["I-SPAN"])
+
+            # Create movie parse tensor
+            parse_tag_tensor = torch.zeros(len(tokens), dtype=int)
+            for i, tag in enumerate(parse_tags):
+                parse_tag_tensor[i] = self.parse_tag_set[tag]
+            
+            # Create movie pos tensor
+            pos_tag_tensor = torch.zeros(len(tokens), dtype=int)
+            for i, tag in enumerate(pos_tags):
+                pos_tag_tensor[i] = self.pos_tag_set[tag]
+
+            # Create movie ner tensor
+            ner_tag_tensor = torch.zeros(len(tokens), dtype=int)
+            for i, tag in enumerate(ner_tags):
+                ner_tag_tensor[i] = self.ner_tag_set[tag]
+
+            # Create movie is pronoun tensor
+            is_pronoun_tensor = torch.FloatTensor(is_pronoun)
+
+            # Create movie is punctuation tensor
+            is_punctuation_tensor = torch.FloatTensor(is_punctuation)
 
             # Find token-level scene boundaries
             if obey_scene_boundaries:
@@ -152,21 +265,21 @@ class CharacterRecognitionDataset(Dataset):
                             found_content_tag = True
                         i += 1
 
-            # Create movie parse tensor
-            parse_tag_tensor = torch.zeros(len(tokens), dtype=int)
-            for i, tag in enumerate(parse_tags):
-                parse_tag_tensor[i] = self.parse_tag_to_id[tag]
-
             # Segment document into sequences
             i = 0
             while i < len(tokens):
                 end = i + seq_length
                 if obey_scene_boundaries and (
                    np.any(scene_boundaries[i + 1: end] == 1)):
-                    end = i + np.nonzero(scene_boundaries[i + 1: end] == 1)[0][0] + 1
+                    end = i + np.nonzero(
+                        scene_boundaries[i + 1: end] == 1)[0][0] + 1
                 tokens_list.append(tokens[i: end])
                 labels_list.append(labels[i: end])
-                parse_tags_list.append(parse_tag_tensor[i : end])
+                parse_tags_list.append(parse_tag_tensor[i: end])
+                pos_tags_list.append(pos_tag_tensor[i: end])
+                ner_tags_list.append(ner_tag_tensor[i: end])
+                is_pronoun_list.append(is_pronoun_tensor[i: end])
+                is_punctuation_list.append(is_punctuation_tensor[i: end])
                 i = end
 
         # Find token character offsets
@@ -221,10 +334,21 @@ class CharacterRecognitionDataset(Dataset):
         self.subtoken_ids = encoding["input_ids"]
         self.attention_mask = encoding["attention_mask"]
         self.token_offset = token_offset
-        self.parse_tag_ids = pad_sequence(parse_tags_list, batch_first=True,
-                                          padding_value=0)
         self.label_ids = pad_sequence(labels_list, batch_first=True,
-                                      padding_value=0)
+                                      padding_value=self.label_set.other_id)
+        self.parse_tag_ids = pad_sequence(
+            parse_tags_list, batch_first=True,
+            padding_value=self.parse_tag_set.other_id)
+        self.pos_tag_ids = pad_sequence(
+            pos_tags_list, batch_first=True,
+            padding_value=self.pos_tag_set.other_id)
+        self.ner_tag_ids = pad_sequence(
+            ner_tags_list, batch_first=True,
+            padding_value=self.ner_tag_set.other_id)
+        self.is_pronoun = pad_sequence(
+            is_pronoun_list, batch_first=True, padding_value=0)
+        self.is_punctuation = pad_sequence(
+            is_punctuation_list, batch_first=True, padding_value=0)
     
     def __len__(self) -> int:
         return len(self.subtoken_ids)
@@ -235,5 +359,9 @@ class CharacterRecognitionDataset(Dataset):
         return dict(subtoken_ids=self.subtoken_ids[i],
                     attention_mask=self.attention_mask[i],
                     token_offset=self.token_offset[i],
+                    labels=self.label_ids[i],
                     parse_ids=self.parse_tag_ids[i],
-                    labels=self.label_ids[i])
+                    pos_ids=self.pos_tag_ids[i],
+                    ner_ids=self.ner_tag_ids[i],
+                    is_pronoun=self.is_pronoun[i],
+                    is_punctuation=self.is_punctuation[i])
