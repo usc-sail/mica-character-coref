@@ -1,4 +1,5 @@
-"""PyTorch modules for fine-tuning wl-RoBERTa on movie coreference data
+"""PyTorch module for modeling the probability of a word being the head of a
+character mention.
 """
 
 import torch
@@ -7,7 +8,6 @@ from transformers import AutoModel
 
 class CharacterRecognition(nn.Module):
     """Character Recognition Model.
-    TODO: remove class weights out of the model
     """
 
     def __init__(self, 

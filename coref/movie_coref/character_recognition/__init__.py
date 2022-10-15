@@ -1,0 +1,3 @@
+from mica_text_coref.coref.movie_coref.character_recognition.trainer import CharacterRecognitionTrainer
+from mica_text_coref.coref.movie_coref.character_recognition.metric import CharacterRecognitionMetric
+from mica_text_coref.coref.movie_coref.character_recognition.model import CharacterRecognition
