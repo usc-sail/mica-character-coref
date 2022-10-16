@@ -54,6 +54,7 @@ class CorefDocument:
             self.clusters[character] = mentions
         self.is_pronoun: list[bool] = [t.lower() in pronouns for t in self.token]
         self.is_punctuation: list[bool] = [t in punctuation for t in self.token]
+        self._data: dict[str, any] = {}
     
     def __repr__(self) -> str:
         desc = "Script\n=====\n\n"

@@ -4,14 +4,13 @@ score between heads, and expand the heads to its span.
 
 import torch
 from torch import nn
-from transformers import AutoModel, AutoTokenizer
+from transformers import RobertaModel, RobertaTokenizerFast
 
 class MovieCoreference(nn.Module):
     """Movie screenplay coreference model
     """
 
     def __init__(self,
-                 encoder_name: str,
                  parsetag_size: int,
                  postag_size: int,
                  nertag_size: int,
@@ -24,7 +23,6 @@ class MovieCoreference(nn.Module):
         """Initializer for the movie screenplay coreference model.
 
         Args:
-            encoder_name: Name of the huggingface encoder.
             parsetag_size: Size of the movie screenplay parse tag set.
             postag_size: Size of the part-of-speech tag set.
             nertag_size: Size of the named-entity tag set.
@@ -41,10 +39,13 @@ class MovieCoreference(nn.Module):
         self.dropout = dropout
 
         # Word Encoder
-        self.encoder = AutoModel.from_pretrained(encoder_name, 
-                                                 add_pooling_layer=False)
-        self.tokenizer = AutoTokenizer.from_pretrained(encoder_name, 
-                                                       use_fast=True)
+        self.encoder: RobertaModel = RobertaModel.from_pretrained(
+            "roberta-large", add_pooling_layer=False)
+        self.tokenizer: RobertaTokenizerFast = (
+            RobertaTokenizerFast.from_pretrained(
+                "roberta-large", use_fast=True, add_prefix_space=True))
+        self.tokenizer_map = {".": ["."], ",": [","], "!": ["!"], "?": ["?"],
+                              ":":[":"], ";":[";"], "'s": ["'s"]}
         word_embedding_size = self.encoder.config.hidden_size
         self.attn = nn.Linear(word_embedding_size, 1)
         self.word_dropout = nn.Dropout(self.dropout)
@@ -123,7 +124,7 @@ class MovieCoreference(nn.Module):
             weights_dict[new_key] = weights_dict.pop(old_key)
         return weights_dict
 
-    def load_weights(self, weights_path):
+    def load_weights(self, weights_path: str):
         """Load weights from trained wl-roberta model
         """
         weights = torch.load(weights_path)
