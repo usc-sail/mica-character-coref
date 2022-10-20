@@ -11,7 +11,7 @@ class TestLoadWeights(unittest.TestCase):
     """
 
     def test_load_weights(self):
-        model = MovieCoreference("roberta-large", 5, 5, 5, 16, 2, 256, True, 0.3)
+        model = MovieCoreference(5, 5, 5, 16, 2, 256, True, 50, 0.3)
         weights_path = os.path.join(
             os.getcwd(), 
             "data/word_level_coref/data/"
