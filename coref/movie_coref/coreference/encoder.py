@@ -4,19 +4,12 @@ from transformers import RobertaModel
 
 class Encoder(nn.Module):
 
-    def __init__(self, dropout: float) -> None:
+    def __init__(self, word_embedding_size: int, dropout: float) -> None:
         super().__init__()
-        self.encoder: RobertaModel = RobertaModel.from_pretrained(
-            "roberta-large", add_pooling_layer=False)
-        word_embedding_size = self.encoder.config.hidden_size
         self.attn = nn.Linear(word_embedding_size, 1)
         self.dropout = nn.Dropout(dropout)
         self._device = torch.device("cpu")
     
-    @property
-    def word_embedding_size(self) -> int:
-        return self.encoder.config.hidden_size
-
     @property
     def device(self) -> torch.device:
         return self._device
@@ -26,19 +19,10 @@ class Encoder(nn.Module):
         self._device = device
     
     def forward(self, 
-                subword_ids: torch.Tensor, 
-                subword_mask: torch.Tensor,
+                subword_embeddings: torch.Tensor,
                 word_to_subword_offset: torch.Tensor) -> torch.Tensor:
         # subword_embeddings: [n_subwords, embedding_size]
         # word_to_subword_offset: [n_words, 2]
-        subword_embeddings = self.encoder(
-            subword_ids, subword_mask).last_hidden_state
-        subword_embeddings = subword_embeddings[subword_mask == 1]
-        word_to_subword_offset = word_to_subword_offset[~(
-            (word_to_subword_offset[:,:,0] == 0) &
-            (word_to_subword_offset[:,:,1] == 0))]
-        word_to_subword_offset = (
-            word_to_subword_offset - word_to_subword_offset[0, 0])
         n_subwords = len(subword_embeddings)
         n_words = len(word_to_subword_offset)
 

@@ -61,6 +61,4 @@ class CharacterRecognizer(nn.Module):
         gru_output, _ = self.gru(gru_input)
         gru_output = self.dropout(gru_output)
         character_scores = self.output(gru_output).squeeze(dim=2)
-        mask = torch.all(word_embeddings == 0, dim=2)
-        character_scores = character_scores[mask]
         return character_scores

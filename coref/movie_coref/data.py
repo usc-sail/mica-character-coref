@@ -116,27 +116,43 @@ class CorefDocument:
     offsets, and clusters. Clusters is a dictionary of character names to set
     of Mention objects.
     """
-    def __init__(self, json: dict[str, any]) -> None:
-        self.movie: str = json["movie"]
-        self.rater: str = json["rater"]
-        self.token: list[str] = json["token"]
-        self.parse: list[str] = json["parse"]
-        self.pos: list[str] = json["pos"]
-        self.ner: list[str] = json["ner"]
-        self.speaker: list[str] = json["speaker"]
-        self.sentence_offsets: list[list[int]] = json["sent_offset"]
-        self.clusters: dict[str, set[Mention]] = {}
-        for character, mentions in json["clusters"].items():
-            mentions = set([Mention(*x) for x in mentions])
-            self.clusters[character] = mentions
-        self.is_pronoun: list[bool] = [t.lower() in pronouns for t in self.token]
-        self.is_punctuation: list[bool] = [t in punctuation for t in self.token]
-        self.parse_ids = [parse_labelset[x] for x in self.parse]
-        self.pos_ids = [pos_labelset[x] for x in self.pos]
-        self.ner_ids = [ner_labelset[x] for x in self.ner]
+    def __init__(self, json: dict[str, any] = None) -> None:
+        self.movie: str
+        self.rater: str
+        self.token: list[str]
+        self.parse: list[str]
+        self.parse_ids: list[int]
+        self.pos: list[str]
+        self.pos_ids: list[int]
+        self.ner: list[str]
+        self.ner_ids: list[int]
+        self.is_pronoun: list[bool]
+        self.is_punctuation: list[bool]
+        self.speaker: list[str]
+        self.sentence_offsets: list[list[int]]
+        self.clusters: dict[str, set[Mention]]
         self.subword_ids: list[int]
         self.word_to_subword_offset: list[list[int]]
         self.subword_dataloader: DataLoader
+        
+        if json is not None:
+            self.movie = json["movie"]
+            self.rater = json["rater"]
+            self.token = json["token"]
+            self.parse = json["parse"]
+            self.parse_ids = [parse_labelset[x] for x in self.parse]
+            self.pos = json["pos"]
+            self.pos_ids = [pos_labelset[x] for x in self.pos]
+            self.ner = json["ner"]
+            self.ner_ids = [ner_labelset[x] for x in self.ner]
+            self.is_pronoun = [t.lower() in pronouns for t in self.token]
+            self.is_punctuation = [t in punctuation for t in self.token]
+            self.speaker = json["speaker"]
+            self.sentence_offsets = json["sent_offset"]
+            self.clusters = {}
+            for character, mentions in json["clusters"].items():
+                mentions = set([Mention(*x) for x in mentions])
+                self.clusters[character] = mentions
     
     def __repr__(self) -> str:
         desc = "Script\n=====\n\n"

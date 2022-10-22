@@ -33,5 +33,5 @@ class CoarseScorer(nn.Module):
             word_embeddings.T)
         rough_scores = pair_mask + bilinear_scores
         top_scores, indices = torch.topk(
-            rough_scores, k=min(self.k, len(rough_scores)), dim=1, sorted=False)
+            rough_scores, k=min(self.topk, len(rough_scores)), dim=1, sorted=False)
         return top_scores, indices

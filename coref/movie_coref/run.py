@@ -45,7 +45,13 @@ flags.DEFINE_float("weight_decay", 1e-3, "Weight decay.")
 flags.DEFINE_integer("max_epochs", 10, "Maximum number of epochs.")
 flags.DEFINE_float("dropout", 0.3, "Dropout rate.")
 flags.DEFINE_integer(
-    "subword_batch_size", 4, "Batch size of subword sequences for encoding.")
+    "document_len", 5120, 
+    "Length of document in words the screenplay is split into.")
+flags.DEFINE_integer(
+    "overlap_len", 512, 
+    "Number of words overlapping between successive documents of a screenplay.")
+flags.DEFINE_integer(
+    "subword_batch_size", 2, "Batch size of subword sequences for encoding.")
 flags.DEFINE_integer(
     "cr_batch_size", 16, 
     "Batch size of word sequences for character head recognition.")
@@ -66,12 +72,20 @@ flags.DEFINE_integer("gru_hidden_size", 256, "Hidden size of GRU.")
 flags.DEFINE_bool("gru_bi", True, "Bidirectional GRU layers.")
 flags.DEFINE_integer("tag_embedding_size", 16, "Tag embedding size.")
 
+# Validators
+flags.register_validator(
+    "document_len", lambda x: x in [2048, 3072, 4096, 5120], 
+    "document_len should be 2048, 3072, 4096, or 5120")
+flags.register_validator(
+    "overlap_len", lambda x: x in [128, 256, 384, 512], 
+    "overlap_len should be 128, 256, 384, or 512")
+
 def main(argv):
     if len(argv) > 1:
         print(f"Unnecessary command-line arguments: {argv}")
     time = (datetime.datetime.now(pytz.timezone("America/Los_Angeles"))
             .strftime("%b%d_%I:%M:%S%p"))
-    log_file = os.path.join(FLAGS.logs_dir, f"{time}.log")
+    log_file = os.path.join(FLAGS.logs_dir, f"latest.log")
     train_file = os.path.join(
         FLAGS.input_dir, FLAGS.input_type, "train.jsonlines")
     dev_file = os.path.join(FLAGS.input_dir, FLAGS.input_type, "dev.jsonlines")
@@ -90,6 +104,8 @@ def main(argv):
         lr=FLAGS.lr,
         weight_decay=FLAGS.weight_decay,
         max_epochs=FLAGS.max_epochs,
+        document_len=FLAGS.document_len,
+        overlap_len=FLAGS.overlap_len,
         cr_seq_len=FLAGS.cr_seq_len,
         subword_batch_size=FLAGS.subword_batch_size,
         cr_batch_size=FLAGS.cr_batch_size,

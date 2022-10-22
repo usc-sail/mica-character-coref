@@ -9,7 +9,7 @@ from mica_text_coref.coref.movie_coref.coreference.span_predictor import SpanPre
 
 import itertools
 import torch
-from transformers import RobertaTokenizerFast
+from transformers import RobertaTokenizerFast, RobertaModel
 
 class MovieCoreference:
 
@@ -30,8 +30,10 @@ class MovieCoreference:
         self.tokenizer_map = {
             ".": ["."], ",": [","], "!": ["!"], "?": ["?"],":":[":"], 
             ";":[";"], "'s": ["'s"]}
-        self.encoder = Encoder(dropout)
-        word_embedding_size = self.encoder.word_embedding_size
+        self.bert: RobertaModel = RobertaModel.from_pretrained(
+            "roberta-large", add_pooling_layer=False)
+        word_embedding_size = self.bert.config.hidden_size
+        self.encoder = Encoder(word_embedding_size, dropout)
         self.character_recognizer = CharacterRecognizer(
             word_embedding_size, tag_embedding_size, parsetag_size, postag_size,
             nertag_size, gru_nlayers, gru_hidden_size, gru_bidirectional,
@@ -64,9 +66,8 @@ class MovieCoreference:
 
     def load_weights(self, weights_path: str):
         weights = torch.load(weights_path, map_location="cpu")
-        encoder_weights = weights["bert"]
-        attn_weights = self._rename_keys(
-            weights["we"], {"attn.weight": "weight", "attn.bias": "bias"})
+        bert_weights = weights["bert"]
+        encoder_weights = weights["we"]
         coarse_scorer_weights = self._rename_keys(
             weights["rough_scorer"], 
             {"bilinear.weight": "scorer.weight",
@@ -83,18 +84,18 @@ class MovieCoreference:
             "out.bias": "scorer.3.bias"})
         sp_weights = self._rename_keys(
             weights["sp"], {"emb.weight": "distance_embedding.weight"})
-        self.encoder.encoder.load_state_dict(encoder_weights, strict=False)
-        self.encoder.attn.load_state_dict(attn_weights)
+        self.bert.load_state_dict(bert_weights, strict=False)
+        self.encoder.load_state_dict(encoder_weights)
         self.coarse_scorer.load_state_dict(coarse_scorer_weights)
         self.fine_scorer.load_state_dict(fine_scorer_weights)
         self.span_predictor.load_state_dict(sp_weights)
     
     def bert_parameters(self):
-        return self.encoder.encoder.parameters()
+        return self.bert.parameters()
     
     def parameters(self):
         return itertools.chain(
-            self.encoder.attn.parameters(), 
+            self.encoder.parameters(), 
             self.character_recognizer.parameters(),
             self.coarse_scorer.parameters(),
             self.fine_scorer.parameters(),
@@ -102,8 +103,8 @@ class MovieCoreference:
     
     def modules(self):
         return [
-            self.encoder, self.character_recognizer, self.coarse_scorer, 
-            self.fine_scorer, self.span_predictor]
+            self.bert, self.encoder, self.character_recognizer, 
+            self.coarse_scorer, self.fine_scorer, self.span_predictor]
     
     def train(self):
         for module in self.modules():
