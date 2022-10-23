@@ -3,12 +3,14 @@ in movie screenplay document.
 """
 from mica_text_coref.coref.movie_coref.coreference.encoder import Encoder
 from mica_text_coref.coref.movie_coref.coreference.character_recognizer import CharacterRecognizer
+from mica_text_coref.coref.movie_coref.coreference.pairwise_encoder import PairwiseEncoder
 from mica_text_coref.coref.movie_coref.coreference.coarse_scorer import CoarseScorer
 from mica_text_coref.coref.movie_coref.coreference.fine_scorer import FineScorer
 from mica_text_coref.coref.movie_coref.coreference.span_predictor import SpanPredictor
 
 import itertools
 import torch
+from torch.nn import BCEWithLogitsLoss
 from transformers import RobertaTokenizerFast, RobertaModel
 
 class MovieCoreference:
@@ -23,6 +25,7 @@ class MovieCoreference:
         gru_hidden_size: int,
         gru_bidirectional: bool,
         topk: int,
+        bce_weight: float,
         dropout: float) -> None:
         self.tokenizer: RobertaTokenizerFast = (
             RobertaTokenizerFast.from_pretrained(
@@ -38,9 +41,11 @@ class MovieCoreference:
             word_embedding_size, tag_embedding_size, parsetag_size, postag_size,
             nertag_size, gru_nlayers, gru_hidden_size, gru_bidirectional,
             dropout)
+        self.pairwise_encoder = PairwiseEncoder(dropout)
         self.coarse_scorer = CoarseScorer(word_embedding_size, topk, dropout)
         self.fine_scorer = FineScorer(word_embedding_size, dropout)
         self.span_predictor = SpanPredictor(word_embedding_size, dropout)
+        self.bce_weight = bce_weight
         self._device = torch.device("cpu")
 
     @property
@@ -52,6 +57,7 @@ class MovieCoreference:
         self._device = device
         self.encoder.device = device
         self.character_recognizer.device = device
+        self.pairwise_encoder.device = device
         self.coarse_scorer.device = device
         self.fine_scorer.device = device
         self.span_predictor.device = device
@@ -66,29 +72,12 @@ class MovieCoreference:
 
     def load_weights(self, weights_path: str):
         weights = torch.load(weights_path, map_location="cpu")
-        bert_weights = weights["bert"]
-        encoder_weights = weights["we"]
-        coarse_scorer_weights = self._rename_keys(
-            weights["rough_scorer"], 
-            {"bilinear.weight": "scorer.weight",
-            "bilinear.bias": "scorer.bias"})
-        fine_scorer_weights = {**weights["pw"], **weights["a_scorer"]}
-        fine_scorer_weights = self._rename_keys(
-            fine_scorer_weights, 
-            {"genre_emb.weight": "genre_embedding.weight",
-            "distance_emb.weight": "distance_embedding.weight",
-            "speaker_emb.weight": "speaker_embedding.weight",
-            "hidden.0.weight": "scorer.0.weight",
-            "hidden.0.bias": "scorer.0.bias",
-            "out.weight": "scorer.3.weight",
-            "out.bias": "scorer.3.bias"})
-        sp_weights = self._rename_keys(
-            weights["sp"], {"emb.weight": "distance_embedding.weight"})
-        self.bert.load_state_dict(bert_weights, strict=False)
-        self.encoder.load_state_dict(encoder_weights)
-        self.coarse_scorer.load_state_dict(coarse_scorer_weights)
-        self.fine_scorer.load_state_dict(fine_scorer_weights)
-        self.span_predictor.load_state_dict(sp_weights)
+        self.bert.load_state_dict(weights["bert"], strict=False)
+        self.encoder.load_state_dict(weights["we"])
+        self.coarse_scorer.load_state_dict(weights["rough_scorer"])
+        self.pairwise_encoder.load_state_dict(weights["pw"])
+        self.fine_scorer.load_state_dict(weights["a_scorer"])
+        self.span_predictor.load_state_dict(weights["sp"])
     
     def bert_parameters(self):
         return self.bert.parameters()
@@ -98,13 +87,15 @@ class MovieCoreference:
             self.encoder.parameters(), 
             self.character_recognizer.parameters(),
             self.coarse_scorer.parameters(),
+            self.pairwise_encoder.parameters(),
             self.fine_scorer.parameters(),
             self.span_predictor.parameters())
     
     def modules(self):
         return [
             self.bert, self.encoder, self.character_recognizer, 
-            self.coarse_scorer, self.fine_scorer, self.span_predictor]
+            self.coarse_scorer, self.pairwise_encoder, self.fine_scorer, 
+            self.span_predictor]
     
     def train(self):
         for module in self.modules():
@@ -113,3 +104,11 @@ class MovieCoreference:
     def eval(self):
         for module in self.modules:
             module.eval()
+
+    def coref_loss(self, scores: torch.Tensor, labels: torch.Tensor):
+        bce_loss_fn = BCEWithLogitsLoss()
+        bce_loss = bce_loss_fn(torch.clamp(scores, min=-50, max=50), labels)
+        gold = torch.logsumexp(scores + torch.log(labels), dim=1)
+        total = torch.logsumexp(scores, dim=1)
+        nlml_loss = (total - gold).mean()
+        return nlml_loss + self.bce_weight * bce_loss

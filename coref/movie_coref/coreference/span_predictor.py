@@ -18,7 +18,7 @@ class SpanPredictor(nn.Module):
             nn.Conv1d(64, 4, 3, 1, 1),
             nn.Conv1d(4, 2, 3, 1, 1)
         )
-        self.distance_embedding = nn.Embedding(128, 64)
+        self.emb = nn.Embedding(128, 64)
         self._device = torch.device("cpu")
 
     @property

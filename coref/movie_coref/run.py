@@ -39,8 +39,12 @@ flags.DEFINE_bool("save_loss_curves", False, "Save loss curves.")
 flags.DEFINE_bool("debug", False, "Debug output.")
 
 # Training
+flags.DEFINE_bool("freeze_bert", False, help="Freeze RoBerta.")
+flags.DEFINE_enum(
+    "genre", "wb", ["bc", "bn", "mz", "nw", "pt", "tc", "wb"], "Genre.")
+flags.DEFINE_float("bce_weight", 0.5, "Weight of BCE coreference loss.")
 flags.DEFINE_float("bert_lr", 1e-5, "Learning rate for the transformer.")
-flags.DEFINE_float("lr", 1e-3, "Learning rate for the model.")
+flags.DEFINE_float("lr", 3e-4, "Learning rate for the model.")
 flags.DEFINE_float("weight_decay", 1e-3, "Weight decay.")
 flags.DEFINE_integer("max_epochs", 10, "Maximum number of epochs.")
 flags.DEFINE_float("dropout", 0.3, "Dropout rate.")
@@ -55,8 +59,6 @@ flags.DEFINE_integer(
 flags.DEFINE_integer(
     "cr_batch_size", 16, 
     "Batch size of word sequences for character head recognition.")
-flags.DEFINE_integer(
-    "cs_batch_size", 16, "Batch size of word embeddings for coarse scoring.")
 flags.DEFINE_integer(
     "fn_batch_size", 16, "Batch size of word pairs for fine scoring.")
 flags.DEFINE_integer(
@@ -100,6 +102,9 @@ def main(argv):
         weights_path=FLAGS.weights_file,
         train_path=train_file,
         dev_path=dev_file,
+        freeze_bert=FLAGS.freeze_bert,
+        genre=FLAGS.genre,
+        bce_weight=FLAGS.bce_weight,
         bert_lr=FLAGS.bert_lr,
         lr=FLAGS.lr,
         weight_decay=FLAGS.weight_decay,
@@ -109,7 +114,6 @@ def main(argv):
         cr_seq_len=FLAGS.cr_seq_len,
         subword_batch_size=FLAGS.subword_batch_size,
         cr_batch_size=FLAGS.cr_batch_size,
-        cs_batch_size=FLAGS.cs_batch_size,
         fn_batch_size=FLAGS.fn_batch_size,
         save_model=FLAGS.save_model,
         save_output=FLAGS.save_tensors,

@@ -131,6 +131,8 @@ class CorefDocument:
         self.speaker: list[str]
         self.sentence_offsets: list[list[int]]
         self.clusters: dict[str, set[Mention]]
+        self.word_cluster_ids: list[int]
+        self.word_head_ids: list[int]
         self.subword_ids: list[int]
         self.word_to_subword_offset: list[list[int]]
         self.subword_dataloader: DataLoader
@@ -153,6 +155,13 @@ class CorefDocument:
             for character, mentions in json["clusters"].items():
                 mentions = set([Mention(*x) for x in mentions])
                 self.clusters[character] = mentions
+            self.word_cluster_ids = np.zeros(len(self.token)).tolist()
+            self.word_head_ids = np.zeros(len(self.token)).tolist()
+            for i, (_, mentions) in enumerate(self.clusters.items()):
+                for mention in mentions:
+                    if len(mentions) > 1:
+                        self.word_cluster_ids[mention.head] = i + 1
+                    self.word_head_ids[mention.head] = 1
     
     def __repr__(self) -> str:
         desc = "Script\n=====\n\n"

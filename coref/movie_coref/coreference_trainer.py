@@ -31,6 +31,9 @@ class CoreferenceTrainer:
         weights_path: str,
         train_path: str,
         dev_path: str,
+        freeze_bert: bool,
+        genre: str,
+        bce_weight: float,
         bert_lr: float,
         lr: float,
         weight_decay: float,
@@ -40,7 +43,6 @@ class CoreferenceTrainer:
         cr_seq_len: int,
         subword_batch_size: int,
         cr_batch_size: int,
-        cs_batch_size: int,
         fn_batch_size: int,
         save_model: bool,
         save_output: bool,
@@ -59,6 +61,9 @@ class CoreferenceTrainer:
         self.weights_path = weights_path
         self.train_path = train_path
         self.dev_path = dev_path
+        self.freeze_bert = freeze_bert
+        self.genre = genre
+        self.bce_weight = bce_weight
         self.bert_lr = bert_lr
         self.lr = lr
         self.weight_decay = weight_decay
@@ -68,7 +73,6 @@ class CoreferenceTrainer:
         self.cr_seq_len = cr_seq_len
         self.subword_batch_size = subword_batch_size
         self.cr_batch_size = cr_batch_size
-        self.cs_batch_size = cs_batch_size
         self.fn_batch_size = fn_batch_size
         self.save_model = save_model
         self.save_output = save_output
@@ -78,7 +82,7 @@ class CoreferenceTrainer:
     
     def _add_log_file(self, log_file: str):
         if self.accelerator.is_local_main_process:
-            file_handler = _logging.FileHandler(log_file)
+            file_handler = _logging.FileHandler(log_file, mode="w")
             self.logger.logger.addHandler(file_handler)
     
     def _debug(self, message: str):
@@ -172,6 +176,8 @@ class CoreferenceTrainer:
                         clusters[character].add(mention)
                         n_mentions += 1
             _document.clusters = clusters
+            _document.word_cluster_ids = document.word_cluster_ids[i: j]
+            _document.word_head_ids = document.word_head_ids[i: j]
             self._debug(
                 f"{_document.movie}: {len(_document.token)} words, "
                 f"{n_mentions} mentions, {len(_document.clusters)} clusters")
@@ -327,8 +333,36 @@ class CoreferenceTrainer:
             f"{prefix}: CR batch size = {batch_size} sequences/batch")
         return dataloader
 
+    def _create_fine_dataloader(
+        self, word_embeddings, features, scores, indices, document):
+        prefix = f"Epoch = {self.epoch:2d}, Movie = {document.movie}"
+        dataset = TensorDataset(word_embeddings, features, indices, scores)
+        dataloader = DataLoader(dataset, batch_size=self.fn_batch_size)
+        dataloader = self.accelerator.prepare_data_loader(dataloader)
+        batch_size = math.ceil(len(word_embeddings)/len(dataloader))
+        self._debug(f"{prefix}: FN batch size = {batch_size} word pairs/batch")
+        return dataloader
+
+    def _get_coref_ground_truth(
+        self, cluster_ids: list[int], top_indices: torch.Tensor, 
+        valid_pair_map: torch.Tensor) -> torch.Tensor:
+        cluster_ids = torch.Tensor(cluster_ids).to(self.accelerator.device)
+        y = cluster_ids[top_indices] * valid_pair_map
+        y[y == 0] = -1
+        dummy = torch.zeros(
+            (len(y), 1), dtype=y.dtype, device=self.accelerator.device)
+        y = torch.cat([dummy, y], dim=1)
+        y = (y == cluster_ids.unsqueeze(1))
+        y[y.sum(dim=1) == 0, 0] = True
+        return y.to(torch.float)
+
     def _train(self, document: CorefDocument):
         prefix = f"Epoch = {self.epoch:2d}, Movie = {document.movie}"
+
+        # Zero grad
+        if not self.freeze_bert:
+            self.bert_optimizer.zero_grad()
+        self.optimizer.zero_grad()
         
         # Bert
         subword_embeddings = []
@@ -339,6 +373,7 @@ class CoreferenceTrainer:
                 (embeddings, mask))
             embeddings = embeddings[mask == 1]
             subword_embeddings.append(embeddings)
+            self.accelerator.wait_for_everyone()
         self._debug(self._gpu_usage())
         subword_embeddings = torch.cat(subword_embeddings, dim=0)
         self._debug_all(
@@ -366,6 +401,7 @@ class CoreferenceTrainer:
                 (embeddings, scores))
             scores = scores[~(embeddings == 0).all(dim=2)]
             character_scores.append(scores)
+            self.accelerator.wait_for_everyone()
         self._debug(self._gpu_usage())
         character_scores = torch.cat(character_scores, dim=0)
         self._debug_all(
@@ -374,12 +410,58 @@ class CoreferenceTrainer:
         self._debug(self._gpu_usage())
 
         # Coarse Coreference Scores
-        top_scores, top_indices = self.model.coarse_scorer(word_embeddings)
+        coarse_scores, top_indices = self.model.coarse_scorer(
+            word_embeddings, character_scores)
         self._debug_all(
-            f"{prefix}: top_scores = {top_scores.shape}, top_indices = "
+            f"{prefix}: coarse_scores = {coarse_scores.shape}, top_indices = "
             f"{top_indices.shape} ({top_indices.device})")
         torch.cuda.empty_cache()
         self._debug(self._gpu_usage())
+
+        # Pairwise Encoder
+        features = self.model.pairwise_encoder(
+            top_indices, document.speaker, self.genre)
+        self._debug_all(
+            f"{prefix}: features = {features.shape} ({features.device})")
+        self._debug(self._gpu_usage())
+        
+        # Fine Coreference Scores
+        fn_dataloader = self._create_fine_dataloader(
+            word_embeddings, features, coarse_scores, top_indices, document)
+        fine_scores = []
+        for i, batch in enumerate(fn_dataloader):
+            batch_prefix = f"{prefix}, Batch {i + 1}"
+            scores = self.model.fine_scorer(word_embeddings, *batch)
+            self._debug_all(
+                f"{batch_prefix}: scores (before gather) = {scores.shape} "
+                f"({scores.device})")
+            scores = self.accelerator.gather_for_metrics(scores)
+            self._debug_all(
+                f"{batch_prefix}: scores (after gather) = {scores.shape} "
+                f"({scores.device})")
+            fine_scores.append(scores)
+            self.accelerator.wait_for_everyone()
+        fine_scores = torch.cat(fine_scores, dim=0)
+        self._debug_all(
+            f"{prefix}: fine_scores = {fine_scores.shape} "
+            f"({fine_scores.device})")
+        torch.cuda.empty_cache()
+        self._debug(self._gpu_usage())
+
+        # Coreference Loss
+        coref_y = self._get_coref_ground_truth(
+            document.word_cluster_ids, top_indices,
+            (coarse_scores > float("-inf")))
+        coref_loss = self.model.coref_loss(fine_scores, coref_y)
+        torch.cuda.empty_cache()
+        self._debug(f"{prefix}: coref_loss = {coref_loss:.4f}")
+        self._debug(self._gpu_usage())
+
+        # Backprop
+        self.accelerator.backward(coref_loss)
+        if not self.freeze_bert:
+            self.bert_optimizer.step()
+        self.optimizer.step()
 
     def run(self):
         self._debug(self._gpu_usage())
@@ -393,6 +475,7 @@ class CoreferenceTrainer:
             gru_hidden_size = self.gru_hidden_size,
             gru_bidirectional = self.gru_bidirectional,
             topk = self.topk,
+            bce_weight = self.bce_weight,
             dropout = self.dropout)
         self.model.device = self.accelerator.device
         self._debug(self._gpu_usage())
@@ -402,17 +485,27 @@ class CoreferenceTrainer:
         self._debug(self._gpu_usage())
 
         self._debug("Creating optimizers")
-        self.bert_optimizer = AdamW(
-            self.model.bert_parameters(), lr=self.bert_lr, 
-            weight_decay=self.weight_decay)
+        if self.freeze_bert:
+            for param in self.model.bert_parameters():
+                param.requires_grad = False
+        else:
+            self.bert_optimizer = AdamW(
+                self.model.bert_parameters(), lr=self.bert_lr, 
+                weight_decay=self.weight_decay)
         self.optimizer = AdamW(
             self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
 
         self._debug("Accelerating model and optimizers")
         for module in self.model.modules():
-            module = self.accelerator.prepare_model(module)
-        self.bert_optimizer, self.optimizer = self.accelerator.prepare(
-            self.bert_optimizer, self.optimizer)
+            if next(module.parameters()).requires_grad:
+                module = self.accelerator.prepare_model(module)
+            else:
+                module.to(self.accelerator.device)
+        if self.freeze_bert:
+            self.optimizer = self.accelerator.prepare_optimizer(self.optimizer)
+        else:
+            self.bert_optimizer, self.optimizer = self.accelerator.prepare(
+                self.bert_optimizer, self.optimizer)
 
         self._debug("Loading training corpus")
         self.train_corpus = CorefCorpus(self.train_path)
@@ -430,9 +523,11 @@ class CoreferenceTrainer:
             inds = np.arange(len(self.train_corpus))
             for self.doc_index in inds:
                 document = self.train_corpus[self.doc_index]
-                self._log_all(
-                    f"Epoch = {self.epoch:2d}, Movie = {document.movie}")
-                self._train(document)
-                self.accelerator.wait_for_everyone()
-                break
+                if document.movie == "prestige_5":
+                    self._log_all(
+                        f"Epoch = {self.epoch:2d}, Movie = {document.movie}")
+                    self._train(document)
+                    torch.cuda.empty_cache()
+                    self._debug(self._gpu_usage())
+                    self.accelerator.wait_for_everyone()
             break
