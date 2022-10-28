@@ -6,7 +6,7 @@ import jsonlines
 import math
 import numpy as np
 import string
-import torch
+from scorch.scores import muc, b_cubed, ceaf_e 
 from torch.utils.data import DataLoader
 
 pronouns = "you i he my him me his yourself mine your her she".split()
@@ -155,8 +155,8 @@ class CorefDocument:
             for character, mentions in json["clusters"].items():
                 mentions = set([Mention(*x) for x in mentions])
                 self.clusters[character] = mentions
-            self.word_cluster_ids = np.zeros(len(self.token)).tolist()
-            self.word_head_ids = np.zeros(len(self.token)).tolist()
+            self.word_cluster_ids = np.zeros(len(self.token), dtype=int).tolist()
+            self.word_head_ids = np.zeros(len(self.token), dtype=int).tolist()
             for i, (_, mentions) in enumerate(self.clusters.items()):
                 for mention in mentions:
                     if len(mentions) > 1:
@@ -202,3 +202,37 @@ class CorefCorpus:
 
     def __getitem__(self, i) -> CorefDocument:
         return self.documents[i]
+
+class GraphNode:
+    """Graph of character mention heads with edges connecting co-referring 
+    head words.
+    """
+    def __init__(self, word_id: int):
+        self.id = word_id
+        self.neighbors: set[GraphNode] = set()
+        self.visited = False
+
+    def link(self, other: "GraphNode"):
+        self.neighbors.add(other)
+        other.neighbors.add(self)
+
+    def __repr__(self) -> str:
+        return str(self.id)
+
+class Metric:
+    """General metric class for precision, recall, and F1
+    """
+    def __init__(self, precision, recall):
+        self.precision = precision
+        self.recall = recall
+        self.f1 = 2 * self.precision * self.recall / (
+            1e-23 + self.precision + self.recall)
+    
+    def __repr__(self) -> str:
+        return f"precision={self.precision:.4f} recall={self.recall:.4f} f1{self.f1:.4f}"
+
+class CorefMetric:
+    """Coreference metric: MUC, Bcubed, and CEAF-ø.
+    Character Head metric: precision, recall, and F1.
+    """
+    def __init__(self, gold_clusters, pred_clusters, gold_)
