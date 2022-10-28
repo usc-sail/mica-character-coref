@@ -64,6 +64,8 @@ flags.DEFINE_integer(
 flags.DEFINE_integer(
     "cr_seq_len", 256, 
     "Sequence length of word sequences for character head recognition.")
+flags.DEFINE_bool(
+    "run_span", False, "Train and evaluate the span predictor module.")
 
 # Model
 flags.DEFINE_integer(
@@ -115,6 +117,7 @@ def main(argv):
         subword_batch_size=FLAGS.subword_batch_size,
         cr_batch_size=FLAGS.cr_batch_size,
         fn_batch_size=FLAGS.fn_batch_size,
+        run_span=FLAGS.run_span,
         save_model=FLAGS.save_model,
         save_output=FLAGS.save_tensors,
         save_loss_curve=FLAGS.save_loss_curves,
