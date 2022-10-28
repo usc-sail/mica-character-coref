@@ -10,7 +10,7 @@ from mica_text_coref.coref.movie_coref.coreference.span_predictor import SpanPre
 
 import itertools
 import torch
-from torch.nn import BCEWithLogitsLoss
+from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss
 from transformers import RobertaTokenizerFast, RobertaModel
 
 class MovieCoreference:
@@ -112,3 +112,30 @@ class MovieCoreference:
         total = torch.logsumexp(scores, dim=1)
         nlml_loss = (total - gold).mean()
         return nlml_loss + self.bce_weight * bce_loss
+    
+    def cr_loss(self, scores: torch.Tensor, labels: torch.Tensor):
+        pos_weight = torch.Tensor(
+            [(labels == 0).sum()/(1 + (labels == 1).sum())]).to(labels.device)
+        bce_loss_fn = BCEWithLogitsLoss(pos_weight=pos_weight, reduction="mean")
+        loss = bce_loss_fn(scores, labels)
+        return loss
+    
+    def sp_loss(
+        self, scores: torch.FloatTensor, starts: torch.LongTensor, 
+        ends: torch.LongTensor, avg_n_heads: int) -> torch.Tensor:
+        """Span Prediction Loss.
+
+        Args:
+            scores: [n_heads, n_words, 2] Float Tensor
+            starts: [n_heads] Long Tensor
+            ends: [n_heads] Long Tensor
+            avg_n_heads: Average number of head words per document
+        
+        Returns:
+            span prediction loss: Tensor
+        """
+        loss_fn = CrossEntropyLoss(reduction="sum")
+        loss = (
+            loss_fn(scores[:, :, 0], starts) + 
+            loss_fn(scores[:, :, 1], ends)) / avg_n_heads / 2
+        return loss
