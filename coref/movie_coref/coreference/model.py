@@ -47,6 +47,7 @@ class MovieCoreference:
         self.span_predictor = SpanPredictor(word_embedding_size, dropout)
         self.bce_weight = bce_weight
         self._device = torch.device("cpu")
+        self._training = False
 
     @property
     def device(self) -> torch.device:    
@@ -61,6 +62,10 @@ class MovieCoreference:
         self.coarse_scorer.device = device
         self.fine_scorer.device = device
         self.span_predictor.device = device
+    
+    @property
+    def training(self) -> bool:
+        return self._training
     
     def _rename_keys(
         self, 
@@ -100,10 +105,12 @@ class MovieCoreference:
     def train(self):
         for module in self.modules():
             module.train()
+        self._training = True
     
     def eval(self):
         for module in self.modules:
             module.eval()
+        self._training = False
 
     def coref_loss(self, scores: torch.Tensor, labels: torch.Tensor):
         bce_loss_fn = BCEWithLogitsLoss()

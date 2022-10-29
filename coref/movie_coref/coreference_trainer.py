@@ -2,8 +2,10 @@
 system using huggingface accelerate library.
 """
 from mica_text_coref.coref.movie_coref.coreference.model import MovieCoreference
-from mica_text_coref.coref.movie_coref.data import CorefCorpus, CorefDocument, Mention
-from mica_text_coref.coref.movie_coref.data import parse_labelset, pos_labelset, ner_labelset, GraphNode
+from mica_text_coref.coref.movie_coref.data import (
+    CorefCorpus, CorefDocument, Mention, GraphNode, CorefResult)
+from mica_text_coref.coref.movie_coref.data import (
+    parse_labelset, pos_labelset, ner_labelset)
 
 import accelerate
 from accelerate import logging
@@ -121,7 +123,8 @@ class CoreferenceTrainer:
         while i < len(document.token):
             if parse_tags[i] in "SNC":
                 j = i + 1
-                while j < len(document.token) and parse_tags[j] == parse_tags[i]:
+                while j < len(document.token) and (
+                    parse_tags[j] == parse_tags[i]):
                     j += 1
                 segment_boundaries[i] = 1
                 i = j
@@ -420,10 +423,19 @@ class CoreferenceTrainer:
 
         return gold_clusters, pred_clusters
 
-    def _get_span_prediction_data(self, document: CorefDocument) -> (
+    def _get_sp_training_data(self, document: CorefDocument) -> (
         tuple[
             torch.LongTensor, torch.LongTensor, torch.LongTensor, 
             torch.LongTensor]):
+        """Get head, start, and end word indexes from document for training the
+        span prediction module.
+
+        Returns:
+            parse_ids: LongTensor, word screenplay parse tags [n_words]
+            heads: LongTensor [n_heads]
+            starts: LongTensor [n_heads]
+            ends: LongTensor [n_heads]
+        """
         parse_ids = torch.LongTensor(document.parse_ids).to(
             self.accelerator.device)
         starts, ends, heads = [], [], []
@@ -436,9 +448,35 @@ class CoreferenceTrainer:
         ends = torch.LongTensor(ends).to(self.accelerator.device)
         heads = torch.LongTensor(heads).to(self.accelerator.device)
         return parse_ids, heads, starts, ends
+    
+    def _get_sp_inference_data(
+        self, document: CorefDocument, word_clusters: list[list[int]]) -> (
+            tuple[torch.LongTensor, torch.LongTensor]):
+        """Get parse ids and heads from the predicted word clusters.
 
-    def _run(self, document: CorefDocument) -> torch.Tensor:
+        Returns:
+            parse_ids: LongTensor [n_words]
+            heads: LongTensor [n_heads]
+        """
+        parse_ids = torch.LongTensor(document.parse_ids).to(
+            self.accelerator.device)
+        heads = set([_head for cluster in word_clusters for _head in cluster])
+        heads = sorted(heads)
+        heads = torch.LongTensor(heads).to(self.accelerator.device)
+        return parse_ids, heads
+
+    def _run(self, document: CorefDocument) -> tuple[torch.Tensor, CorefResult]:
+        """Model coreference in document.
+
+        Returns:
+            loss: Training loss to be used in backprop.
+            coref_result: CorefResult object containing gold and predicted
+                word clusters, character heads, and span clusters.
+        
+        In evaluation, the loss does not contain span prediction loss.
+        """
         prefix = f"Epoch = {self.epoch:2d}, Movie = {document.movie}"
+        result = CorefResult()
 
         # Bert
         subword_embeddings = []
@@ -534,28 +572,52 @@ class CoreferenceTrainer:
             f"loss (character + coref) = {loss:.4f}")
         self._debug(self._gpu_usage())
 
-        # Word Clusters
-
+        # Word Clusters and Character Heads
+        gold_word_clusters, pred_word_clusters = self._get_word_clusters(
+            document, character_scores, fine_scores, top_indices)
+        gold_character_heads = document.word_head_ids
+        pred_character_heads = (torch.sigmoid(character_scores) > 0.5).to(
+            torch.long).tolist()
+        result.add_word_clusters(gold_word_clusters, pred_word_clusters)
+        result.add_characters(gold_character_heads, pred_character_heads)
 
         # Span Prediction
         if self.run_span:
-            parse_ids, heads, starts, ends = self._get_span_prediction_data(
-                document)
-            sp_scores = self.model.span_predictor(
-                word_embeddings, parse_ids, heads)
-            sp_loss = self.model.sp_loss(
-                sp_scores, starts, ends, self.avg_n_train_heads)
-            loss = loss + sp_loss
-            self._debug(
-                f"{prefix}: heads = {heads.shape}, sp_scores = {sp_scores.shape} "
-                f"({sp_scores.device})")
-            self._debug(
-                f"{prefix}: span_loss = {sp_loss:.4f}, "
-                f"loss (character + coref + span) = {loss:.4f}")
-            torch.cuda.empty_cache()
-            self._debug(self._gpu_usage())
+            if self.model.training:
+                parse_ids, heads, starts, ends = self._get_sp_training_data(
+                    document)
+                sp_scores = self.model.span_predictor(
+                    word_embeddings, parse_ids, heads)
+                sp_loss = self.model.sp_loss(
+                    sp_scores, starts, ends, self.avg_n_train_heads)
+                loss = loss + sp_loss
+                self._debug(
+                    f"{prefix}: heads = {heads.shape}, sp_scores = "
+                    f"{sp_scores.shape} ({sp_scores.device})")
+                self._debug(
+                    f"{prefix}: span_loss = {sp_loss:.4f}, "
+                    f"loss (character + coref + span) = {loss:.4f}")
+                torch.cuda.empty_cache()
+                self._debug(self._gpu_usage())
+            else:
+                parse_ids, heads = self._get_sp_inference_data(
+                    document, pred_word_clusters)
+                sp_scores = self.model.span_predictor(
+                    word_embeddings, parse_ids, heads)
+                starts = sp_scores[:, :, 0].argmax(dim=1).tolist()
+                ends = sp_scores[:, :, 1].argmax(dim=1).tolist()
+                head2span = {
+                    head: [start, end] 
+                    for head, start, end in zip(heads.tolist(), starts, ends)}
+                pred_span_clusters = [
+                    [head2span[head] for head in cluster] 
+                    for cluster in pred_word_clusters]
+                gold_span_clusters = [
+                    [[mention.begin, mention.end] for mention in cluster] 
+                    for cluster in document.clusters]
+                result.add_span_clusters(gold_span_clusters, pred_span_clusters)
 
-        return loss
+        return loss, result
 
     def _train(self, document: CorefDocument):
         # Zero grad
