@@ -108,7 +108,7 @@ class MovieCoreference:
         self._training = True
     
     def eval(self):
-        for module in self.modules:
+        for module in self.modules():
             module.eval()
         self._training = False
 
