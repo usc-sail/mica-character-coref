@@ -20,6 +20,9 @@ class Metric:
     
     def __repr__(self) -> str:
         return (f"precision={self.precision:.4f} recall={self.recall:.4f} f1={self.f1:.4f}")
+    
+    def tolist(self) -> list[str]:
+        return [str(self.precision), str(self.recall), str(self.f1)]
 
 class CorefResult:
     """Data class to store gold and predicted coreference and character head
