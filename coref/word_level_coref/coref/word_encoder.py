@@ -5,8 +5,8 @@ from typing import Tuple
 
 import torch
 
-from coref.config import Config
-from coref.const import Doc
+from mica_text_coref.coref.word_level_coref.coref.config import Config
+from mica_text_coref.coref.word_level_coref.coref.const import Doc
 
 
 class WordEncoder(torch.nn.Module):  # pylint: disable=too-many-instance-attributes

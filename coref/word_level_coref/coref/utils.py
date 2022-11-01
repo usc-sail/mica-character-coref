@@ -4,7 +4,7 @@ from typing import List, Set
 
 import torch
 
-from coref.const import EPSILON
+from mica_text_coref.coref.word_level_coref.coref.const import EPSILON
 
 
 class GraphNode:

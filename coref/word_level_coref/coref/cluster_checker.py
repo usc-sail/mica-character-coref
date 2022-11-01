@@ -3,7 +3,7 @@ See aclweb.org/anthology/P16-1060.pdf. """
 
 from typing import Hashable, List, Tuple
 
-from coref.const import EPSILON
+from mica_text_coref.coref.word_level_coref.coref.const import EPSILON
 
 
 class ClusterChecker:

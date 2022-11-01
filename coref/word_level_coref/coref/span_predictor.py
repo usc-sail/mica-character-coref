@@ -4,7 +4,7 @@ head word and context embeddings.
 
 from typing import List, Optional, Tuple
 
-from coref.const import Doc, Span
+from mica_text_coref.coref.word_level_coref.coref.const import Doc, Span
 import torch
 
 

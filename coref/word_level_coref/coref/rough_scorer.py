@@ -6,7 +6,7 @@ from typing import Tuple
 
 import torch
 
-from coref.config import Config
+from mica_text_coref.coref.word_level_coref.coref.config import Config
 
 
 class RoughScorer(torch.nn.Module):

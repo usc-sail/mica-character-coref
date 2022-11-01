@@ -5,8 +5,8 @@ from typing import List
 
 import torch
 
-from coref.config import Config
-from coref.const import Doc
+from mica_text_coref.coref.word_level_coref.coref.config import Config
+from mica_text_coref.coref.word_level_coref.coref.const import Doc
 
 
 class PairwiseEncoder(torch.nn.Module):

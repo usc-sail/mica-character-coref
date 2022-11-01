@@ -3,8 +3,8 @@ mentions produces their anaphoricity scores.
 """
 import torch
 
-from coref import utils
-from coref.config import Config
+from mica_text_coref.coref.word_level_coref.coref import utils
+from mica_text_coref.coref.word_level_coref.coref.config import Config
 
 
 class AnaphoricityScorer(torch.nn.Module):

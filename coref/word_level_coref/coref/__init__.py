@@ -6,7 +6,7 @@
   model.evaluate("dev")
 """
 
-from .coref_model import CorefModel
+from mica_text_coref.coref.word_level_coref.coref.coref_model import CorefModel
 
 
 __all__ = [

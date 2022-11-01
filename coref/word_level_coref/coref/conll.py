@@ -6,8 +6,8 @@ from contextlib import contextmanager
 import os
 from typing import List, TextIO
 
-from coref.config import Config
-from coref.const import Doc, Span
+from mica_text_coref.coref.word_level_coref.coref.config import Config
+from mica_text_coref.coref.word_level_coref.coref.const import Doc, Span
 
 
 # pylint: disable=too-many-locals

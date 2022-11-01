@@ -8,9 +8,9 @@
 data_dir = "data"
 
 # Train, dev and test jsonlines
-train_data = "data/english_train_head.jsonlines"
-dev_data = "data/english_development_head.jsonlines"
-test_data = "data/english_test_head.jsonlines"
+train_data = "/home/sbaruah_usc_edu/mica_text_coref/data/word_level_coref/data/english_train_head.jsonlines"
+dev_data = "/home/sbaruah_usc_edu/mica_text_coref/data/word_level_coref/data/english_development_head.jsonlines"
+test_data = "/home/sbaruah_usc_edu/mica_text_coref/data/word_level_coref/data/english_test_head.jsonlines"
 
 # The device where everything is to be placed. "cuda:N"/"cpu" are supported.
 device = "cuda:0"

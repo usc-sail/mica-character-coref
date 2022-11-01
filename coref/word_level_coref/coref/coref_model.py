@@ -14,18 +14,18 @@ import torch
 from tqdm import tqdm   # type: ignore
 import transformers     # type: ignore
 
-from coref import bert, conll, utils
-from coref.anaphoricity_scorer import AnaphoricityScorer
-from coref.cluster_checker import ClusterChecker
-from coref.config import Config
-from coref.const import CorefResult, Doc
-from coref.loss import CorefLoss
-from coref.pairwise_encoder import PairwiseEncoder
-from coref.rough_scorer import RoughScorer
-from coref.span_predictor import SpanPredictor
-from coref.tokenizer_customization import TOKENIZER_FILTERS, TOKENIZER_MAPS
-from coref.utils import GraphNode
-from coref.word_encoder import WordEncoder
+from mica_text_coref.coref.word_level_coref.coref import bert, conll, utils
+from mica_text_coref.coref.word_level_coref.coref.anaphoricity_scorer import AnaphoricityScorer
+from mica_text_coref.coref.word_level_coref.coref.cluster_checker import ClusterChecker
+from mica_text_coref.coref.word_level_coref.coref.config import Config
+from mica_text_coref.coref.word_level_coref.coref.const import CorefResult, Doc
+from mica_text_coref.coref.word_level_coref.coref.loss import CorefLoss
+from mica_text_coref.coref.word_level_coref.coref.pairwise_encoder import PairwiseEncoder
+from mica_text_coref.coref.word_level_coref.coref.rough_scorer import RoughScorer
+from mica_text_coref.coref.word_level_coref.coref.span_predictor import SpanPredictor
+from mica_text_coref.coref.word_level_coref.coref.tokenizer_customization import TOKENIZER_FILTERS, TOKENIZER_MAPS
+from mica_text_coref.coref.word_level_coref.coref.utils import GraphNode
+from mica_text_coref.coref.word_level_coref.coref.word_encoder import WordEncoder
 
 
 class CorefModel:  # pylint: disable=too-many-instance-attributes
