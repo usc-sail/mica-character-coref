@@ -10,6 +10,7 @@ import re
 import spacy
 import tqdm
 import unidecode
+from copy import deepcopy
 
 def convert_screenplay_and_coreference_annotation_to_json(
     screenplay_parse_file: str, movie_and_raters_file: str,
@@ -506,12 +507,6 @@ def add_says(movie_data: list[dict[str, any]]) -> list[dict[str, any]]:
 
     return new_movie_data
 
-def convert_offsets_to_list(offsets: list[list[int]]) -> list[int]:
-    ids = []
-    for i, j in offsets:
-        ids.append([k for k in range(j - i)])
-    return ids
-
 def prepare_for_wlcoref(movie_data: list[dict[str, any]]) -> (
     list[dict[str, any]]):
     """Convert to jsonlines format which can be used as input to the word-level
@@ -519,10 +514,18 @@ def prepare_for_wlcoref(movie_data: list[dict[str, any]]) -> (
     """
     new_movie_data = []
     for mdata in movie_data:
-        new_movie_data.append({
-            "document_id": f"wb/{mdata['movie']}",
-            "cased_words": mdata["token"],
-            "sent_id": convert_offsets_to_list(mdata["sent_offset"]),
-            "speaker": mdata["speaker"]
-        })
+        parse_ids = []
+        i, c = 0, 0
+        while i < len(mdata["parse"]):
+            j = i + 1
+            while j < len(mdata["parse"]) and mdata["parse"][j] == mdata["parse"][i]:
+                j += 1
+            parse_ids.extend([c] * (j - i))
+            c += 1
+            i = j
+        _mdata = deepcopy(mdata)
+        _mdata["document_id"] = mdata["movie"]
+        _mdata["cased_words"] = mdata["token"]
+        _mdata["sent_id"] = parse_ids
+        new_movie_data.append(_mdata)
     return new_movie_data
