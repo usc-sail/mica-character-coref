@@ -75,12 +75,13 @@ flags.register_validator("eval_document_overlap_len", lambda x: x in [128, 256, 
 def main(argv):
     if len(argv) > 1:
         print(f"Unnecessary command-line arguments: {argv}")
-    if FLAGS.debug:
-        log_file = os.path.join(FLAGS.logs_dir, f"latest.log")
-    else:
-        time = (datetime.datetime.now(pytz.timezone("America/Los_Angeles")).strftime(
-            "%b%d_%I:%M:%S%p"))
-        log_file = os.path.join(FLAGS.logs_dir, f"{time}.log")
+    # if FLAGS.debug:
+    #     log_file = os.path.join(FLAGS.logs_dir, f"latest.log")
+    # else:
+    #     time = (datetime.datetime.now(pytz.timezone("America/Los_Angeles")).strftime(
+    #         "%b%d_%I:%M:%S%p"))
+    #     log_file = os.path.join(FLAGS.logs_dir, f"{time}.log")
+    log_file = os.path.join(FLAGS.logs_dir, f"latest.log")
     train_file = os.path.join(FLAGS.input_dir, FLAGS.input_type, "train.jsonlines")
     dev_file = os.path.join(FLAGS.input_dir, FLAGS.input_type, "dev.jsonlines")
     trainer = CoreferenceTrainer(

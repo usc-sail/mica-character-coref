@@ -140,14 +140,14 @@ class CorefResult:
             pred_word_file = os.path.join(epoch_dir, f"pred.word.{name}.conll")
             gold_span_file = os.path.join(epoch_dir, f"gold.span.{name}.conll")
             pred_span_file = os.path.join(epoch_dir, f"pred.span.{name}.conll")
-            (muc_precision, muc_recall, b_cubed_precision, b_cubed_recall,
-            ceaf_e_precision, ceaf_e_recall) = (conll.evaluate_conll(self.reference_scorer, 
-                gold_word_conll_lines, pred_word_conll_lines, gold_word_file, pred_word_file))
+            (muc_precision, muc_recall, b_cubed_precision, b_cubed_recall, ceaf_e_precision, 
+            ceaf_e_recall) = conll.evaluate_conll(self.reference_scorer, gold_word_conll_lines, 
+                pred_word_conll_lines, gold_word_file, pred_word_file)
             self._word_metric = (Metric(muc_precision, muc_recall), Metric(b_cubed_precision, 
                 b_cubed_recall), Metric(ceaf_e_precision, ceaf_e_recall))
             (muc_precision, muc_recall, b_cubed_precision, b_cubed_recall, ceaf_e_precision, 
-            ceaf_e_recall) = (conll.evaluate_conll(self.reference_scorer, gold_span_conll_lines, 
-                pred_span_conll_lines, gold_span_file, pred_span_file))
+            ceaf_e_recall) = conll.evaluate_conll(self.reference_scorer, gold_span_conll_lines, 
+                pred_span_conll_lines, gold_span_file, pred_span_file)
             self._span_metric = (Metric(muc_precision, muc_recall), Metric(b_cubed_precision, 
                 b_cubed_recall), Metric(ceaf_e_precision, ceaf_e_recall))
             self._character_metric = self._evaluate_sequence(gold_character, pred_character, 1)

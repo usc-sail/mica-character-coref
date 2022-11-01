@@ -358,13 +358,13 @@ class CoreferenceTrainer:
         tensor_nertag_ids = torch.LongTensor(seq_nertag_ids).to(self.accelerator.device)
         tensor_ispronoun = torch.LongTensor(seq_ispronoun).to(self.accelerator.device)
         tensor_ispunctuation = torch.LongTensor(seq_parsetag_ids).to(self.accelerator.device)
-        self._log(f"{prefix}: {len(tensor_word_embeddings)} cr word embedding "
+        self._debug(f"{prefix}: {len(tensor_word_embeddings)} cr word embedding "
             f"sequences, {tensor_word_embeddings.shape[1]} words/sequence")
         dataloader = self.accelerator.prepare_data_loader(DataLoader(TensorDataset(
             tensor_word_embeddings, tensor_parsetag_ids, tensor_postag_ids, tensor_nertag_ids, 
             tensor_ispronoun, tensor_ispunctuation), batch_size=self.cr_batch_size))
         batch_size = math.ceil(len(tensor_word_embeddings)/len(dataloader))
-        self._log(f"{prefix}: CR batch size = {batch_size} sequences/batch")
+        self._debug(f"{prefix}: CR batch size = {batch_size} sequences/batch")
         return dataloader
 
     def _create_fine_dataloader(
@@ -394,7 +394,7 @@ class CoreferenceTrainer:
         dataloader = DataLoader(dataset, batch_size=self.fn_batch_size)
         dataloader = self.accelerator.prepare_data_loader(dataloader)
         batch_size = math.ceil(len(word_embeddings)/len(dataloader))
-        self._log(f"{prefix}: fn batch size = {batch_size} word pairs/batch")
+        self._debug(f"{prefix}: fn batch size = {batch_size} word pairs/batch")
         return dataloader
 
     def _get_coref_ground_truth(
@@ -534,7 +534,7 @@ class CoreferenceTrainer:
         
         In evaluation, the loss does not contain span prediction loss.
         """
-        prefix = f"Epoch = {self.epoch:2d}, Movie = {document.movie}"
+        prefix = f"Epoch = {self.epoch:2d}, Movie = {document.movie:20s}"
         result = CorefResult(self.reference_scorer, self.output_dir, self.epoch)
 
         # Bert
@@ -611,7 +611,7 @@ class CoreferenceTrainer:
         character_loss = self.model.cr_loss(character_scores, character_y)
         loss = coref_loss + character_loss
         torch.cuda.empty_cache()
-        self._debug(f"{prefix}: character_loss = {character_loss:.4f}, coref_loss = "
+        self._log(f"{prefix}: character_loss = {character_loss:.4f}, coref_loss = "
             f"{coref_loss:.4f}, loss (character + coref) = {loss:.4f}")
         self._debug(self._gpu_usage())
 
@@ -632,7 +632,7 @@ class CoreferenceTrainer:
                 loss = loss + sp_loss
                 self._debug(f"{prefix}: heads = {heads.shape}, sp_scores = {sp_scores.shape} "
                     f"({sp_scores.device})")
-                self._debug(f"{prefix}: span_loss = {sp_loss:.4f}, loss (character + coref + span)"
+                self._log(f"{prefix}: span_loss = {sp_loss:.4f}, loss (character + coref + span)"
                     f" = {loss:.4f}")
                 torch.cuda.empty_cache()
                 self._debug(self._gpu_usage())
@@ -651,10 +651,9 @@ class CoreferenceTrainer:
 
         return loss, result
 
-    def _train(self, document: CorefDocument):
-        """Train model on document.
+    def _train(self, document: CorefDocument) -> float:
+        """Train model on document and return loss value.
         """
-        prefix = f"Epoch = {self.epoch:2d}, Movie = {document.movie}"
         self.model.train()
         if not self.freeze_bert:
             self.bert_optimizer.zero_grad()
@@ -664,9 +663,8 @@ class CoreferenceTrainer:
         if not self.freeze_bert:
             self.bert_optimizer.step()
         self.optimizer.step()
-        self._log(f"{prefix}: training loss = {loss:.4f}")
-        self._log(f"{prefix}: {result}")
         self.accelerator.wait_for_everyone()
+        return loss.item()
     
     def _eval(self):
         """Evaluate model on development corpus documents.
@@ -674,10 +672,12 @@ class CoreferenceTrainer:
         self.model.eval()
         with torch.no_grad():
             result = CorefResult(self.reference_scorer, self.output_dir, self.epoch)
+            loss = []
             for document in self.dev_corpus:
-                _, _result = self._run(document)
+                _loss, _result = self._run(document)
+                loss.append(_loss.item())
                 result.add(_result)
-            self._log(f"Epoch = {self.epoch:2d}, Eval movies: {result}")
+            self._log(f"Epoch = {self.epoch:2d}, eval average loss: {np.mean(loss):.4f}")
 
     def __call__(self):
         self._debug(self._gpu_usage())
@@ -734,6 +734,7 @@ class CoreferenceTrainer:
         for self.epoch in range(1, self.max_epochs + 1):
             # TODO randomize this
             inds = np.arange(len(self.train_corpus))
+            training_losses = []
             for self.doc_index in inds:
 
                 # Train 
@@ -741,9 +742,12 @@ class CoreferenceTrainer:
                 self._debug_all(
                     f"Epoch = {self.epoch:2d}, Movie = {document.movie} "
                     f"({self.accelerator.device})")
-                self._train(document)
+                train_loss = self._train(document)
+                training_losses.append(train_loss)
                 torch.cuda.empty_cache()
                 self._debug(self._gpu_usage())
+                self._log(f"Epoch = {self.epoch:2d}: Running train loss = "
+                    f"{np.mean(training_losses):.4f}")
 
-                # Eval
-                self._eval()
+            # Eval
+            self._eval()

@@ -108,20 +108,16 @@ def evaluate_conll(reference_scorer: str, gold_conll_lines: list[str],
     with open(gold_file, "w") as f1, open(pred_file, "w") as f2:
         f1.writelines(gold_conll_lines)
         f2.writelines(pred_conll_lines)
-    cmd = [reference_scorer, "all", gold_file, pred_file, "none"]
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-    stdout, _ = process.communicate()
-    process.wait()
-    stdout = stdout.decode("utf-8")
-    matched_tuples = re.findall(r"Coreference: Recall: \([0-9.]+ / [0-9.]+\) ([0-9.]+)%\s+"
-        r"Precision: \([0-9.]+ / [0-9.]+\) ([0-9.]+)%\s+F1: ([0-9.]+)%", stdout, flags=re.DOTALL)
-
-    muc_recall = float(matched_tuples[0][0])/100
-    muc_precision = float(matched_tuples[0][1])/100
-    bcubed_recall = float(matched_tuples[1][0])/100
-    bcubed_precision = float(matched_tuples[1][1])/100
-    ceafe_recall = float(matched_tuples[3][0])/100
-    ceafe_precision = float(matched_tuples[3][1])/100
-
-    return [muc_precision, muc_recall, bcubed_precision, bcubed_recall, ceafe_precision, 
-        ceafe_recall]
+    values = []
+    for metric in ["muc", "bcub", "ceafe"]:
+        cmd = [reference_scorer, metric, gold_file, pred_file, "none"]
+        process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+        stdout, _ = process.communicate()
+        process.wait()
+        stdout = stdout.decode("utf-8")
+        matched_tuples = re.findall(r"Coreference: Recall: \([0-9.]+ / [0-9.]+\) ([0-9.]+)%\s+"
+            r"Precision: \([0-9.]+ / [0-9.]+\) ([0-9.]+)%\s+F1: ([0-9.]+)%", stdout, flags=re.DOTALL)
+        recall = float(matched_tuples[0][0])/100
+        precision = float(matched_tuples[0][1])/100
+        values.extend([precision, recall])
+    return values
