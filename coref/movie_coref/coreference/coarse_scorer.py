@@ -25,7 +25,7 @@ class CoarseScorer(nn.Module):
     def forward(
         self, 
         word_embeddings: torch.Tensor, 
-        character_scores: torch.Tensor) -> tuple[torch.Tensor, torch.Tensor]:
+        character_scores: torch.Tensor = None) -> tuple[torch.Tensor, torch.Tensor]:
         # [n_words, n_words]
         pair_mask = torch.arange(word_embeddings.shape[0])
         pair_mask = pair_mask.unsqueeze(1) - pair_mask.unsqueeze(0)
@@ -33,9 +33,11 @@ class CoarseScorer(nn.Module):
         pair_mask = pair_mask.to(self.device)
         bilinear_scores = self.dropout(self.bilinear(word_embeddings)).mm(
             word_embeddings.T)
-        rough_scores = (
-            pair_mask + bilinear_scores + character_scores.unsqueeze(dim=1) + 
-            character_scores.unsqueeze(dim=0))
+        if character_scores is not None:
+            rough_scores = (pair_mask + bilinear_scores + character_scores.unsqueeze(dim=1) + 
+                character_scores.unsqueeze(dim=0))
+        else:
+            rough_scores = pair_mask + bilinear_scores
         top_scores, indices = torch.topk(
             rough_scores, k=min(self.topk, len(rough_scores)), 
             dim=1, sorted=False)
