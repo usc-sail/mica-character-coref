@@ -57,10 +57,11 @@ def keep_persons(ner_tags: list[str], clusters: list[set[tuple[int, int]]]) -> (
 def _merge(words: list[str], parse_tags: list[str], cluster_x: set[tuple[int, int]], 
     cluster_y: set[tuple[int, int]]):
     """Returns true if cluster have speakers with same names."""
+    parse_tags = np.array(parse_tags)
     speakers_x = set([re.sub(r"\([^\)]+\)", "", " ".join(words[i: j + 1])).upper().strip()
-        for i, j in cluster_x if all(parse_tags[i: j + 1]) == "C"])
+        for i, j in cluster_x if all(parse_tags[i: j + 1] == "C")])
     speakers_y = set([re.sub(r"\([^\)]+\)", "", " ".join(words[i: j + 1])).upper().strip()
-        for i, j in cluster_y if all(parse_tags[i: j + 1]) == "C"])
+        for i, j in cluster_y if all(parse_tags[i: j + 1] == "C")])
     return not speakers_x.isdisjoint(speakers_y)
 
 def merge_speakers(words: list[str], parse_tags: list[str], clusters: list[set[tuple[int, int]]]
@@ -89,3 +90,17 @@ def merge_speakers(words: list[str], parse_tags: list[str], clusters: list[set[t
             _clusters.append(cluster)
 
     return _clusters
+
+def filter_mentions(mentions: set[tuple[int, int]], clusters: list[set[tuple[int, int]]]
+    ) -> list[set[tuple[int, int]]]:
+    """Filter mentions in clusters by the given mentions list."""
+    _clusters = []
+    for cluster in clusters:
+        cluster = cluster.intersection(mentions)
+        if len(cluster) > 0:
+            _clusters.append(cluster)
+    return _clusters
+
+def remove_singleton_clusters(clusters: list[set[tuple[int, int]]]) -> list[set[tuple[int, int]]]:
+    """Remove clusters containing one mention."""
+    return list(filter(lambda cluster: len(cluster) > 1, clusters))

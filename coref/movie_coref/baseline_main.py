@@ -28,6 +28,8 @@ flags.DEFINE_enum("preprocess", default="none", enum_values=["addsays", "nochara
 flags.DEFINE_enum("entity", default="all", enum_values=["person", "speaker", "all"],
     help="Filter entities criterion.")
 flags.DEFINE_bool("merge_speakers", default=False, help="Merge clusters by speaker.")
+flags.DEFINE_bool("provide_gold_mentions", default=False, help="Provide gold mentions to predictor.")
+flags.DEFINE_bool("remove_gold_singletons", default=False, help="Remove singletons from annotations.")
 flags.DEFINE_string("reference_scorer", default=p("coref/movie_coref/scorer/v8.01/scorer.pl"), 
     help="Path to conll reference scorer.")
 flags.DEFINE_string("input_dir", default=p("data/movie_coref/results"),
@@ -49,10 +51,12 @@ def main(argv):
     muc_metric, b_cubed_metric, ceafe_metric, average_f1 = baseline.wl_evaluate(
         FLAGS.reference_scorer, FLAGS.wl_config, FLAGS.wl_weights,
         FLAGS.wl_batch_size, FLAGS.wl_genre, input_file, output_file, FLAGS.entity, 
-        FLAGS.merge_speakers, FLAGS.overwrite)
+        FLAGS.merge_speakers, FLAGS.provide_gold_mentions, FLAGS.remove_gold_singletons,
+        FLAGS.overwrite)
     with open(os.path.join(FLAGS.output_dir, "baseline.tsv"), "a") as fw:
         fw.write("\t".join([FLAGS.preprocess, FLAGS.wl_genre, FLAGS.entity,
-            str(FLAGS.merge_speakers)] + muc_metric.tolist() + b_cubed_metric.tolist() + 
+            str(FLAGS.merge_speakers), str(FLAGS.provide_gold_mentions), 
+            str(FLAGS.remove_gold_singletons)] + muc_metric.tolist() + b_cubed_metric.tolist() + 
             ceafe_metric.tolist() + [str(average_f1)]))
         fw.write("\n")
 

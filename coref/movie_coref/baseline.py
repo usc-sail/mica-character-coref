@@ -60,9 +60,28 @@ def wl_predict(config_file: str, weights: str, batch_size: int, genre: str, inpu
         output_data.write_all(docs)
 
 def wl_evaluate(reference_scorer: str, config_file: str, weights: str, batch_size: int, genre: str,
-    input_file: str, output_file: str, entity: str, merge_speakers: bool, overwrite: bool
+    input_file: str, output_file: str, entity: str, merge_speakers: bool, 
+    provide_gold_mentions: bool, remove_gold_singletons: bool, overwrite: bool
     ) -> tuple[Metric, Metric, Metric, float]:
     """Evaluate coreference using word-level coreference model.
+
+    Args:
+        reference_scorer (str): Path to conll perl reference scorer.
+        config_file (str): Config file used by the word-level roberta coreference model.
+        weights (str): Path to the weights of the word-level roberta coreference model.
+        batch_size (int): Batch size to use by the word-level roberta coreference model for antecedent
+            scoring.
+        genre (str): Genre to use by word-level roberta coreference model.
+        input_file (str): Jsonlines file containing gold annotations and screenplay.
+        output_file (str): Jsonlines file to which the predictions will be saved.
+        entity (str): Type of entity to keep.
+        merge_speakers (bool): If true, merge clusters by speakers.
+        provide_gold_mentions (bool): If true, provide gold mentions to the model.
+        remove_gold_singletons (bool): If true, remove gold clusters with only a single mention.
+        overwrite (bool): If true, run prediction even if output file is present.
+    
+    Returns:
+        tuple [Metric, Metric, Metric, float]: MUC, B_cubed, and CEAFe metric, and the average F1.
     """
     if overwrite or not os.path.exists(output_file):
         wl_predict(config_file, weights, batch_size, genre, input_file, output_file)
@@ -82,20 +101,33 @@ def wl_evaluate(reference_scorer: str, config_file: str, weights: str, batch_siz
         pred_clusters = [set([(i, j - 1) for i, j in cluster]) 
             for cluster in output_doc["span_clusters"]]
 
+        # Merge predicted clusters by speaker names
+        if merge_speakers:
+            pred_clusters = rules.merge_speakers(document.token, document.parse, pred_clusters)
+
+        # Filter predicted clusters by entity type
         if entity == "speaker":
             pred_clusters = rules.keep_speakers(document.parse, pred_clusters)
         elif entity == "person":
             pred_clusters = rules.keep_persons(document.ner, pred_clusters)
 
-        if merge_speakers:
-            pred_clusters = rules.merge_speakers(document.token, document.parse, pred_clusters)
+        # Remove gold clusters containing single mention
+        if remove_gold_singletons:
+            gold_clusters = rules.remove_singleton_clusters(gold_clusters)
+
+        # Filter predicted mentions by gold mentions
+        if provide_gold_mentions:
+            gold_mentions = set([mention for cluster in gold_clusters for mention in cluster])
+            pred_clusters = rules.filter_mentions(gold_mentions, pred_clusters)
 
         gold_lines.extend(conll.convert_to_conll(document, gold_clusters))
         pred_lines.extend(conll.convert_to_conll(document, pred_clusters))
 
-    gold_file = output_file.rstrip(".jsonlines") + ".gold.conll"
-    pred_file = output_file.rstrip(".jsonlines") + ".pred.conll"
+    gold_file = os.path.join(os.path.dirname(os.path.normpath(output_file)), "gold.conll")
+    pred_file = os.path.join(os.path.dirname(os.path.normpath(output_file)), "pred.conll")
     values = conll.evaluate_conll(reference_scorer, gold_lines, pred_lines, gold_file, pred_file)
+    os.remove(gold_file)
+    os.remove(pred_file)
     muc_metric = Metric(*values[:2])
     b_cubed_metric = Metric(*values[2:4])
     ceafe_metric = Metric(*values[4:])
