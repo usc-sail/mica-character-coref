@@ -27,20 +27,17 @@ class MovieCoreference:
         topk: int,
         bce_weight: float,
         dropout: float) -> None:
-        self.tokenizer: RobertaTokenizerFast = (
-            RobertaTokenizerFast.from_pretrained(
-                "roberta-large", use_fast=True, add_prefix_space=True))
-        self.tokenizer_map = {
-            ".": ["."], ",": [","], "!": ["!"], "?": ["?"],":":[":"], 
-            ";":[";"], "'s": ["'s"]}
-        self.bert: RobertaModel = RobertaModel.from_pretrained(
-            "roberta-large", add_pooling_layer=False)
+        self.tokenizer: RobertaTokenizerFast = (RobertaTokenizerFast.from_pretrained(
+            "roberta-large", use_fast=True, add_prefix_space=True))
+        self.tokenizer_map = {".": ["."], ",": [","], "!": ["!"], "?": ["?"],":":[":"], ";":[";"],
+            "'s": ["'s"]}
+        self.bert: RobertaModel = RobertaModel.from_pretrained("roberta-large",
+            add_pooling_layer=False)
         word_embedding_size = self.bert.config.hidden_size
         self.encoder = Encoder(word_embedding_size, dropout)
-        self.character_recognizer = CharacterRecognizer(
-            word_embedding_size, tag_embedding_size, parsetag_size, postag_size,
-            nertag_size, gru_nlayers, gru_hidden_size, gru_bidirectional,
-            dropout)
+        self.character_recognizer = CharacterRecognizer(word_embedding_size, tag_embedding_size,
+            parsetag_size, postag_size, nertag_size, gru_nlayers, gru_hidden_size,
+            gru_bidirectional, dropout)
         self.pairwise_encoder = PairwiseEncoder(dropout)
         self.coarse_scorer = CoarseScorer(word_embedding_size, topk, dropout)
         self.fine_scorer = FineScorer(word_embedding_size, dropout)
@@ -56,17 +53,18 @@ class MovieCoreference:
     @device.setter
     def device(self, device: torch.device):
         self._device = device
+        self.bert.to(device)
         self.encoder.device = device
         self.character_recognizer.device = device
         self.pairwise_encoder.device = device
         self.coarse_scorer.device = device
         self.fine_scorer.device = device
         self.span_predictor.device = device
-    
+
     @property
     def training(self) -> bool:
         return self._training
-    
+
     def _rename_keys(
         self, 
         weights_dict: dict[str, torch.Tensor], 
@@ -83,30 +81,27 @@ class MovieCoreference:
         self.pairwise_encoder.load_state_dict(weights["pw"])
         self.fine_scorer.load_state_dict(weights["a_scorer"])
         self.span_predictor.load_state_dict(weights["sp"])
-    
+
     def bert_parameters(self):
         return self.bert.parameters()
-    
-    def parameters(self):
-        return itertools.chain(
-            self.encoder.parameters(), 
-            self.character_recognizer.parameters(),
-            self.coarse_scorer.parameters(),
-            self.pairwise_encoder.parameters(),
-            self.fine_scorer.parameters(),
+
+    def cr_parameters(self):
+        return self.character_recognizer.parameters()
+
+    def coref_parameters(self):
+        return itertools.chain(self.encoder.parameters(), self.coarse_scorer.parameters(),
+            self.pairwise_encoder.parameters(), self.fine_scorer.parameters(),
             self.span_predictor.parameters())
-    
-    def modules(self):
-        return [
-            self.bert, self.encoder, self.character_recognizer, 
-            self.coarse_scorer, self.pairwise_encoder, self.fine_scorer, 
-            self.span_predictor]
-    
+
+    def coref_modules(self):
+        return [self.bert, self.encoder, self.character_recognizer, self.coarse_scorer,
+            self.pairwise_encoder, self.fine_scorer, self.span_predictor]
+
     def train(self):
         for module in self.modules():
             module.train()
         self._training = True
-    
+
     def eval(self):
         for module in self.modules():
             module.eval()
@@ -119,14 +114,13 @@ class MovieCoreference:
         total = torch.logsumexp(scores, dim=1)
         nlml_loss = (total - gold).mean()
         return nlml_loss + self.bce_weight * bce_loss
-    
+
     def cr_loss(self, scores: torch.Tensor, labels: torch.Tensor):
-        pos_weight = torch.Tensor(
-            [(labels == 0).sum()/(1 + (labels == 1).sum())]).to(labels.device)
+        pos_weight = torch.Tensor([(labels == 0).sum()/(1 + (labels == 1).sum())]).to(labels.device)
         bce_loss_fn = BCEWithLogitsLoss(pos_weight=pos_weight, reduction="mean")
         loss = bce_loss_fn(scores, labels)
         return loss
-    
+
     def sp_loss(
         self, scores: torch.FloatTensor, starts: torch.LongTensor, 
         ends: torch.LongTensor, avg_n_heads: int) -> torch.Tensor:
@@ -137,12 +131,10 @@ class MovieCoreference:
             starts: [n_heads] Long Tensor
             ends: [n_heads] Long Tensor
             avg_n_heads: Average number of head words per document
-        
+
         Returns:
             span prediction loss: Tensor
         """
         loss_fn = CrossEntropyLoss(reduction="sum")
-        loss = (
-            loss_fn(scores[:, :, 0], starts) + 
-            loss_fn(scores[:, :, 1], ends)) / avg_n_heads / 2
+        loss = (loss_fn(scores[:, :, 0], starts) + loss_fn(scores[:, :, 1], ends)) / avg_n_heads / 2
         return loss
