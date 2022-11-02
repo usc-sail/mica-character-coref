@@ -39,7 +39,8 @@ class CoreferenceTrainer:
         genre: str,
         bce_weight: float,
         bert_lr: float,
-        lr: float,
+        character_lr: float,
+        coref_lr: float,
         weight_decay: float,
         max_epochs: int,
         train_document_len: int,
@@ -50,6 +51,11 @@ class CoreferenceTrainer:
         cr_batch_size: int,
         fn_batch_size: int,
         run_span: bool,
+        add_cr_to_coarse: bool,
+        filter_mentions_by_cr: bool,
+        remove_singleton_cr: bool,
+        train_cr_epochs: int,
+        train_bert_with_cr: bool,
         save_model: bool,
         save_output: bool,
         save_loss_curve: bool,
@@ -73,7 +79,8 @@ class CoreferenceTrainer:
         self.genre = genre
         self.bce_weight = bce_weight
         self.bert_lr = bert_lr
-        self.lr = lr
+        self.character_lr = character_lr
+        self.coref_lr = coref_lr
         self.weight_decay = weight_decay
         self.max_epochs = max_epochs
         self.train_document_len = train_document_len
@@ -84,6 +91,11 @@ class CoreferenceTrainer:
         self.cr_batch_size = cr_batch_size
         self.fn_batch_size = fn_batch_size
         self.run_span = run_span
+        self.add_cr_to_coarse = add_cr_to_coarse
+        self.filter_mentions_by_cr = filter_mentions_by_cr
+        self.remove_singleton_cr = remove_singleton_cr
+        self.train_cr_epochs = train_cr_epochs
+        self.train_bert_with_cr = train_bert_with_cr
         self.save_model = save_model
         self.save_output = save_output
         self.save_loss_curve = save_loss_curve
@@ -119,6 +131,40 @@ class CoreferenceTrainer:
             desc.append(
                 f"GPU {gpu.index} = {gpu.memory_used}/{gpu.memory_total}")
         return ", ".join(desc)
+
+    def _create_optimizers(self):
+        """Create and accelerate optimizers. If freeze_bert is true, don't create the bert
+        optimizer
+        """
+        # Create optimizers
+        self._log("Creating optimizers")
+        if self.freeze_bert:
+            for param in self.model.bert_parameters():
+                param.requires_grad = False
+        else:
+            self.bert_optimizer = AdamW(self.model.bert_parameters(), lr=self.bert_lr, 
+                weight_decay=self.weight_decay)
+        self.cr_optimizer = AdamW(self.model.cr_parameters(), lr=self.character_lr, 
+            weight_decay=self.weight_decay)
+        self.coref_optimizer = AdamW(self.model.coref_parameters(), lr=self.coref_lr, 
+            weight_decay=self.weight_decay)
+
+        # Accelerate model
+        self._log("Accelerating model and optimizers")
+        for module in self.model.modules():
+            if next(module.parameters()).requires_grad:
+                module = self.accelerator.prepare_model(module)
+            else:
+                module.to(self.accelerator.device)
+
+        # Accelerate optimizer
+        if self.freeze_bert:
+            self.cr_optimizer, self.coref_optimizer = self.accelerator.prepare(self.cr_optimizer, 
+                self.coref_optimizer)
+        else:
+            self.bert_optimizer, self.cr_optimizer, self.coref_optimizer = (
+                self.accelerator.prepare(self.bert_optimizer, self.cr_optimizer, 
+                    self.coref_optimizer))
 
     def _split_screenplay(
         self, document: CorefDocument, split_len: int, overlap_len: int):
@@ -455,13 +501,13 @@ class CoreferenceTrainer:
 
         nodes = [GraphNode(i) for i in range(len(coref_scores))]
         for i, j in zip(coref_span_heads.tolist(), antecedents.tolist()):
-            if is_character[i] and is_character[j]:
+            if not self.filter_mentions_by_cr or (is_character[i] and is_character[j]):
                 nodes[i].link(nodes[j])
                 assert nodes[i] is not nodes[j]
 
         pred_clusters = []
         for node in nodes:
-            if not node.visited and is_character[node.id]:
+            if not node.visited and (not self.filter_mentions_by_cr or is_character[node.id]):
                 cluster = set([])
                 stack = [node]
                 while stack:
@@ -469,7 +515,8 @@ class CoreferenceTrainer:
                     current_node.visited = True
                     cluster.add(current_node.id)
                     stack.extend(_node for _node in current_node.neighbors if not _node.visited)
-                pred_clusters.append(cluster)
+                if not self.remove_singleton_cr or len(cluster) > 1:
+                    pred_clusters.append(cluster)
 
         gold_clusters = []
         for mentions in document.clusters.values():
@@ -577,7 +624,10 @@ class CoreferenceTrainer:
         self._debug(self._gpu_usage())
 
         # Coarse Coreference Scores
-        coarse_scores, top_indices = self.model.coarse_scorer(word_embeddings, character_scores)
+        if self.add_cr_to_coarse:
+            coarse_scores, top_indices = self.model.coarse_scorer(word_embeddings, character_scores)
+        else:
+            coarse_scores, top_indices = self.model.coarse_scorer(word_embeddings)
         self._debug(f"{prefix}: coarse_scores = {coarse_scores.shape}, top_indices = "
             f"{top_indices.shape} ({top_indices.device})")
         torch.cuda.empty_cache()
@@ -651,18 +701,31 @@ class CoreferenceTrainer:
 
         return loss, result
 
+    def _step(self):
+        """Update model weights"""
+        self.cr_optimizer.step()
+        if self.freeze_bert:
+            if self.epoch > self.train_cr_epochs:
+                self.coref_optimizer.step()
+        else:
+            if self.epoch <= self.train_cr_epochs:
+                if self.train_bert_with_cr:
+                    self.bert_optimizer.step()
+            else:
+                self.bert_optimizer.step()
+                self.coref_optimizer.step()
+
     def _train(self, document: CorefDocument) -> float:
         """Train model on document and return loss value.
         """
         self.model.train()
         if not self.freeze_bert:
             self.bert_optimizer.zero_grad()
-        self.optimizer.zero_grad()
-        loss, result = self._run(document)
+        self.cr_optimizer.zero_grad()
+        self.coref_optimizer.zero_grad()
+        loss, _ = self._run(document)
         self.accelerator.backward(loss)
-        if not self.freeze_bert:
-            self.bert_optimizer.step()
-        self.optimizer.step()
+        self._step()
         self.accelerator.wait_for_everyone()
         return loss.item()
     
@@ -677,10 +740,13 @@ class CoreferenceTrainer:
                 _loss, _result = self._run(document)
                 loss.append(_loss.item())
                 result.add(_result)
-            self._log(f"Epoch = {self.epoch:2d}, eval average loss: {np.mean(loss):.4f}")
+            self._log(f"Epoch = {self.epoch:2d}, eval average loss: {np.mean(loss):.4f}, "
+                f"result = {result}")
 
     def __call__(self):
         self._debug(self._gpu_usage())
+
+        # Create model
         self._log("Initializing model")
         self.model = MovieCoreference(
             parsetag_size = len(parse_labelset),
@@ -695,40 +761,30 @@ class CoreferenceTrainer:
             dropout = self.dropout)
         self.model.device = self.accelerator.device
 
+        # Load model weights
         self._log("Loading model weights from word-level-coref model")
         self.model.load_weights(self.weights_path)
 
-        self._log("Creating optimizers")
-        if self.freeze_bert:
-            for param in self.model.bert_parameters():
-                param.requires_grad = False
-        else:
-            self.bert_optimizer = AdamW(self.model.bert_parameters(), lr=self.bert_lr, 
-                weight_decay=self.weight_decay)
-        self.optimizer = AdamW(self.model.parameters(), lr=self.lr, weight_decay=self.weight_decay)
+        # Create optimizers
+        self._create_optimizers()
 
-        self._log("Accelerating model and optimizers")
-        for module in self.model.modules():
-            if next(module.parameters()).requires_grad:
-                module = self.accelerator.prepare_model(module)
-            else:
-                module.to(self.accelerator.device)
-        if self.freeze_bert:
-            self.optimizer = self.accelerator.prepare_optimizer(self.optimizer)
-        else:
-            self.bert_optimizer, self.optimizer = self.accelerator.prepare(self.bert_optimizer,
-                self.optimizer)
-
+        # Load training set
         self._log("Loading training corpus")
         self.train_corpus = CorefCorpus(self.train_path)
         self.train_corpus = self._prepare_corpus(self.train_corpus, self.train_document_len, 0)
         self.avg_n_train_heads = self._find_avg_n_heads(self.train_corpus)
-        
+
+        # Load development set
         self._log("Loading development corpus")
         self.dev_corpus = CorefCorpus(self.dev_path)
         self.dev_corpus = self._prepare_corpus(self.dev_corpus, self.eval_document_len, 
             self.eval_document_overlap_len)
 
+        # Sanity check for eval
+        self.epoch = 0
+        self._eval()
+
+        # Training loop
         self._log("Starting training")
         self._debug(self._gpu_usage())
         for self.epoch in range(1, self.max_epochs + 1):
@@ -739,8 +795,7 @@ class CoreferenceTrainer:
 
                 # Train 
                 document = self.train_corpus[self.doc_index]
-                self._debug_all(
-                    f"Epoch = {self.epoch:2d}, Movie = {document.movie} "
+                self._debug_all(f"Epoch = {self.epoch:2d}, Movie = {document.movie} "
                     f"({self.accelerator.device})")
                 train_loss = self._train(document)
                 training_losses.append(train_loss)

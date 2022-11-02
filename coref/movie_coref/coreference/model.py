@@ -93,7 +93,7 @@ class MovieCoreference:
             self.pairwise_encoder.parameters(), self.fine_scorer.parameters(),
             self.span_predictor.parameters())
 
-    def coref_modules(self):
+    def modules(self):
         return [self.bert, self.encoder, self.character_recognizer, self.coarse_scorer,
             self.pairwise_encoder, self.fine_scorer, self.span_predictor]
 
