@@ -37,9 +37,9 @@ flags.DEFINE_enum("genre", default="wb", enum_values=["bc", "bn", "mz", "nw", "p
     help="Genre.")
 flags.DEFINE_float("bce_weight", default=0.5, help="Weight of BCE coreference loss.")
 flags.DEFINE_float("bert_lr", default=1e-5, help="Learning rate for the transformer.")
-flags.DEFINE_float("character_lr", default=1e-4, 
+flags.DEFINE_float("character_lr", default=1e-5, 
     help="Learning rate for the character recognition model.")
-flags.DEFINE_float("coref_lr", default=3e-4, help="Learning rate for the coreference model.")
+flags.DEFINE_float("coref_lr", default=1e-5, help="Learning rate for the coreference model.")
 flags.DEFINE_float("weight_decay", default=1e-3, help="Weight decay.")
 flags.DEFINE_integer("max_epochs", default=10, help="Maximum number of epochs.")
 flags.DEFINE_float("dropout", default=0.3, help="Dropout rate.")
