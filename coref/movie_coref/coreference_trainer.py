@@ -716,22 +716,22 @@ class CoreferenceTrainer:
                 self.coref_optimizer.step()
 
     def _train(self, document: CorefDocument) -> float:
-        """Train model on document and return loss value.
-        """
+        """Train model on document and return loss value."""
+        prefix = f"Epoch = {self.epoch:2d}, Movie = {document.movie:20s}"
         self.model.train()
         if not self.freeze_bert:
             self.bert_optimizer.zero_grad()
         self.cr_optimizer.zero_grad()
         self.coref_optimizer.zero_grad()
-        loss, _ = self._run(document)
+        loss, result = self._run(document)
+        self._log(f"{prefix}: result = {result}")
         self.accelerator.backward(loss)
         self._step()
         self.accelerator.wait_for_everyone()
         return loss.item()
     
     def _eval(self):
-        """Evaluate model on development corpus documents.
-        """
+        """Evaluate model on development corpus documents."""
         self.model.eval()
         with torch.no_grad():
             result = CorefResult(self.reference_scorer, self.output_dir, self.epoch)
