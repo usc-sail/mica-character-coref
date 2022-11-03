@@ -93,10 +93,8 @@ class CorefResult:
         """Join another CorefResult.
         """
         self._clear_scores()
-        assert set(self._movie_to_data.keys()).isdisjoint(
-            set(other._movie_to_data.keys())), (
-                "You are trying to join two CorefResults that already share"
-                " some common document.")
+        assert set(self._movie_to_data.keys()).isdisjoint(set(other._movie_to_data.keys())), (
+            "You are trying to join two CorefResults that already share some common document.")
         self._movie_to_data.update(other._movie_to_data)
 
     def _evaluate_sequence(self, gold: list[int], pred: list[int], 
