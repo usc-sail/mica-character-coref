@@ -17,12 +17,10 @@ class CharacterRecognizer(nn.Module):
         super().__init__()
         gru_input_size = word_embedding_size + 3*tag_embedding_size + 2
         gru_output_size = gru_hidden_size * (1 + gru_bidirectional)
-        self.parsetag_embedding = nn.Embedding(
-            parsetag_size, tag_embedding_size)
+        self.parsetag_embedding = nn.Embedding(parsetag_size, tag_embedding_size)
         self.postag_embedding = nn.Embedding(postag_size, tag_embedding_size)
         self.nertag_embedding = nn.Embedding(nertag_size, tag_embedding_size)
-        self.gru = nn.GRU(
-            gru_input_size, gru_hidden_size, num_layers=gru_nlayers, 
+        self.gru = nn.GRU(gru_input_size, gru_hidden_size, num_layers=gru_nlayers, 
             batch_first=True, bidirectional=gru_bidirectional)
         self.dropout = nn.Dropout(dropout)
         self.output = nn.Linear(gru_output_size, 1)
