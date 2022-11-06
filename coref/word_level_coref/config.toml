@@ -13,7 +13,7 @@ dev_data = "/home/sbaruah_usc_edu/mica_text_coref/data/word_level_coref/data/eng
 test_data = "/home/sbaruah_usc_edu/mica_text_coref/data/word_level_coref/data/english_test_head.jsonlines"
 
 # The device where everything is to be placed. "cuda:N"/"cpu" are supported.
-device = "cuda:0"
+device = "cpu"
 
 
 # Bert settings ======================
