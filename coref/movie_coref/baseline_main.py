@@ -34,9 +34,11 @@ flags.DEFINE_string("reference_scorer", default=p("coref/movie_coref/scorer/v8.0
     help="Path to conll reference scorer.")
 flags.DEFINE_string("input_dir", default=p("data/movie_coref/results"),
     help="Directory containing the jsonlines")
+flags.DEFINE_bool("run_train", default=False, help="Run baseline on training scripts.")
 flags.DEFINE_string("output_dir", default=p("data/movie_coref/results/coreference/baselines"),
     help="Directory to which the baseline predictions will be saved")
 flags.DEFINE_bool("overwrite", default=False, help="Overwrite predictions.")
+flags.DEFINE_bool("append_results", default=False, help="Append results.")
 
 def main(argv):
     if len(argv) > 1:
@@ -45,20 +47,23 @@ def main(argv):
         subdir = "regular"
     else:
         subdir = FLAGS.preprocess
-    input_file = os.path.join(FLAGS.input_dir, subdir, "dev_wl.jsonlines")
-    output_filename = f"preprocess_{FLAGS.preprocess}.genre_{FLAGS.wl_genre}.dev_wl.jsonlines"
+    partition = "train" if FLAGS.run_train else "dev"
+    input_file = os.path.join(FLAGS.input_dir, subdir, f"{partition}_wl.jsonlines")
+    output_filename = f"preprocess_{FLAGS.preprocess}.genre_{FLAGS.wl_genre}.{partition}_wl.jsonlines"
     output_file = os.path.join(FLAGS.output_dir, output_filename)
-    muc_metric, b_cubed_metric, ceafe_metric, average_f1 = baseline.wl_evaluate(
+    result = baseline.wl_evaluate(
         FLAGS.reference_scorer, FLAGS.wl_config, FLAGS.wl_weights,
         FLAGS.wl_batch_size, FLAGS.wl_genre, input_file, output_file, FLAGS.entity, 
         FLAGS.merge_speakers, FLAGS.provide_gold_mentions, FLAGS.remove_gold_singletons,
         FLAGS.overwrite)
-    with open(os.path.join(FLAGS.output_dir, "baseline.tsv"), "a") as fw:
-        fw.write("\t".join([FLAGS.preprocess, FLAGS.wl_genre, FLAGS.entity,
-            str(FLAGS.merge_speakers), str(FLAGS.provide_gold_mentions), 
-            str(FLAGS.remove_gold_singletons)] + muc_metric.tolist() + b_cubed_metric.tolist() + 
-            ceafe_metric.tolist() + [str(average_f1)]))
-        fw.write("\n")
+    if FLAGS.append_results:
+        with open(os.path.join(FLAGS.output_dir, f"{partition}.baseline.tsv"), "a") as fw:
+            for metric, metric_result in result.items():
+                for movie, movie_metric in metric_result.items():
+                    fw.write("\t".join([FLAGS.preprocess, FLAGS.wl_genre, FLAGS.entity,
+                        str(FLAGS.merge_speakers), str(FLAGS.provide_gold_mentions), 
+                        str(FLAGS.remove_gold_singletons), metric, movie] + movie_metric.tolist()))
+                    fw.write("\n")
 
 if __name__ == '__main__':
     app.run(main)

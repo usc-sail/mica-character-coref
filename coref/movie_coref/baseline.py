@@ -9,6 +9,7 @@ from mica_text_coref.coref.movie_coref import conll
 from mica_text_coref.coref.movie_coref.result import Metric
 from mica_text_coref.coref.movie_coref import rules
 
+from collections import defaultdict
 import jsonlines
 import os
 import torch
@@ -62,7 +63,7 @@ def wl_predict(config_file: str, weights: str, batch_size: int, genre: str, inpu
 def wl_evaluate(reference_scorer: str, config_file: str, weights: str, batch_size: int, genre: str,
     input_file: str, output_file: str, entity: str, merge_speakers: bool, 
     provide_gold_mentions: bool, remove_gold_singletons: bool, overwrite: bool
-    ) -> tuple[Metric, Metric, Metric, float]:
+    ) -> dict[str, dict[str, Metric]]:
     """Evaluate coreference using word-level coreference model.
 
     Args:
@@ -125,15 +126,12 @@ def wl_evaluate(reference_scorer: str, config_file: str, weights: str, batch_siz
 
     gold_file = os.path.join(os.path.dirname(os.path.normpath(output_file)), "gold.conll")
     pred_file = os.path.join(os.path.dirname(os.path.normpath(output_file)), "pred.conll")
-    values = conll.evaluate_conll(reference_scorer, gold_lines, pred_lines, gold_file, pred_file)
+    _result = conll.evaluate_conll(reference_scorer, gold_lines, pred_lines, gold_file, pred_file)
+    result = defaultdict(lambda: defaultdict(lambda: Metric))
     os.remove(gold_file)
     os.remove(pred_file)
-    muc_metric = Metric(*values[:2])
-    b_cubed_metric = Metric(*values[2:4])
-    ceafe_metric = Metric(*values[4:])
-    average_f1 = (muc_metric.f1 + b_cubed_metric.f1 + ceafe_metric.f1)/3
-    print(f"MUC = {muc_metric}")
-    print(f"B_cubed = {b_cubed_metric}")
-    print(f"CEAFe = {ceafe_metric}")
-    print(f"Average F1 = {average_f1:.4f}")
-    return muc_metric, b_cubed_metric, ceafe_metric, average_f1
+    for metric, metric_result in _result.items():
+        for movie, movie_result in metric_result.items():
+            result[metric][movie] = Metric(*movie_result)
+    result = dict(result)
+    return result

@@ -41,13 +41,19 @@ use: scorer.pl <metric> <keys_file> <response_file> [name]
 }
 
 my $metric = shift(@ARGV);
-if ($metric !~ /^(muc|bcub|ceafm|ceafe|blanc|all)/i) {
+if ($metric !~ /^(muc|bcub|ceafm|ceafe|blanc|all|conll)/i) {
   print "Invalid metric\n";
   exit;
 }
 
 if ($metric eq 'all') {
   foreach my $m ('muc', 'bcub', 'ceafm', 'ceafe', 'blanc') {
+    print "\nMETRIC $m:\n";
+    &CorScorer::Score($m, @ARGV);
+  }
+}
+elsif ($metric eq 'conll') {
+  foreach my $m ('muc', 'bcub', 'ceafe') {
     print "\nMETRIC $m:\n";
     &CorScorer::Score($m, @ARGV);
   }

@@ -3,6 +3,7 @@
 
 from mica_text_coref.coref.movie_coref.data import CorefDocument
 
+from collections import defaultdict
 import re
 import subprocess
 
@@ -88,7 +89,8 @@ def convert_to_conll(
     return conll_lines
 
 def evaluate_conll(reference_scorer: str, gold_conll_lines: list[str],
-    pred_conll_lines: list[str], gold_file: str, pred_file: str) -> list[float]:
+    pred_conll_lines: list[str], gold_file: str, pred_file: str) -> dict[str, dict[str, 
+        tuple[float, float, float]]]:
     """Evaluate coreference using conll reference scorer. gold_conll_lines
     contain the gold annotations, and pred_conll_lines contain the predicted
     labels.
@@ -102,22 +104,44 @@ def evaluate_conll(reference_scorer: str, gold_conll_lines: list[str],
         pred_file: File to which the pred_conll_lines will be saved.
 
     Returns:
-        List of 6 numbers in the following order: precision and recall of
-        MUC, precision and recall of B-cubed, precision and recall of CEAF-e.
+        Dictionary with metric names as keys: muc, bcubed, ceafe. Values are dictionaries with
+        movie names as keys + "all" for micro-averaged values. Values of this inner movie-level
+        dictionary is a tuple of 3 floats: precision, recall, f1.
     """
+    score_pattern = re.compile("Recall: \([0-9.]+ / [0-9.]+\) ([0-9.]+)%\s+Precision: \([0-9.]+ /"
+        " [0-9.]+\) ([0-9.]+)%\s+F1: ([0-9.]+)%")
+    document_pattern = re.compile("====> (\w+);")
+    metric_pattern = re.compile("METRIC (\w+):")
+    pattern = re.compile(f"({score_pattern.pattern})|({document_pattern.pattern})|"
+        f"({metric_pattern.pattern})")
+
     with open(gold_file, "w") as f1, open(pred_file, "w") as f2:
         f1.writelines(gold_conll_lines)
         f2.writelines(pred_conll_lines)
-    values = []
-    for metric in ["muc", "bcub", "ceafe"]:
-        cmd = [reference_scorer, metric, gold_file, pred_file, "none"]
-        process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-        stdout, _ = process.communicate()
-        process.wait()
-        stdout = stdout.decode("utf-8")
-        matched_tuples = re.findall(r"Coreference: Recall: \([0-9.]+ / [0-9.]+\) ([0-9.]+)%\s+"
-            r"Precision: \([0-9.]+ / [0-9.]+\) ([0-9.]+)%\s+F1: ([0-9.]+)%", stdout, flags=re.DOTALL)
-        recall = float(matched_tuples[0][0])/100
-        precision = float(matched_tuples[0][1])/100
-        values.extend([precision, recall])
-    return values
+    cmd = [reference_scorer, "conll", gold_file, pred_file]
+    process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+    stdout, _ = process.communicate()
+    process.wait()
+    stdout = stdout.decode("utf-8")
+    result = defaultdict(lambda: defaultdict(tuple))
+
+    metric, movie, n_score_pattern_rows = "", "", 0
+    n_movies = len(set(map(lambda match: match.group(1), document_pattern.finditer(stdout))))
+
+    for match in pattern.finditer(stdout):
+        if match.group(1):
+            n_score_pattern_rows += 1
+            recall = float(match.group(2))
+            precision = float(match.group(3))
+            f1 = float(match.group(4))
+            if n_score_pattern_rows <= n_movies:
+                result[metric][movie] = (precision, recall, f1)
+            elif n_score_pattern_rows == n_movies + 2:
+                result[metric]["all"] = (precision, recall, f1)
+        elif match.group(5):
+            movie = match.group(6)
+        else:
+            metric = match.group(8)
+            n_score_pattern_rows = 0
+
+    return result
