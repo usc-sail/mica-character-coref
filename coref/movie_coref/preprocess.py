@@ -12,14 +12,12 @@ import tqdm
 import unidecode
 from copy import deepcopy
 
-def convert_screenplay_and_coreference_annotation_to_json(
-    screenplay_parse_file: str, movie_and_raters_file: str,
-    screenplays_dir: str, annotations_dir: str, output_dir: str,
+def convert_screenplay_and_coreference_annotation_to_json(screenplay_parse_file: str, 
+    movie_and_raters_file: str, screenplays_dir: str, annotations_dir: str, output_dir: str,
     spacy_model = "en_core_web_sm", spacy_gpu_device = -1):
-    '''
-    Converts coreference annotations, text screenplays, and
-    screenplay parsing tags to json objects for further processing. Each json
-    object contains the following:
+    """
+    Converts coreference annotations, text screenplays, and screenplay parsing tags to json objects
+    for further processing. Each json object contains the following:
 
     Attributes:
         rater: Name of the student worker who annotated the coreference
@@ -29,44 +27,32 @@ def convert_screenplay_and_coreference_annotation_to_json(
         ner: List of named entity tags 
         parse: List of movieparser tags 
         speaker: List of speakers 
-        sent_offset: List of sentence offsets. Each sentence offset is a list of
-            two integers: start and end. The end is included, therefore you can
-            get the sentence text as tokens[start: end]
-        clusters : Dictionary of character to list of mentions. Each mention is
-            a list of three integers: start, end, and head. The head is the 
-            index of the mention's head word, therefore start <= head <= end. 
-            The end is inclusive, therefore you can get the mention text as 
-            tokens[start: end + 1]
+        sent_offset: List of sentence offsets. Each sentence offset is a list of two integers:
+            start and end. The end is included, therefore you can get the sentence text as
+            tokens[start: end]
+        clusters : Dictionary of character to list of mentions. Each mention is a list of three
+            integers: start, end, and head. The head is the index of the mention's head word,
+            therefore start <= head <= end. The end is inclusive, therefore you can get the mention
+            text as tokens[start: end + 1]
 
-    token, pos, ner, parse, and speaker are of equal length. Each 
-    json object is further converted to a different json format used as input
-    to a pre-trained wl-RoBERTa for inference.
-
-    The function creates three sets of file, each set containing the json
-    files. The first set of files is saved to output_dir/regular and the
-    format of the json file is as described above.
-
-    The second set removes character names (and possible corresponding
-     annotated mentions) that precede an utterance. The second set is saved to
-    output_dir/nocharacters.
-
-    The third set adds the word "says" between character names and their
-    utterances. It is saved to output_dir/addsays.
+    token, pos, ner, parse, and speaker are of equal length. Each json object is further converted
+    to a different json format used as input to a pre-trained wl-RoBERTa for inference. The function
+    creates three sets of file, each set containing the json files. The first set of files is saved
+    to output_dir/regular and the format of the json file is as described above. The second set
+    removes character names (and possible corresponding annotated mentions) that precede an
+    utterance. The second set is saved to output_dir/nocharacters. The third set adds the word
+    "says" between character names and their utterances. It is saved to output_dir/addsays.
 
     Args:
         screenplay_parse_file: csv file containing screenplay parsing tags.
-        movie_and_raters_file: text file containing movie and corresponding
-            raters names.
-        screenplays_dir: directory containing screenplay text files for each
-            movie.
-        annotations_dir: directory containing csv files of coreference
-            annotations.
-        output_dir: directory to which the output (json object, conll, and
-            json object formatted for word-level coref model, for all three
-            sets) is saved.
+        movie_and_raters_file: text file containing movie and corresponding raters names.
+        screenplays_dir: directory containing screenplay text files for each movie.
+        annotations_dir: directory containing csv files of coreference annotations.
+        output_dir: directory to which the output (json object, conll, and json object formatted
+            for word-level coref model, for all three sets) is saved.
         spacy_model: name of the english spacy_model
         spacy_gpu_device: GPU to use for spacy
-    '''
+    """
     # Initialize spacy model
     if spacy_gpu_device >= 0:
         spacy.require_gpu(gpu_id=spacy_gpu_device)
@@ -108,8 +94,7 @@ def convert_screenplay_and_coreference_annotation_to_json(
             if i == 0:
                 wsbegin = len(re.sub("\s", "", script[:begin]))
             else:
-                wsbegin = prev_wsbegin + len(
-                    re.sub("\s", "", script[prev_begin: begin]))
+                wsbegin = prev_wsbegin + len(re.sub("\s", "", script[prev_begin: begin]))
             prev_begin, prev_wsbegin = begin, wsbegin
             wsend = wsbegin + len(re.sub("\s", "", script[begin: end]))
             begins.append(begin)
@@ -139,17 +124,15 @@ def convert_screenplay_and_coreference_annotation_to_json(
 
         # Extract tokens, and the head index, part-of-speech tag, named entity
         # tag, offsets, parse tag, and sentence id of each token
-        (tokens, token_heads, token_postags, token_nertags, token_begins,
-            token_ends, token_tags, token_sentids) = ([], [], [], [], [], [],
-                                                      [], [])
+        (tokens, token_heads, token_postags, token_nertags, token_begins, token_ends, token_tags,
+            token_sentids) = [], [], [], [], [], [], [], []
         c, s, n = 0, 0, 0
         for i, doc in enumerate(docs):
             for sent in doc.sents:
                 for stoken in sent:
                     text = stoken.text
                     ascii_text = unidecode.unidecode(text, errors="strict")
-                    assert ascii_text != "", (
-                        f"token='{text}', Empty ascii text")
+                    assert ascii_text != "", f"token='{text}', Empty ascii text"
                     postag = stoken.tag_
                     nertag = stoken.ent_type_
                     if not nertag:
@@ -310,19 +293,17 @@ def convert_screenplay_and_coreference_annotation_to_json(
                         writer.write(d)
 
 def remove_characters(movie_data: list[dict[str, any]]) -> list[dict[str, any]]:
-    '''Removes character names preceding an utterance.
-    '''
+    """Removes character names preceding an utterance.
+    """
     # Initialize new movie data
     new_movie_data = []
 
     # Loop over movies
     tbar = tqdm.tqdm(movie_data, total=len(movie_data), unit="movie")
     for mdata in tbar:
-        (movie, rater, tokens, postags, nertags, parsetags, sentence_offsets,
-         speakers, clusters) = (
-            mdata["movie"], mdata["rater"], mdata["token"], mdata["pos"],
-            mdata["ner"], mdata["parse"], mdata["sent_offset"], 
-            mdata["speaker"], mdata["clusters"])
+        (movie, rater, tokens, postags, nertags, parsetags, sentence_offsets, speakers, 
+            clusters) = (mdata["movie"], mdata["rater"], mdata["token"], mdata["pos"], mdata["ner"],
+                mdata["parse"], mdata["sent_offset"], mdata["speaker"], mdata["clusters"])
         tbar.set_description(movie)
 
         # removed[x] is the number of tokens to remove from tokens[:x]
@@ -352,8 +333,7 @@ def remove_characters(movie_data: list[dict[str, any]]) -> list[dict[str, any]]:
                 i += 1
 
         # Skip the tokens marked for removal
-        newtokens, newpostags, newnertags, newparsetags, newspeakers = (
-            [], [], [], [], [])
+        newtokens, newpostags, newnertags, newparsetags, newspeakers = [], [], [], [], []
         i = 0
         while i < len(tokens):
             if removed[i] != -1:
@@ -380,10 +360,9 @@ def remove_characters(movie_data: list[dict[str, any]]) -> list[dict[str, any]]:
         for character, mentions in clusters.items():
             new_mentions = []
             for begin, end, head in mentions:
-                assert (all(removed[begin: end + 1] == -1) or
-                        all(removed[begin: end + 1] != -1)), (
-                            "All tokens or none of the tokens of a mention"
-                            f" should be removed, mention = [{begin},{end},{head}]")
+                assert (all(removed[begin: end + 1] == -1) or all(removed[begin: end + 1] != -1)), (
+                    "All tokens or none of the tokens of a mention should be removed, mention = "
+                    f"[{begin},{end},{head}]")
                 if all(removed[begin: end + 1] != -1):
                     begin = begin - int(removed[begin])
                     end = end - int(removed[end])
@@ -408,21 +387,19 @@ def remove_characters(movie_data: list[dict[str, any]]) -> list[dict[str, any]]:
     return new_movie_data
 
 def add_says(movie_data: list[dict[str, any]]) -> list[dict[str, any]]:
-    '''
+    """
     Inserts 'says' between character name and utterance block. Give the token
     'says' a unique tag `A`.
-    '''
+    """
     # Initialize new movie data
     new_movie_data = []
 
     # Loop over each movie
     tbar = tqdm.tqdm(movie_data, total=len(movie_data), unit="movie")
     for mdata in tbar:
-        (movie, rater, tokens, postags, nertags, parsetags, sentence_offsets,
-         speakers, clusters) = (
-            mdata["movie"], mdata["rater"], mdata["token"], mdata["pos"],
-            mdata["ner"], mdata["parse"], mdata["sent_offset"], 
-            mdata["speaker"], mdata["clusters"])
+        (movie, rater, tokens, postags, nertags, parsetags, sentence_offsets, speakers,
+            clusters) = (mdata["movie"], mdata["rater"], mdata["token"], mdata["pos"], mdata["ner"],
+                mdata["parse"], mdata["sent_offset"], mdata["speaker"], mdata["clusters"])
         tbar.set_description(movie)
 
         # added[x] is the number of 'says' added in tokens[0...x] or tokens[:x + 1]
@@ -509,8 +486,7 @@ def add_says(movie_data: list[dict[str, any]]) -> list[dict[str, any]]:
 
 def prepare_for_wlcoref(movie_data: list[dict[str, any]]) -> (
     list[dict[str, any]]):
-    """Convert to jsonlines format which can be used as input to the word-level
-    coreference model.
+    """Convert to jsonlines format which can be used as input to the word-level coreference model.
     """
     new_movie_data = []
     for mdata in movie_data:

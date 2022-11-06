@@ -45,7 +45,8 @@ class PairwiseEncoder(torch.nn.Module):
                 top_indices: torch.Tensor,
                 doc: Doc) -> torch.Tensor:
         word_ids = torch.arange(0, len(doc["cased_words"]), device=self.device)
-        speaker_map = torch.tensor(self._speaker_map(doc), device=self.device)
+        speaker_map = self._speaker_map(doc)
+        speaker_map = torch.tensor(speaker_map).to(self.device)
 
         same_speaker = (speaker_map[top_indices] == speaker_map.unsqueeze(1))
         same_speaker = self.speaker_emb(same_speaker.to(torch.long))
@@ -58,8 +59,8 @@ class PairwiseEncoder(torch.nn.Module):
         distance = torch.where(distance < 5, distance - 1, log_distance + 2)
         distance = self.distance_emb(distance)
 
-        genre = torch.tensor(self.genre2int[doc["document_id"][:2]],
-                             device=self.device).expand_as(top_indices)
+        genre = torch.tensor(self.genre2int[doc["document_id"][:2]]).expand_as(top_indices).to(
+            self.device)
         genre = self.genre_emb(genre)
 
         return self.dropout(torch.cat((same_speaker, distance, genre), dim=2))

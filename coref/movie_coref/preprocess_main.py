@@ -11,25 +11,16 @@ import os
 
 FLAGS = flags.FLAGS
 proj_dir = os.getcwd()
-flags.DEFINE_string("screenplay_parse_csv",
-                    default=os.path.join(proj_dir,
-                                         "data/movie_coref/parse.csv"),
-                    help="Screenplay parse csv file.")
-flags.DEFINE_string("movie_raters_text",
-                    default=os.path.join(proj_dir,
-                                         "data/movie_coref/movies.txt"),
-                    help="Movie and raters text file.")
-flags.DEFINE_string("screenplays_dir",
-                    default=os.path.join(proj_dir,
-                                         "data/movie_coref/screenplay"),
-                    help="Directory containing screenplay text files.")
-flags.DEFINE_string("annotation_dir",
-                    default=os.path.join(proj_dir, "data/movie_coref/csv"),
-                    help="Directory containing annotated csv files.")
-flags.DEFINE_string("output_dir",
-                    default=os.path.join(proj_dir, "data/movie_coref/results"),
-                    help=("Directory to which the jsonlines and conll files"
-                          " will be saved."))
+flags.DEFINE_string("screenplay_parse_csv", default=os.path.join(proj_dir,
+    "data/movie_coref/parse.csv"), help="Screenplay parse csv file.")
+flags.DEFINE_string("movie_raters_text", default=os.path.join(proj_dir,
+    "data/movie_coref/movies.txt"), help="Movie and raters text file.")
+flags.DEFINE_string("screenplays_dir", default=os.path.join(proj_dir,
+    "data/movie_coref/screenplay"), help="Directory containing screenplay text files.")
+flags.DEFINE_string("annotation_dir", default=os.path.join(proj_dir, "data/movie_coref/csv"),
+    help="Directory containing annotated csv files.")
+flags.DEFINE_string("output_dir", default=os.path.join(proj_dir, "data/movie_coref/results"),
+    help="Directory to which the jsonlines and conll files will be saved.")
 
 def main(argv):
     parse = FLAGS.screenplay_parse_csv

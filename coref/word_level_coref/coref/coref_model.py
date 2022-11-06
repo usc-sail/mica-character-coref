@@ -51,7 +51,8 @@ class CorefModel:  # pylint: disable=too-many-instance-attributes
     def __init__(self,
                  config_path: str,
                  section: str,
-                 epochs_trained: int = 0):
+                 epochs_trained: int = 0,
+                 use_gpu: bool = False):
         """
         A newly created model is set to evaluation mode.
 
@@ -60,8 +61,10 @@ class CorefModel:  # pylint: disable=too-many-instance-attributes
             section (str): the selected section of the config file
             epochs_trained (int): the number of epochs finished
                 (useful for warm start)
+            use_gpu (bool): use cuda:0 gpu
         """
         self.config = CorefModel._load_config(config_path, section)
+        self.config.device = "cuda:0" if use_gpu else "cpu"
         self.epochs_trained = epochs_trained
         self._docs: Dict[str, List[Doc]] = {}
         self._build_model()

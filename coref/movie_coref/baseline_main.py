@@ -39,6 +39,7 @@ flags.DEFINE_string("output_dir", default=p("data/movie_coref/results/coreferenc
     help="Directory to which the baseline predictions will be saved")
 flags.DEFINE_bool("overwrite", default=False, help="Overwrite predictions.")
 flags.DEFINE_bool("append_results", default=False, help="Append results.")
+flags.DEFINE_bool("use_gpu", default=False, help="Use cuda:0 gpu if available")
 
 def main(argv):
     if len(argv) > 1:
@@ -55,7 +56,7 @@ def main(argv):
         FLAGS.reference_scorer, FLAGS.wl_config, FLAGS.wl_weights,
         FLAGS.wl_batch_size, FLAGS.wl_genre, input_file, output_file, FLAGS.entity, 
         FLAGS.merge_speakers, FLAGS.provide_gold_mentions, FLAGS.remove_gold_singletons,
-        FLAGS.overwrite)
+        FLAGS.overwrite, FLAGS.use_gpu)
     if FLAGS.append_results:
         with open(os.path.join(FLAGS.output_dir, f"{partition}.baseline.tsv"), "a") as fw:
             for metric, metric_result in result.items():

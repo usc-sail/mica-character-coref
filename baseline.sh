@@ -24,5 +24,6 @@ echo -e "preprocess=${preprocess} entity=${entity} genre=${genre} merge_speakers
 provide_gold_mentions=${gmx} remove_gold_singletons=${gsx}"
 python coref/movie_coref/baseline_main.py --preprocess=$preprocess --entity=$entity \
 --wl_genre=$genre --${mg}merge_speakers --${gm}provide_gold_mentions --${gs}remove_gold_singletons \
---append_results --run_train
+--append_results --run_train --use_gpu
+exit
 done; done; done; done; done; done
