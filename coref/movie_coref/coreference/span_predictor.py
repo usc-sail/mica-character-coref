@@ -3,8 +3,10 @@ from torch import nn
 
 class SpanPredictor(nn.Module):
 
-    def __init__(self, word_embedding_size: int, dropout: float) -> None:
+    def __init__(self, max_left: int, max_right: int, word_embedding_size: int, dropout: float) -> None:
         super().__init__()
+        self.max_left = max_left
+        self.max_right = max_right
         self.ffnn = nn.Sequential(
             nn.Linear(word_embedding_size * 2 + 64, word_embedding_size),
             nn.ReLU(),
@@ -32,7 +34,6 @@ class SpanPredictor(nn.Module):
     def forward(
         self, 
         embeddings: torch.FloatTensor, 
-        parse_ids: torch.LongTensor,
         head_ids: torch.LongTensor) -> torch.FloatTensor:
         """
         Calculates span start/end scores of words for each head_id.
@@ -47,37 +48,32 @@ class SpanPredictor(nn.Module):
             torch.FloatTensor: span start/end scores [n_heads, n_words, 2]
         """
         # Obtain distance embedding indices [n_heads, n_words]
-        relative_positions = (
-            head_ids.unsqueeze(1) - torch.arange(embeddings.shape[0], 
+        relative_positions = (head_ids.unsqueeze(1) - torch.arange(embeddings.shape[0], 
             device=self.device).unsqueeze(0))
         emb_ids = relative_positions + 63
         emb_ids[(emb_ids < 0) + (emb_ids > 126)] = 127
 
-        # Obtain "same segment" boolean mask, [n_heads, n_words]
-        same_segment = (
-            parse_ids[head_ids].unsqueeze(1) == parse_ids.unsqueeze(0))
+        # Obtain valid positions boolean mask, [n_heads, n_words]
+        valid_positions = (-self.max_right <= relative_positions) & (
+            relative_positions <= self.max_left)
 
         # pair_matrix contains concatenated head word embedding + 
         # candidate word embedding + distance embedding, for each candidate 
-        # among the words in the same segment as the head word
+        # among the words in valid positions for the head word
         # [total_n_candidates, emb_size x 2 + distance_emb_size]
-        rows, cols = same_segment.nonzero(as_tuple=True)
-        pair_matrix = torch.cat((
-            embeddings[head_ids[rows]],
-            embeddings[cols],
+        rows, cols = valid_positions.nonzero(as_tuple=True)
+        pair_matrix = torch.cat((embeddings[head_ids[rows]], embeddings[cols],
             self.emb(emb_ids[rows, cols])), dim=1)
 
         # padding_mask: [n_heads, max_segment_len]
-        lengths = same_segment.sum(dim=1)
-        padding_mask = torch.arange(
-            0, lengths.max(), device=self.device).unsqueeze(0)
+        lengths = valid_positions.sum(dim=1)
+        padding_mask = torch.arange(0, lengths.max(), device=self.device).unsqueeze(0)
         padding_mask = (padding_mask < lengths.unsqueeze(1))
 
         # [n_heads, max_segment_len, emb_size x 2 + distance_emb_size]
         # This is necessary to allow the convolution layer to look at several
         # word scores
-        padded_pairs = torch.zeros(
-            *padding_mask.shape, pair_matrix.shape[-1], device=self.device)
+        padded_pairs = torch.zeros(*padding_mask.shape, pair_matrix.shape[-1], device=self.device)
         padded_pairs[padding_mask] = pair_matrix
 
         # res: [n_heads, n_candidates, 2]
@@ -85,8 +81,7 @@ class SpanPredictor(nn.Module):
         res = self.conv(res.permute(0, 2, 1)).permute(0, 2, 1)
 
         # scores: [n_heads, n_words, 2]
-        scores = torch.full(
-            (head_ids.shape[0], embeddings.shape[0], 2), float('-inf'), 
+        scores = torch.full((head_ids.shape[0], embeddings.shape[0], 2), float('-inf'), 
             device=self.device)
         scores[rows, cols] = res[padding_mask]
 

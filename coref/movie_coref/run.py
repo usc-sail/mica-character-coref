@@ -54,6 +54,7 @@ flags.DEFINE_integer("subword_batch_size", default=2,
 flags.DEFINE_integer("cr_batch_size", default=16, 
     help="Batch size of word sequences for character head recognition.")
 flags.DEFINE_integer("fn_batch_size", default=16, help="Batch size of word pairs for fine scoring.")
+flags.DEFINE_integer("sp_batch_size", default=4, help="Batch size of head ids for span prediction.")
 flags.DEFINE_integer("cr_seq_len", default=256, 
     help="Sequence length of word sequences for character head recognition.")
 flags.DEFINE_bool("run_span", default=False, help="Train and evaluate the span predictor module.")
@@ -124,6 +125,7 @@ def main(argv):
         subword_batch_size=FLAGS.subword_batch_size,
         cr_batch_size=FLAGS.cr_batch_size,
         fn_batch_size=FLAGS.fn_batch_size,
+        sp_batch_size=FLAGS.sp_batch_size,
         run_span=FLAGS.run_span,
         add_cr_to_coarse=FLAGS.add_cr_to_coarse,
         filter_mentions_by_cr=FLAGS.filter_by_cr,

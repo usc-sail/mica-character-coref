@@ -5,6 +5,10 @@
 		}
 	],
 	"settings": {
-		"git.ignoreLimitWarning": true
+		"git.ignoreLimitWarning": true,
+		"workbench.colorCustomizations": {
+			"editorRuler.foreground": "#5f535c",
+			"terminal.selectionBackground": "#b5f7af"
+		}
 	}
 }

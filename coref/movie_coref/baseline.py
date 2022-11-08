@@ -49,8 +49,7 @@ def wl_predict(config_file: str, weights: str, batch_size: int, genre: str, inpu
         "general_optimizer", "bert_scheduler", "general_scheduler"})
     model.training = False
     with jsonlines.open(input_file, mode="r") as input_data:
-        docs = [wl_build_doc(doc, model) for doc in input_data 
-            if doc["document_id"] != "avengers_endgame"]
+        docs = [wl_build_doc(doc, model) for doc in input_data]
     with torch.no_grad():
         tbar = tqdm.tqdm(docs, unit="docs")
         for doc in tbar:

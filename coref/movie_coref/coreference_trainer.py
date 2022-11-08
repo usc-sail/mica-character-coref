@@ -15,6 +15,7 @@ import itertools
 import logging as _logging
 import math
 import numpy as np
+import os
 import torch
 from torch.utils.data import TensorDataset, DataLoader
 from torch.optim import AdamW
@@ -50,6 +51,7 @@ class CoreferenceTrainer:
         subword_batch_size: int,
         cr_batch_size: int,
         fn_batch_size: int,
+        sp_batch_size: int,
         run_span: bool,
         add_cr_to_coarse: bool,
         filter_mentions_by_cr: bool,
@@ -90,6 +92,7 @@ class CoreferenceTrainer:
         self.subword_batch_size = subword_batch_size
         self.cr_batch_size = cr_batch_size
         self.fn_batch_size = fn_batch_size
+        self.sp_batch_size = sp_batch_size
         self.run_span = run_span
         self.add_cr_to_coarse = add_cr_to_coarse
         self.filter_mentions_by_cr = filter_mentions_by_cr
@@ -295,9 +298,8 @@ class CoreferenceTrainer:
         batch_size = math.ceil(len(subword_id_seqs)/len(document.subword_dataloader))
         self._log(f"{document.movie}: Subword batch size = {batch_size} sequences/batch")
 
-    def _prepare_corpus(
-        self, corpus: CorefCorpus, split_len: int | None, 
-        overlap_len = 0) -> CorefCorpus:
+    def _prepare_corpus(self, corpus: CorefCorpus, split_len: int | None, overlap_len = 0) -> (
+        CorefCorpus):
         """Create new corpus by splitting, tokenizing, and creating subword
         sequences of the screenplay documents in the original corpus.
 
@@ -320,10 +322,19 @@ class CoreferenceTrainer:
             self._create_subword_dataloader(_document)
             _corpus.documents.append(_document)
         return _corpus
+
+    def _find_max_n_words_left_and_right_of_head(self, corpus: CorefCorpus) -> tuple[int, int]:
+        """Get the maximum number of words to the left and right of a head word"""
+        max_left, max_right = -1, -1
+        for document in corpus:
+            for mentions in document.clusters.values():
+                for mention in mentions:
+                    max_left = max(max_left, mention.head - mention.begin)
+                    max_right = max(max_right, mention.end - mention.head)
+        return max_left, max_right
     
     def _find_avg_n_heads(self, corpus: CorefCorpus) -> float:
-        """Get average number of character mention heads in a document.
-        """
+        """Get average number of character mention heads in a document."""
         n_heads = []
         for document in corpus:
             n_document_heads = 0
@@ -355,6 +366,10 @@ class CoreferenceTrainer:
     def _fn_gather(self, dataloader: DataLoader):
         """Get gather function to use in fine coreference dataloader"""
         return self._gather(dataloader, self.fn_batch_size)
+
+    def _sp_gather(self, dataloader: DataLoader):
+        """Get gather function to use in span prediction dataloader"""
+        return self._gather(dataloader, self.sp_batch_size)
 
     def _create_cr_dataloader(
         self, word_embeddings: torch.FloatTensor, 
@@ -474,10 +489,9 @@ class CoreferenceTrainer:
         y[y.sum(dim=1) == 0, 0] = True
         return y.to(torch.float)
 
-    def _get_word_clusters(
-        self, document: CorefDocument, character_scores: torch.FloatTensor, 
-        coref_scores: torch.FloatTensor, indices: torch.LongTensor
-        ) -> tuple[list[set[int]], list[set[int]]]:
+    def _get_word_clusters(self, document: CorefDocument, character_scores: torch.FloatTensor, 
+        coref_scores: torch.FloatTensor, indices: torch.LongTensor) -> tuple[
+            list[set[int]], list[set[int]]]:
         """
         Find word-level clusters from character head and coreference scores.
         Return both gold and predicted clusters.
@@ -527,23 +541,16 @@ class CoreferenceTrainer:
 
         return gold_clusters, pred_clusters
 
-    def _get_sp_training_data(self, document: CorefDocument) -> (
-        tuple[
-            torch.LongTensor, torch.LongTensor, torch.LongTensor, 
-            torch.LongTensor]):
-        """Get head, start, and end word indexes from document for training the
-        span prediction module.
+    def _get_sp_training_data(self, document: CorefDocument) -> tuple[torch.LongTensor, 
+        torch.LongTensor, torch.LongTensor]:
+        """Get head, start, and end word indexes from document for training the span prediction
+        module.
 
         Returns:
-            parse_ids: Long tensor of word screenplay parse tags [n_words]
-            heads: Long tensor of word indices of heads of character mentions 
-                [n_heads]
-            starts: Long tensor of word indices of beginning of character
-                mentions [n_heads]
-            ends: Long tensor of word indices of ending of character
-                mentions [n_heads]
+            heads: Long tensor of word indices of heads of character mentions [n_heads].
+            starts: Long tensor of word indices of beginning of character mentions [n_heads].
+            ends: Long tensor of word indices of ending of character mentions [n_heads].
         """
-        parse_ids = torch.LongTensor(document.parse_ids).to(self.accelerator.device)
         starts, ends, heads = [], [], []
         for mentions in document.clusters.values():
             for mention in mentions:
@@ -553,23 +560,21 @@ class CoreferenceTrainer:
         starts = torch.LongTensor(starts).to(self.accelerator.device)
         ends = torch.LongTensor(ends).to(self.accelerator.device)
         heads = torch.LongTensor(heads).to(self.accelerator.device)
-        return parse_ids, heads, starts, ends
-    
-    def _get_sp_inference_data(
-        self, document: CorefDocument, word_clusters: list[list[int]]) -> (
-            tuple[torch.LongTensor, torch.LongTensor]):
-        """Get parse ids and heads from the predicted word clusters.
+        return heads, starts, ends
 
-        Returns:
-            parse_ids: Long tensor of word screenplay parse tags [n_words]
-            heads: Long tensor of word indices of heads of predicted
-                character mentions [n_heads]
-        """
-        parse_ids = torch.LongTensor(document.parse_ids).to(self.accelerator.device)
+    def _get_sp_dataloader(self, head_ids: torch.LongTensor) -> DataLoader:
+        """Get head ids dataloader for span predictor module"""
+        dataset = TensorDataset(head_ids)
+        dataloader = DataLoader(dataset, batch_size=self.sp_batch_size)
+        dataloader = self.accelerator.prepare_data_loader(dataloader)
+        return dataloader
+    
+    def _get_sp_inference_data(self, word_clusters: list[list[int]]) -> torch.LongTensor:
+        """Get heads from the predicted word clusters."""
         heads = set([_head for cluster in word_clusters for _head in cluster])
         heads = sorted(heads)
         heads = torch.LongTensor(heads).to(self.accelerator.device)
-        return parse_ids, heads
+        return heads
 
     def _run(self, document: CorefDocument) -> tuple[torch.Tensor, CorefResult]:
         """Model coreference in document.
@@ -593,19 +598,12 @@ class CoreferenceTrainer:
             embeddings, mask = subword_gather((embeddings, mask))
             embeddings = embeddings[mask == 1]
             subword_embeddings.append(embeddings)
-            self.accelerator.wait_for_everyone()
         subword_embeddings = torch.cat(subword_embeddings, dim=0)
-        self._debug(f"{prefix}: subword_embeddings = {subword_embeddings.shape} "
-            f"({subword_embeddings.device})")
-        self._debug(self._gpu_usage())
 
         # Word Encoder
         word_to_subword_offset = torch.LongTensor(document.word_to_subword_offset).to(
             self.accelerator.device)
         word_embeddings = self.model.encoder(subword_embeddings, word_to_subword_offset)
-        self._debug(f"{prefix}: word_embeddings = {word_embeddings.shape} "
-            f"({word_embeddings.device})")
-        self._debug(self._gpu_usage())
 
         # Character Scores
         character_scores = []
@@ -617,26 +615,16 @@ class CoreferenceTrainer:
             embeddings, scores = cr_gather((embeddings, scores))
             scores = scores[~(embeddings == 0).all(dim=2)]
             character_scores.append(scores)
-            self.accelerator.wait_for_everyone()
         character_scores = torch.cat(character_scores, dim=0)
-        self._debug(f"{prefix}: character_scores = {character_scores.shape} "
-            f"({character_scores.device})")
-        self._debug(self._gpu_usage())
 
         # Coarse Coreference Scores
         if self.add_cr_to_coarse:
             coarse_scores, top_indices = self.model.coarse_scorer(word_embeddings, character_scores)
         else:
             coarse_scores, top_indices = self.model.coarse_scorer(word_embeddings)
-        self._debug(f"{prefix}: coarse_scores = {coarse_scores.shape}, top_indices = "
-            f"{top_indices.shape} ({top_indices.device})")
-        torch.cuda.empty_cache()
-        self._debug(self._gpu_usage())
 
         # Pairwise Encoder
         features = self.model.pairwise_encoder(top_indices, document.speaker, self.genre)
-        self._debug(f"{prefix}: features = {features.shape} ({features.device})")
-        self._debug(self._gpu_usage())
         
         # Fine Coreference Scores
         fine_scores = []
@@ -647,11 +635,7 @@ class CoreferenceTrainer:
             scores = self.model.fine_scorer(word_embeddings, *batch)
             scores = fn_gather(scores)
             fine_scores.append(scores)
-            self.accelerator.wait_for_everyone()
         fine_scores = torch.cat(fine_scores, dim=0)
-        self._debug(f"{prefix}: fine_scores = {fine_scores.shape} ({fine_scores.device})")
-        torch.cuda.empty_cache()
-        self._debug(self._gpu_usage())
 
         # Loss
         coref_y = self._get_coref_ground_truth(document.word_cluster_ids, top_indices,
@@ -660,10 +644,6 @@ class CoreferenceTrainer:
         character_y = torch.FloatTensor(document.word_head_ids).to(self.accelerator.device)
         character_loss = self.model.cr_loss(character_scores, character_y)
         loss = coref_loss + character_loss
-        torch.cuda.empty_cache()
-        self._log(f"{prefix}: character_loss = {character_loss:.4f}, coref_loss = "
-            f"{coref_loss:.4f}, loss (character + coref) = {loss:.4f}")
-        self._debug(self._gpu_usage())
 
         # Performance
         gold_word_clusters, pred_word_clusters = self._get_word_clusters(document, character_scores,
@@ -676,19 +656,26 @@ class CoreferenceTrainer:
         # Span Prediction
         if self.run_span:
             if self.model.training:
-                parse_ids, heads, starts, ends = self._get_sp_training_data(document)
-                sp_scores = self.model.span_predictor(word_embeddings, parse_ids, heads)
+                heads, starts, ends = self._get_sp_training_data(document)
+            else:
+                heads = self._get_sp_inference_data(pred_word_clusters)
+
+            sp_scores = []
+            sp_dataloader = self._get_sp_dataloader(heads)
+            sp_gather = self._sp_gather(sp_dataloader)
+            for batch in sp_dataloader:
+                scores = self.model.span_predictor(word_embeddings, *batch)
+                scores = sp_gather(scores)
+                sp_scores.append(scores)
+            sp_scores = torch.cat(sp_scores, dim=0)
+
+            if self.model.training:
                 sp_loss = self.model.sp_loss(sp_scores, starts, ends, self.avg_n_train_heads)
                 loss = loss + sp_loss
-                self._debug(f"{prefix}: heads = {heads.shape}, sp_scores = {sp_scores.shape} "
-                    f"({sp_scores.device})")
-                self._log(f"{prefix}: span_loss = {sp_loss:.4f}, loss (character + coref + span)"
+                self._log(f"{prefix}: character_loss = {character_loss:.4f}, coref_loss = "
+                    f"{coref_loss:.4f}, span_loss = {sp_loss:.4f}, loss (character + coref + span)"
                     f" = {loss:.4f}")
-                torch.cuda.empty_cache()
-                self._debug(self._gpu_usage())
             else:
-                parse_ids, heads = self._get_sp_inference_data(document, pred_word_clusters)
-                sp_scores = self.model.span_predictor(word_embeddings, parse_ids, heads)
                 starts = sp_scores[:, :, 0].argmax(dim=1).tolist()
                 ends = sp_scores[:, :, 1].argmax(dim=1).tolist()
                 head2span = {head: (start, end) for head, start, end in zip(heads.tolist(), starts,
@@ -696,8 +683,12 @@ class CoreferenceTrainer:
                 pred_span_clusters = [set([head2span[head] for head in cluster])
                     for cluster in pred_word_clusters]
                 gold_span_clusters = [set([(mention.begin, mention.end) for mention in cluster])
-                    for cluster in document.clusters]
+                    for cluster in document.clusters.values()]
                 result.add_span_clusters(document, gold_span_clusters, pred_span_clusters)
+        else:
+            if self.model.training:
+                self._log(f"{prefix}: character_loss = {character_loss:.4f}, coref_loss = "
+                    f"{coref_loss:.4f}, loss (character + coref) = {loss:.4f}")
 
         return loss, result
 
@@ -717,17 +708,14 @@ class CoreferenceTrainer:
 
     def _train(self, document: CorefDocument) -> float:
         """Train model on document and return loss value."""
-        prefix = f"Epoch = {self.epoch:2d}, Movie = {document.movie:20s}"
         self.model.train()
         if not self.freeze_bert:
             self.bert_optimizer.zero_grad()
         self.cr_optimizer.zero_grad()
         self.coref_optimizer.zero_grad()
-        loss, result = self._run(document)
-        self._log(f"{prefix}: result = {result}")
+        loss, _ = self._run(document)
         self.accelerator.backward(loss)
         self._step()
-        self.accelerator.wait_for_everyone()
         return loss.item()
     
     def _eval(self):
@@ -740,11 +728,12 @@ class CoreferenceTrainer:
                 _loss, _result = self._run(document)
                 loss.append(_loss.item())
                 result.add(_result)
-            self._log(f"Epoch = {self.epoch:2d}, eval average loss: {np.mean(loss):.4f}, "
-                f"result = {result}")
+            self._log(f"Epoch = {self.epoch:2d}, eval loss (character + coref) = "
+                f"{np.mean(loss):.4f}, result = {result}")
 
     def __call__(self):
         self._debug(self._gpu_usage())
+        max_left, max_right = -1, -1
 
         # Create model
         self._log("Initializing model")
@@ -757,6 +746,8 @@ class CoreferenceTrainer:
             gru_hidden_size = self.gru_hidden_size,
             gru_bidirectional = self.gru_bidirectional,
             topk = self.topk,
+            max_left = max_left,
+            max_right = max_right,
             bce_weight = self.bce_weight,
             dropout = self.dropout)
         self.model.device = self.accelerator.device
@@ -773,6 +764,9 @@ class CoreferenceTrainer:
         self.train_corpus = CorefCorpus(self.train_path)
         self.train_corpus = self._prepare_corpus(self.train_corpus, self.train_document_len, 0)
         self.avg_n_train_heads = self._find_avg_n_heads(self.train_corpus)
+        max_left, max_right = self._find_max_n_words_left_and_right_of_head(self.train_corpus)
+        self.model.span_predictor.max_left = max_left
+        self.model.span_predictor.max_right = max_right
 
         # Load development set
         self._log("Loading development corpus")
@@ -786,7 +780,6 @@ class CoreferenceTrainer:
 
         # Training loop
         self._log("Starting training")
-        self._debug(self._gpu_usage())
         for self.epoch in range(1, self.max_epochs + 1):
             # TODO randomize this
             inds = np.arange(len(self.train_corpus))
@@ -799,8 +792,7 @@ class CoreferenceTrainer:
                     f"({self.accelerator.device})")
                 train_loss = self._train(document)
                 training_losses.append(train_loss)
-                torch.cuda.empty_cache()
-                self._debug(self._gpu_usage())
+                self.accelerator.wait_for_everyone()
                 self._log(f"Epoch = {self.epoch:2d}: Running train loss = "
                     f"{np.mean(training_losses):.4f}")
 

@@ -25,6 +25,8 @@ class MovieCoreference:
         gru_hidden_size: int,
         gru_bidirectional: bool,
         topk: int,
+        max_left: int,
+        max_right: int,
         bce_weight: float,
         dropout: float) -> None:
         self.tokenizer: RobertaTokenizerFast = (RobertaTokenizerFast.from_pretrained(
@@ -41,7 +43,7 @@ class MovieCoreference:
         self.pairwise_encoder = PairwiseEncoder(dropout)
         self.coarse_scorer = CoarseScorer(word_embedding_size, topk, dropout)
         self.fine_scorer = FineScorer(word_embedding_size, dropout)
-        self.span_predictor = SpanPredictor(word_embedding_size, dropout)
+        self.span_predictor = SpanPredictor(max_left, max_right, word_embedding_size, dropout)
         self.bce_weight = bce_weight
         self._device = torch.device("cpu")
         self._training = False
@@ -121,9 +123,8 @@ class MovieCoreference:
         loss = bce_loss_fn(scores, labels)
         return loss
 
-    def sp_loss(
-        self, scores: torch.FloatTensor, starts: torch.LongTensor, 
-        ends: torch.LongTensor, avg_n_heads: int) -> torch.Tensor:
+    def sp_loss(self, scores: torch.FloatTensor, starts: torch.LongTensor, ends: torch.LongTensor, 
+        avg_n_heads: int) -> torch.Tensor:
         """Span Prediction Loss.
 
         Args:
