@@ -3,11 +3,12 @@ model on the scripts.
 """
 
 from mica_text_coref.coref.word_level_coref.coref import CorefModel
-from mica_text_coref.coref.word_level_coref.coref.tokenizer_customization import *
+from mica_text_coref.coref.word_level_coref.coref.tokenizer_customization import TOKENIZER_FILTERS, TOKENIZER_MAPS
 from mica_text_coref.coref.movie_coref.data import CorefCorpus
 from mica_text_coref.coref.movie_coref import conll
 from mica_text_coref.coref.movie_coref.result import Metric
 from mica_text_coref.coref.movie_coref import rules
+from mica_text_coref.coref.movie_coref import split_and_merge
 
 from collections import defaultdict
 import jsonlines
@@ -38,34 +39,49 @@ def wl_build_doc(doc: dict, model: CorefModel) -> dict:
     return doc
 
 def wl_predict(config_file: str, weights: str, batch_size: int, genre: str, input_file: str,
-    output_file: str, use_gpu: bool):
+    output_file: str, split_len: int | None, overlap_len: int, use_gpu: bool):
     """Predict coreference clusters using the word-level coreference model. Save predictions to 
     output file.
     """
+    # Initialize model
     use_gpu = use_gpu and torch.cuda.is_available()
     model = CorefModel(config_file, "roberta", use_gpu = use_gpu)
     model.config.a_scoring_batch_size = batch_size
     model.load_weights(path=weights, map_location=model.config.device, ignore={"bert_optimizer", 
         "general_optimizer", "bert_scheduler", "general_scheduler"})
     model.training = False
+
+    # Collect docs and split them (optional)
+    docs = []
     with jsonlines.open(input_file, mode="r") as input_data:
-        docs = [wl_build_doc(doc, model) for doc in input_data]
+        for doc in input_data:
+            if split_len is None:
+                docs.append(doc)
+            else:
+                for small_doc in split_and_merge.split_screenplay(doc, split_len, overlap_len):
+                    docs.append(small_doc)
+
+    # Inference
     with torch.no_grad():
         tbar = tqdm.tqdm(docs, unit="docs")
         for doc in tbar:
             tbar.set_description(doc["document_id"])
             doc["document_id"] = genre + "_" + doc["document_id"]
+            doc = wl_build_doc(doc, model)
             result = model.run(doc)
             doc["span_clusters"] = result.span_clusters
             doc["word_clusters"] = result.word_clusters
             for key in ("word2subword", "subwords", "word_id", "head2span"):
                 del doc[key]
+
+    # Write output docs
     with jsonlines.open(output_file, mode="w") as output_data:
         output_data.write_all(docs)
 
 def wl_evaluate(reference_scorer: str, config_file: str, weights: str, batch_size: int, genre: str,
     input_file: str, output_file: str, entity: str, merge_speakers: bool, 
-    provide_gold_mentions: bool, remove_gold_singletons: bool, overwrite: bool, use_gpu: bool
+    provide_gold_mentions: bool, remove_gold_singletons: bool, split_len: int | None,
+    overlap_len: int, overwrite: bool, use_gpu: bool
     ) -> dict[str, dict[str, Metric]]:
     """Evaluate coreference using word-level coreference model.
 
@@ -82,6 +98,8 @@ def wl_evaluate(reference_scorer: str, config_file: str, weights: str, batch_siz
         merge_speakers (bool): If true, merge clusters by speakers.
         provide_gold_mentions (bool): If true, provide gold mentions to the model.
         remove_gold_singletons (bool): If true, remove gold clusters with only a single mention.
+        split_len (int|None): Number of words of the smaller screenplays. If None, no splitting occurs.
+        overlap_len (int): Overlap in words between smaller screenplays.
         overwrite (bool): If true, run prediction even if output file is present.
         use_gpu (bool): If true, use cuda:0 gpu if available.
     
@@ -91,14 +109,18 @@ def wl_evaluate(reference_scorer: str, config_file: str, weights: str, batch_siz
         movie names and a special key called "all" that contains micro-averaged scores. The values
         are Metric objects.
     """
+    # Run inference and write predictions to output file
     if overwrite or not os.path.exists(output_file):
-        wl_predict(config_file, weights, batch_size, genre, input_file, output_file, use_gpu)
+        wl_predict(config_file, weights, batch_size, genre, input_file, output_file, 
+            split_len, overlap_len, use_gpu)
 
+    # Read predictions
     docid_to_output = {}
     with jsonlines.open(output_file) as reader:
         for doc in reader:
             docid_to_output[doc["document_id"]] = doc
 
+    # For each document, convert the gold and predicted clusters to conll lines
     corpus = CorefCorpus(input_file)
     gold_lines, pred_lines = [], []
     for document in corpus:
@@ -131,12 +153,17 @@ def wl_evaluate(reference_scorer: str, config_file: str, weights: str, batch_siz
         gold_lines.extend(conll.convert_to_conll(document, gold_clusters))
         pred_lines.extend(conll.convert_to_conll(document, pred_clusters))
 
+    # Evaluate using perl scorer
     gold_file = os.path.join(os.path.dirname(os.path.normpath(output_file)), "gold.conll")
     pred_file = os.path.join(os.path.dirname(os.path.normpath(output_file)), "pred.conll")
     _result = conll.evaluate_conll(reference_scorer, gold_lines, pred_lines, gold_file, pred_file)
     result = defaultdict(lambda: defaultdict(lambda: Metric))
+
+    # Remove the conll files
     os.remove(gold_file)
     os.remove(pred_file)
+
+    # Convert into Metric objects
     for metric, metric_result in _result.items():
         for movie, movie_result in metric_result.items():
             result[metric][movie] = Metric(*movie_result)

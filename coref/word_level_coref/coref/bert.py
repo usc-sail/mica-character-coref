@@ -33,9 +33,11 @@ def get_subwords_batches(doc: Doc,
 
         # Move back till we hit a sentence end
         if end < len(subwords):
-            sent_id = doc["sent_id"][doc["word_id"][end]]
-            while end and doc["sent_id"][doc["word_id"][end - 1]] == sent_id:
-                end -= 1
+            sent_ids = sorted(set(doc["sent_id"][doc["word_id"][start] : doc["word_id"][end]]))
+            if len(sent_ids) > 1:
+                sent_id = doc["sent_id"][doc["word_id"][end]]
+                while end and doc["sent_id"][doc["word_id"][end - 1]] == sent_id:
+                    end -= 1
 
         length = end - start
         batch = [tok.cls_token] + subwords[start:end] + [tok.sep_token]
@@ -46,8 +48,10 @@ def get_subwords_batches(doc: Doc,
         batch += [tok.pad_token] * (batch_size - length)
         batch_ids += [-1] * (batch_size - length)
 
-        subwords_batches.append([tok.convert_tokens_to_ids(token)
-                                 for token in batch])
+        subword_batch = []
+        for token in batch:
+            subword_batch.append(tok.convert_tokens_to_ids(token))
+        subwords_batches.append(subword_batch)
         start += length
 
     return np.array(subwords_batches)

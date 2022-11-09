@@ -9,7 +9,7 @@ gold_singleton=("" "no")
 
 rm -f data/movie_coref/results/coreference/baselines/train.baseline.tsv
 echo -e "preprocess\tgenre\tentity\tmerge_speakers\tprovide_gold_mentions\tremove_gold_singletons\
-\tmetric\tmovie\tprecision\trecall\tf1" > \
+\toverlap_len\tsplit_len\tmetric\tmovie\tprecision\trecall\tf1" > \
 data/movie_coref/results/coreference/baselines/train.baseline.tsv
 for preprocess in "${preprocess_vals[@]}"; do
 for entity in "${entity_vals[@]}"; do
@@ -24,6 +24,6 @@ echo -e "preprocess=${preprocess} entity=${entity} genre=${genre} merge_speakers
 provide_gold_mentions=${gmx} remove_gold_singletons=${gsx}"
 python coref/movie_coref/baseline_main.py --preprocess=$preprocess --entity=$entity \
 --wl_genre=$genre --${mg}merge_speakers --${gm}provide_gold_mentions --${gs}remove_gold_singletons \
---append_results --run_train --use_gpu
+--append_results --run_train --split_len=5120 --overlap_len=512 --use_gpu --overwrite
 exit
 done; done; done; done; done; done
