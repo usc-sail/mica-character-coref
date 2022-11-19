@@ -140,5 +140,5 @@ coref/seq_coref/scorer/
 # slurm jobs
 /carc
 
-# English training head for baseline
-roberta-large_english_train_head.jsonlines.pickle
+# vscode workspace
+*.code-workspace
