@@ -9,6 +9,7 @@ import datetime
 import random
 import sys
 import time
+import os
 
 import numpy as np  # type: ignore
 import torch        # type: ignore
@@ -42,7 +43,7 @@ if __name__ == "__main__":
     argparser = argparse.ArgumentParser()
     argparser.add_argument("mode", choices=("train", "eval"))
     argparser.add_argument("experiment")
-    argparser.add_argument("--config-file", default="config.toml")
+    argparser.add_argument("--config-file", default=os.path.join(os.getenv("PROJ_DIR"), "mica_text_coref/coref/word_level_coref/config.toml"))
     argparser.add_argument("--data-split", choices=("train", "dev", "test"),
                            default="test",
                            help="Data split to be used for evaluation."
@@ -73,14 +74,15 @@ if __name__ == "__main__":
         sys.exit(1)
 
     seed(2020)
-    model = CorefModel(args.config_file, args.experiment)
+    model = CorefModel(args.config_file, args.experiment, use_gpu = True)
 
     if args.batch_size:
         model.config.a_scoring_batch_size = args.batch_size
 
     if args.mode == "train":
         if args.weights is not None or args.warm_start:
-            model.load_weights(path=args.weights, map_location="cpu",
+            print("loading weights")
+            model.load_weights(path=args.weights,
                                noexception=args.warm_start)
         with output_running_time():
             model.train()

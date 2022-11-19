@@ -11,7 +11,7 @@ from mica_text_coref.coref.movie_coref.coreference.span_predictor import SpanPre
 import itertools
 import torch
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss
-from transformers import RobertaTokenizerFast, RobertaModel
+from transformers import RobertaTokenizerFast, RobertaModel # type: ignore
 
 class MovieCoreference:
 
@@ -25,25 +25,18 @@ class MovieCoreference:
         gru_hidden_size: int,
         gru_bidirectional: bool,
         topk: int,
-        max_left: int,
-        max_right: int,
         bce_weight: float,
         dropout: float) -> None:
-        self.tokenizer: RobertaTokenizerFast = (RobertaTokenizerFast.from_pretrained(
-            "roberta-large", use_fast=True, add_prefix_space=True))
-        self.tokenizer_map = {".": ["."], ",": [","], "!": ["!"], "?": ["?"],":":[":"], ";":[";"],
-            "'s": ["'s"]}
-        self.bert: RobertaModel = RobertaModel.from_pretrained("roberta-large",
-            add_pooling_layer=False)
+        self.tokenizer: RobertaTokenizerFast = (RobertaTokenizerFast.from_pretrained("roberta-large", use_fast=True, add_prefix_space=True))
+        self.tokenizer_map = {".": ["."], ",": [","], "!": ["!"], "?": ["?"],":":[":"], ";":[";"], "'s": ["'s"]}
+        self.bert: RobertaModel = RobertaModel.from_pretrained("roberta-large", add_pooling_layer=False)
         word_embedding_size = self.bert.config.hidden_size
         self.encoder = Encoder(word_embedding_size, dropout)
-        self.character_recognizer = CharacterRecognizer(word_embedding_size, tag_embedding_size,
-            parsetag_size, postag_size, nertag_size, gru_nlayers, gru_hidden_size,
-            gru_bidirectional, dropout)
+        self.character_recognizer = CharacterRecognizer(word_embedding_size, tag_embedding_size, parsetag_size, postag_size, nertag_size, gru_nlayers, gru_hidden_size, gru_bidirectional, dropout)
         self.pairwise_encoder = PairwiseEncoder(dropout)
         self.coarse_scorer = CoarseScorer(word_embedding_size, topk, dropout)
         self.fine_scorer = FineScorer(word_embedding_size, dropout)
-        self.span_predictor = SpanPredictor(max_left, max_right, word_embedding_size, dropout)
+        self.span_predictor = SpanPredictor(word_embedding_size, dropout)
         self.bce_weight = bce_weight
         self._device = torch.device("cpu")
         self._training = False
@@ -67,10 +60,7 @@ class MovieCoreference:
     def training(self) -> bool:
         return self._training
 
-    def _rename_keys(
-        self, 
-        weights_dict: dict[str, torch.Tensor], 
-        renaming_schema: dict[str, str]) -> dict[str, torch.Tensor]:
+    def _rename_keys(self, weights_dict: dict[str, torch.Tensor], renaming_schema: dict[str, str]) -> dict[str, torch.Tensor]:
         for old_key, new_key in renaming_schema.items():
             weights_dict[new_key] = weights_dict.pop(old_key)
         return weights_dict
@@ -91,13 +81,10 @@ class MovieCoreference:
         return self.character_recognizer.parameters()
 
     def coref_parameters(self):
-        return itertools.chain(self.encoder.parameters(), self.coarse_scorer.parameters(),
-            self.pairwise_encoder.parameters(), self.fine_scorer.parameters(),
-            self.span_predictor.parameters())
+        return itertools.chain(self.encoder.parameters(), self.coarse_scorer.parameters(), self.pairwise_encoder.parameters(), self.fine_scorer.parameters(), self.span_predictor.parameters())
 
     def modules(self):
-        return [self.bert, self.encoder, self.character_recognizer, self.coarse_scorer,
-            self.pairwise_encoder, self.fine_scorer, self.span_predictor]
+        return [self.bert, self.encoder, self.character_recognizer, self.coarse_scorer, self.pairwise_encoder, self.fine_scorer, self.span_predictor]
 
     def train(self):
         for module in self.modules():

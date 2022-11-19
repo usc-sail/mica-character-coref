@@ -288,6 +288,7 @@ def convert_screenplay_and_coreference_annotation_to_json(screenplay_parse_file:
                     jsonlines_file = os.path.join(
                         format_dir, f"{partition}.jsonlines")
 
+                print(f"writing to {jsonlines_file}")
                 with jsonlines.open(jsonlines_file, "w") as writer:
                     for d in write_data:
                         writer.write(d)
@@ -500,8 +501,26 @@ def prepare_for_wlcoref(movie_data: list[dict[str, any]]) -> (
             c += 1
             i = j
         _mdata = deepcopy(mdata)
-        _mdata["document_id"] = mdata["movie"]
+        _mdata["document_id"] = "wb_" + mdata["movie"]
+        _mdata["part_id"] = 0
         _mdata["cased_words"] = mdata["token"]
         _mdata["sent_id"] = parse_ids
+
+        head2span: set[tuple[int, int, int]] = set()
+        word_clusters: list[set[int]] = []
+        span_clusters: list[set[tuple[int, int]]] = []
+        for _, cluster in _mdata["clusters"].items():
+            word_cluster: set[int] = set()
+            span_cluster: set[tuple[int, int]] = set()
+            for begin, end, head in cluster:
+                head2span.add((begin, end + 1, head))
+                word_cluster.add(head)
+                span_cluster.add((begin, end + 1))
+            word_clusters.append(word_cluster)
+            span_clusters.append(span_cluster)
+
+        _mdata["head2span"] = [[head, begin, end] for head, begin, end in head2span]
+        _mdata["word_clusters"] = [sorted(word_cluster) for word_cluster in word_clusters]
+        _mdata["span_clusters"] = [sorted([list(span) for span in span_cluster]) for span_cluster in span_clusters]
         new_movie_data.append(_mdata)
     return new_movie_data

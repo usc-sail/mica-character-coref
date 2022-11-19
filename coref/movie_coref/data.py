@@ -1,6 +1,7 @@
 """Data structure for movie coreference for fine-tuning worl-level coreference
 models
 """
+# pyright: reportGeneralTypeIssues=false
 
 import jsonlines
 import math

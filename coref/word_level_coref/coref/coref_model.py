@@ -65,6 +65,11 @@ class CorefModel:  # pylint: disable=too-many-instance-attributes
         """
         self.config = CorefModel._load_config(config_path, section)
         self.config.device = "cuda:0" if use_gpu else "cpu"
+        self.config.data_dir = os.path.join(os.getenv("DATA_DIR"), self.config.data_dir)
+        self.config.train_data = os.path.join(os.getenv("DATA_DIR"), self.config.train_data)
+        self.config.dev_data = os.path.join(os.getenv("DATA_DIR"), self.config.dev_data)
+        self.config.test_data = os.path.join(os.getenv("DATA_DIR"), self.config.test_data)
+        self.config.conll_log_dir = os.path.join(os.getenv("DATA_DIR"), self.config.conll_log_dir)
         self.epochs_trained = epochs_trained
         self._docs: Dict[str, List[Doc]] = {}
         self._build_model()
@@ -192,6 +197,8 @@ class CorefModel:  # pylint: disable=too-many-instance-attributes
         print(f"Loading from {path}...")
         state_dicts = torch.load(path, map_location=map_location)
         self.epochs_trained = state_dicts.pop("epochs_trained", 0)
+        print(state_dicts.keys())
+        self.epochs_trained = 0
         for key, state_dict in state_dicts.items():
             if not ignore or key not in ignore:
                 if key.endswith("_optimizer"):
@@ -249,6 +256,9 @@ class CorefModel:  # pylint: disable=too-many-instance-attributes
         # coref_scores  [n_spans, n_ants]
         res.coref_scores = torch.cat(a_scores_lst, dim=0)
 
+        # top_indices [n_spans, n_ants]
+        res.top_indices = top_indices
+
         res.coref_y = self._get_ground_truth(
             cluster_ids, top_indices, (top_rough_scores > float("-inf")))
         res.word_clusters = self._clusterize(doc, res.coref_scores,
@@ -284,6 +294,9 @@ class CorefModel:  # pylint: disable=too-many-instance-attributes
         docs_ids = list(range(len(docs)))
         avg_spans = sum(len(doc["head2span"]) for doc in docs) / len(docs)
 
+        self.evaluate()
+        torch.cuda.empty_cache()
+
         for epoch in range(self.epochs_trained, self.config.train_epochs):
             self.training = True
             running_c_loss = 0.0
@@ -300,8 +313,10 @@ class CorefModel:  # pylint: disable=too-many-instance-attributes
 
                 c_loss = self._coref_criterion(res.coref_scores, res.coref_y)
                 if res.span_y:
-                    s_loss = (self._span_criterion(res.span_scores[:, :, 0], res.span_y[0])
-                              + self._span_criterion(res.span_scores[:, :, 1], res.span_y[1])) / avg_spans / 2
+                    rows = torch.arange(len(res.span_y[0]), device=res.span_scores.device)
+                    mask = (res.span_scores[rows, res.span_y[0], 0] > float("-inf")) & (res.span_scores[rows, res.span_y[1], 1] > float("-inf"))
+                    s_loss = (self._span_criterion(res.span_scores[:, :, 0][mask], res.span_y[0][mask])
+                              + self._span_criterion(res.span_scores[:, :, 1][mask], res.span_y[1][mask])) / avg_spans / 2
                 else:
                     s_loss = torch.zeros_like(c_loss)
 
@@ -326,8 +341,9 @@ class CorefModel:  # pylint: disable=too-many-instance-attributes
                 )
 
             self.epochs_trained += 1
-            self.save_weights()
+            # self.save_weights()
             self.evaluate()
+            torch.cuda.empty_cache()
 
     # ========================================================= Private methods
 
@@ -441,7 +457,7 @@ class CorefModel:  # pylint: disable=too-many-instance-attributes
         if path not in self._docs:
             basename = os.path.basename(path)
             model_name = self.config.bert_model.replace("/", "_")
-            cache_filename = f"{model_name}_{basename}.pickle"
+            cache_filename = os.path.join(self.config.data_dir, f"{model_name}_{basename}.pickle")
             if os.path.exists(cache_filename):
                 with open(cache_filename, mode="rb") as cache_f:
                     self._docs[path] = pickle.load(cache_f)

@@ -4,9 +4,10 @@ documents.
 
 import collections
 import numpy as np
-import re
+import torch
+from typing import Any
 
-def split_screenplay(document: dict[str, any], split_len: int, overlap_len: int):
+def split_screenplay(document: dict[str, Any], split_len: int, overlap_len: int, verbose = False):
     """Split screenplay document into smaller documents.
 
     Args:
@@ -42,7 +43,7 @@ def split_screenplay(document: dict[str, any], split_len: int, overlap_len: int)
         if j < len(document["cased_words"]):
             while j >= i and segment_boundaries[j] == 0:
                 j -= 1
-            k = i + split_len - overlap_len
+            k = j - overlap_len
             while k >= i and segment_boundaries[k] == 0:
                 k -= 1
             nexti = k
@@ -54,11 +55,11 @@ def split_screenplay(document: dict[str, any], split_len: int, overlap_len: int)
 
     # Numify original sentence offsets
     sentence_offsets = np.array(document["sent_offset"])
-    
+
     # Create the smaller documents
     for k, (i, j) in enumerate(doc_offsets):
         # Populate general fields
-        _document: dict[str, any] = {}
+        _document: dict[str, Any] = {}
         _document["movie"] = document["movie"] + f"_{k + 1}"
         _document["rater"] = document["rater"]
         _document["token"] = document["token"][i: j]
@@ -108,33 +109,71 @@ def split_screenplay(document: dict[str, any], split_len: int, overlap_len: int)
             i = j
         _document["sent_id"] = parse_ids
 
-        print(f"{_document['document_id']}: {len(_document['cased_words'])} words, "
-            f"{n_mentions} mentions, {len(_document['clusters'])} clusters")
+        if verbose:
+            print(f"{_document['document_id']}: {len(_document['cased_words'])} words, {n_mentions} mentions, {len(_document['clusters'])} clusters")
         yield _document
 
-# def combine_screenplays(documents: list[dict[str, any]], starts: list[int],
-#     ends: list[int]) -> dict[str, any]:
-#     """Combine predictions from smaller screenplays.
+def combine_coref_scores(corefs: list[torch.Tensor], inds: list[torch.Tensor], overlap_lens: list[int], strategy: str) -> tuple[torch.Tensor, torch.Tensor]:
+    """Combine corefs and inds into a single coref and ind tensor.
+    
+    Args:
+        corefs: list[Tensor[*, k + 1]]
+        inds: list[Tensor[*, k]]
+        overlap_lens: list[int]
+        strategy: Can be one of "before", "after", "average", "max", "min", or "none"
+        
+    Return:
+        coref: Tensor[n, 2k + 1]
+        top_indices: Tensor[n, 2k]
+    """
+    # Assertions
+    assert len(corefs) > 0, "Number of coref tensors should be atleast 1"
+    assert len(corefs) == len(inds), "Number of coref tensors should equal number of indices tensors"
+    if len(corefs) == 1: return corefs[0], inds[0]
+    assert len(overlap_lens) == len(corefs) - 1, "Number of overlap lengths should equal one less than the number of coref tensors"
 
-#     Args:
-#         documents: List of smaller documents.
-#         starts: List of integers specifying the start of the document.
-#         ends: List of integers specifying the end of the document.
+    # Intialize
+    n = sum([len(coref) - overlap_len for coref, overlap_len in zip(corefs[:-1], overlap_lens)]) + len(corefs[-1])
+    k = inds[0].shape[1]
+    device = corefs[0].device
+    coref = torch.full((n, 2*k), fill_value=-torch.inf, device=device)
+    ind = torch.full((n, 2*k), fill_value=-1, device=device)
+    coref_start, coref_end = 0, 0
+    overlap_lens.extend([0, 0])
 
-#     Returns:
-#         Combined document.
-#     """
-#     assert len(documents) > 0, "No documents provided"
-#     assert len(documents) == len(starts) == len(ends), "Number of documents and length of starts and ends list should equal"
-#     _document: dict[str, any] = {}
-#     _document["document_id"] = re.sub("_\d+$", "", documents[0]["document_id"])
-#     cased_words, parse_tags, speakers = [], [], []
-#     gold_clusters = collections.defaultdict(set)
-#     for document, i, j in zip(documents, starts, ends):
-#         k = len(cased_words) - i
-#         cased_words.extend(document["cased_words"][k: j])
-#         parse_tags.extend(document["parse"][k: j])
-#         speakers.extend(document["speakers"][k: j])
-#         for character, mentions in document["clusters"].items():
-#             for begin, end, head in mentions:
-#                 gold_clusters[character].add((begin + i, end + i, head + i))
+    # Combine
+    for i in range(len(corefs)):
+        assert len(corefs[i]) - overlap_lens[i - 1] - overlap_lens[i] > 0, "Atmost two segments should overlap"
+        coref_start, coref_end = coref_end, coref_end + len(corefs[i]) - overlap_lens[i - 1] - overlap_lens[i]
+        start, end = overlap_lens[i - 1], len(corefs[i]) - overlap_lens[i]
+
+        # Non-overlapping
+        coref[coref_start: coref_end, :k] = corefs[i][start: end, 1:]
+        ind[coref_start: coref_end, :k] = inds[i][start: end]
+
+        # Overlapping
+        coref_start, coref_end = coref_end, coref_end + overlap_lens[i]
+        if strategy != "none" and i < len(corefs) - 1:
+            for j in range(overlap_lens[i]):
+                heads_x, heads_y = inds[i][end + j].tolist(), inds[i + 1][j].tolist()
+                scores_x, scores_y = corefs[i][end + j, 1:].tolist(), corefs[i + 1][j, 1:].tolist()
+                head_to_score = {h: s for h, s in zip(heads_x, scores_x) if s != -torch.inf}
+                for h, s in zip(heads_y, scores_y):
+                    if s != -torch.inf:
+                        if h in head_to_score:
+                            if strategy == "after": head_to_score[h] = s
+                            elif strategy == "mean": head_to_score[h] = 0.5 * (head_to_score[h] + s)
+                            elif strategy == "max": head_to_score[h] = max(head_to_score[h], s)
+                            elif strategy == "min": head_to_score[h] = min(head_to_score[h], s)
+                        else: head_to_score[h] = s
+                for l, (h, s) in enumerate(head_to_score.items()):
+                    coref[coref_start + j, l] = s
+                    ind[coref_start + j, l] = h
+        else:
+            coref[coref_start: coref_end, :k] = corefs[i][end:, 1:]
+            ind[coref_start: coref_end, :k] = inds[i][end:]
+
+    # Add dummy
+    dummy = torch.zeros((n, 1), device=coref.device)
+    coref = torch.cat((dummy, coref), dim=1)
+    return coref, ind

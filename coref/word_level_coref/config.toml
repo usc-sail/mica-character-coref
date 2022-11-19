@@ -5,16 +5,20 @@
 [DEFAULT]
 
 # The directory that contains extracted files of everything you've downloaded.
-data_dir = "data"
+data_dir = "mica_text_coref/word_level_coref"
+
+# # Train, dev and test jsonlines
+# train_data = "mica_text_coref/word_level_coref/data/english_train_head.jsonlines"
+# dev_data = "mica_text_coref/word_level_coref/data/english_development_head.jsonlines"
+# test_data = "mica_text_coref/word_level_coref/data/english_test_head.jsonlines"
 
 # Train, dev and test jsonlines
-train_data = "/home1/sbaruah/mica_text_coref/data/word_level_coref/data/english_train_head.jsonlines"
-dev_data = "/home1/sbaruah/mica_text_coref/data/word_level_coref/data/english_development_head.jsonlines"
-test_data = "/home1/sbaruah/mica_text_coref/data/word_level_coref/data/english_test_head.jsonlines"
+train_data = "mica_text_coref/movie_coref/results/nocharacters/train_wl.split_4096.jsonlines"
+dev_data = "mica_text_coref/movie_coref/results/nocharacters/dev_wl.jsonlines"
+test_data = "mica_text_coref/movie_coref/results/nocharacters/dev_wl.jsonlines"
 
 # The device where everything is to be placed. "cuda:N"/"cpu" are supported.
-device = "cpu"
-
+device = "cuda:0"
 
 # Bert settings ======================
 
@@ -80,7 +84,7 @@ train_epochs = 20
 bce_loss_weight = 0.5
 
 # The directory that will contain conll prediction files
-conll_log_dir = "data/conll_logs"
+conll_log_dir = "mica_text_coref/word_level_coref/conll_logs"
 
 # =============================================================================
 # Extra keyword arguments to be passed to bert tokenizers of specified models

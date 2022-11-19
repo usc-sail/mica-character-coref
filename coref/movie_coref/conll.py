@@ -1,14 +1,15 @@
 """Evaluate coreference using official conll-2012 scripts
 """
+# pyright: reportGeneralTypeIssues=false
 
 from mica_text_coref.coref.movie_coref.data import CorefDocument
 
 from collections import defaultdict
 import re
 import subprocess
+import os
 
-def convert_to_conll(
-    document: CorefDocument, clusters: list[set[tuple[int, int]]]) -> list[str]:
+def convert_to_conll(document: CorefDocument, clusters: list[set[tuple[int, int]]]) -> list[str]:
     """Create conll lines from clusters.
 
     Args:
@@ -26,10 +27,8 @@ def convert_to_conll(
     mentions = [(j, k, i + 1) for i, cluster in enumerate(clusters) for j, k in cluster]
     non_unigram_mentions = list(filter(lambda mention: mention[1] - mention[0] > 0, mentions))
     unigram_mentions = list(filter(lambda mention: mention[1] == mention[0], mentions))
-    non_unigram_mentions_sorted_by_begin = sorted(non_unigram_mentions, key=lambda mention: 
-        (mention[0], -mention[1]))
-    non_unigram_mentions_sorted_by_end = sorted(non_unigram_mentions, key=lambda mention: 
-        (mention[1], -mention[0]))
+    non_unigram_mentions_sorted_by_begin = sorted(non_unigram_mentions, key=lambda mention: (mention[0], -mention[1]))
+    non_unigram_mentions_sorted_by_end = sorted(non_unigram_mentions, key=lambda mention: (mention[1], -mention[0]))
 
     for begin, _, cluster_index in non_unigram_mentions_sorted_by_begin:
         if coref_column[begin] == "-":
@@ -88,32 +87,24 @@ def convert_to_conll(
 
     return conll_lines
 
-def evaluate_conll(reference_scorer: str, gold_conll_lines: list[str],
-    pred_conll_lines: list[str], gold_file: str, pred_file: str) -> dict[str, dict[str, 
-        tuple[float, float, float]]]:
-    """Evaluate coreference using conll reference scorer. gold_conll_lines
-    contain the gold annotations, and pred_conll_lines contain the predicted
-    labels.
+def evaluate_conll(reference_scorer: str, gold_conll_lines: list[str], pred_conll_lines: list[str], gold_file: str, pred_file: str, remove = True) -> dict[str, dict[str, tuple[float, float, float]]]:
+    """Evaluate coreference using conll reference scorer. gold_conll_lines contain the gold annotations, and pred_conll_lines contain the predicted labels.
 
     Args:
         reference_scorer: Path to the perl scorer.
         gold_conll_lines: List of lines in conll-format containing gold labels.
-        pred_conll_lines: List of lines in conll-format containing predicted
-            labels.
+        pred_conll_lines: List of lines in conll-format containing predicted labels.
         gold_file: File to which the gold_conll_lines will be saved.
         pred_file: File to which the pred_conll_lines will be saved.
 
     Returns:
-        Dictionary with metric names as keys: muc, bcubed, ceafe. Values are dictionaries with
-        movie names as keys + "all" for micro-averaged values. Values of this inner movie-level
+        Dictionary with metric names as keys: muc, bcubed, ceafe. Values are dictionaries with movie names as keys + "all" for micro-averaged values. Values of this inner movie-level
         dictionary is a tuple of 3 floats: precision, recall, f1.
     """
-    score_pattern = re.compile("Recall: \([0-9.]+ / [0-9.]+\) ([0-9.]+)%\s+Precision: \([0-9.]+ /"
-        " [0-9.]+\) ([0-9.]+)%\s+F1: ([0-9.]+)%")
-    document_pattern = re.compile("====> (\w+);")
-    metric_pattern = re.compile("METRIC (\w+):")
-    pattern = re.compile(f"({score_pattern.pattern})|({document_pattern.pattern})|"
-        f"({metric_pattern.pattern})")
+    score_pattern = re.compile(r"Recall: \([0-9.]+ / [0-9.]+\) ([0-9.]+)%\s+Precision: \([0-9.]+ / [0-9.]+\) ([0-9.]+)%\s+F1: ([0-9.]+)%")
+    document_pattern = re.compile(r"====> (\w+);")
+    metric_pattern = re.compile(r"METRIC (\w+):")
+    pattern = re.compile(f"({score_pattern.pattern})|({document_pattern.pattern})|({metric_pattern.pattern})")
 
     with open(gold_file, "w") as f1, open(pred_file, "w") as f2:
         f1.writelines(gold_conll_lines)
@@ -123,7 +114,7 @@ def evaluate_conll(reference_scorer: str, gold_conll_lines: list[str],
     stdout, _ = process.communicate()
     process.wait()
     stdout = stdout.decode("utf-8")
-    result = defaultdict(lambda: defaultdict(tuple))
+    result = defaultdict(lambda: defaultdict(tuple[float, float, float]))
 
     metric, movie, n_score_pattern_rows = "", "", 0
     n_movies = len(set(map(lambda match: match.group(1), document_pattern.finditer(stdout))))
@@ -143,5 +134,10 @@ def evaluate_conll(reference_scorer: str, gold_conll_lines: list[str],
         else:
             metric = match.group(8)
             n_score_pattern_rows = 0
+
+    # Remove the conll files
+    if remove:
+        os.remove(gold_file)
+        os.remove(pred_file)
 
     return result

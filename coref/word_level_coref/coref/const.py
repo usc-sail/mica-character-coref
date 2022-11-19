@@ -17,6 +17,7 @@ Span = Tuple[int, int]
 class CorefResult:
     coref_scores: torch.Tensor = None                  # [n_words, k + 1]
     coref_y: torch.Tensor = None                       # [n_words, k + 1]
+    top_indices: torch.Tensor = None                   # [n_words, k]
 
     word_clusters: List[List[int]] = None
     span_clusters: List[List[Span]] = None

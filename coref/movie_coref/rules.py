@@ -1,7 +1,9 @@
 """Coreference resolution rules"""
+# pyright: reportGeneralTypeIssues=false
 
 import numpy as np
 import re
+import tqdm
 
 class ClusterNode:
     """Graph of clusters with edges connecting co-referring clusters."""
@@ -54,24 +56,15 @@ def keep_persons(ner_tags: list[str], clusters: list[set[tuple[int, int]]]) -> (
     is_person = [tag == "PERSON" for tag in ner_tags]
     return _keep(is_person, clusters)
 
-def _merge(words: list[str], parse_tags: list[str], cluster_x: set[tuple[int, int]], 
-    cluster_y: set[tuple[int, int]]):
-    """Returns true if cluster have speakers with same names."""
-    parse_tags = np.array(parse_tags)
-    speakers_x = set([re.sub(r"\([^\)]+\)", "", " ".join(words[i: j + 1])).upper().strip()
-        for i, j in cluster_x if all(parse_tags[i: j + 1] == "C")])
-    speakers_y = set([re.sub(r"\([^\)]+\)", "", " ".join(words[i: j + 1])).upper().strip()
-        for i, j in cluster_y if all(parse_tags[i: j + 1] == "C")])
-    return not speakers_x.isdisjoint(speakers_y)
-
-def merge_speakers(words: list[str], parse_tags: list[str], clusters: list[set[tuple[int, int]]]
-    ) -> list[set[tuple[int, int]]]:
+def merge_speakers(words: list[str], parse_tags: list[str], clusters: list[set[tuple[int, int]]]) -> list[set[tuple[int, int]]]:
     """Merge clusters that contain speaker mentions with the same name."""
     cluster_nodes = [ClusterNode(i) for i in range(len(clusters))]
+    parse_tags = np.array(parse_tags)
+    cluster_speakers = [set([re.sub(r"\([^\)]+\)", "", " ".join(words[i: j + 1])).upper().strip() for i, j in cluster if all(parse_tags[i: j + 1] == "C")]) for cluster in clusters]
 
     for i in range(len(clusters)):
         for j in range(i + 1, len(clusters)):
-            if _merge(words, parse_tags, clusters[i], clusters[j]):
+            if not cluster_speakers[i].isdisjoint(cluster_speakers[j]):
                 cluster_nodes[i].link(cluster_nodes[j])
 
     _clusters = []
