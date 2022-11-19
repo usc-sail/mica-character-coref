@@ -26,6 +26,7 @@ use: scorer.pl <metric> <keys_file> <response_file> [name]
     ceafe: CEAF (Luo et al, 2005) using entity-based similarity
     blanc: BLANC
     all: uses all the metrics to score
+    conll: uses muc, bcub, and ceafe metrics to score
 
   keys_file: file with expected coreference chains in SemEval format
 
