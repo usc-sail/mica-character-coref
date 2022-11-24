@@ -1,10 +1,10 @@
 """Data class for storing gold and predicted coreference labels and score them."""
-# pyright: reportGeneralTypeIssues=false
 from mica_text_coref.coref.movie_coref.data import CorefDocument
 from mica_text_coref.coref.movie_coref import conll
 
 import numpy as np
 import os
+import tempfile
 
 class Metric:
     """General metric class for precision, recall, and F1"""
@@ -17,7 +17,7 @@ class Metric:
             self.f1 = f1
     
     def __repr__(self) -> str:
-        return (f"precision={self.precision:.4f} recall={self.recall:.4f} f1={self.f1:.4f}")
+        return (f"p={100*self.precision:.1f} r={100*self.recall:.1f} f1={100*self.f1:.1f}")
     
     def tolist(self) -> list[str]:
         return [str(self.precision), str(self.recall), str(self.f1)]
@@ -25,7 +25,7 @@ class Metric:
 class CorefResult:
     """Data class to store gold and predicted coreference and character head labels, and compute performance using conll reference scorer."""
 
-    def __init__(self, reference_scorer: str, results_dir: str, epoch: int, name: str = "dev"):
+    def __init__(self, reference_scorer: str, results_dir: str = None, name: str = "dev"):
         """Initialize CorefResult object.
 
         Args:
@@ -36,7 +36,6 @@ class CorefResult:
         """
         self.reference_scorer = reference_scorer
         self.results_dir = results_dir
-        self.epoch = epoch
         self.name = name
         self._movie_to_data: dict[str, any] = {}
         self._word_metric: tuple[Metric, Metric, Metric] = None
@@ -79,6 +78,12 @@ class CorefResult:
         self._clear_scores()
         assert set(self._movie_to_data.keys()).isdisjoint(set(other._movie_to_data.keys())), "You are trying to join two CorefResults that already share some common document."
         self._movie_to_data.update(other._movie_to_data)
+    
+    def __getitem__(self, movie) -> tuple[list[list[int]], list[list[list[int]]], list[int]]:
+        pred_word_clusters = [sorted([span[0] for span in cluster]) for cluster in self._movie_to_data[movie]["pred_word"]]
+        pred_span_clusters = [sorted([list(span) for span in cluster]) for cluster in self._movie_to_data[movie]["pred_span"]]
+        pred_heads = list(self._movie_to_data[movie]["pred_character"])
+        return pred_word_clusters, pred_span_clusters, pred_heads
 
     def _evaluate_sequence(self, gold: list[int], pred: list[int], pos_label: int) -> Metric:
         assert len(gold) == len(pred)
@@ -94,7 +99,17 @@ class CorefResult:
     def _average_conll_f1(self) -> tuple[float, float]:
         word_f1 = np.mean([m.f1 for m in self._word_metric])
         span_f1 = np.mean([m.f1 for m in self._span_metric])
-        return word_f1, span_f1
+        return float(word_f1), float(span_f1)
+
+    def _conll_score(self, output_dir, gold_word_conll_lines, pred_word_conll_lines, gold_span_conll_lines, pred_span_conll_lines):
+        gold_word_file = os.path.join(output_dir, f"gold_epoch.word.{self.name}.conll")
+        pred_word_file = os.path.join(output_dir, f"pred_epoch.word.{self.name}.conll")
+        gold_span_file = os.path.join(output_dir, f"gold_epoch.span.{self.name}.conll")
+        pred_span_file = os.path.join(output_dir, f"pred_epoch.span.{self.name}.conll")
+        word_result = conll.evaluate_conll(self.reference_scorer, gold_word_conll_lines, pred_word_conll_lines, gold_word_file, pred_word_file)
+        self._word_metric = (Metric(*word_result["muc"]["all"]), Metric(*word_result["bcub"]["all"]), Metric(*word_result["ceafe"]["all"]))
+        span_result = conll.evaluate_conll(self.reference_scorer, gold_span_conll_lines, pred_span_conll_lines, gold_span_file, pred_span_file)
+        self._span_metric = (Metric(*span_result["muc"]["all"]), Metric(*span_result["bcub"]["all"]), Metric(*span_result["ceafe"]["all"]))
 
     def _score(self):
         if self._word_metric is None or self._span_metric is None or self._character_metric is None:
@@ -111,20 +126,25 @@ class CorefResult:
                 if len(data["document"].token) == len(data["gold_character"]) == len(data["pred_character"]):
                     gold_character.extend(data["gold_character"])
                     pred_character.extend(data["pred_character"])
-            epoch_dir = os.path.join(self.results_dir, f"epoch_{self.epoch}")
-            os.makedirs(epoch_dir, exist_ok=True)
-            gold_word_file = os.path.join(epoch_dir, f"gold.word.{self.name}.conll")
-            pred_word_file = os.path.join(epoch_dir, f"pred.word.{self.name}.conll")
-            gold_span_file = os.path.join(epoch_dir, f"gold.span.{self.name}.conll")
-            pred_span_file = os.path.join(epoch_dir, f"pred.span.{self.name}.conll")
-            word_result = conll.evaluate_conll(self.reference_scorer, gold_word_conll_lines, pred_word_conll_lines, gold_word_file, pred_word_file, remove=False)
-            self._word_metric = (Metric(*word_result["muc"]["all"]), Metric(*word_result["bcub"]["all"]), Metric(*word_result["ceafe"]["all"]))
-            span_result = conll.evaluate_conll(self.reference_scorer, gold_span_conll_lines, pred_span_conll_lines, gold_span_file, pred_span_file, remove=False)
-            self._span_metric = (Metric(*span_result["muc"]["all"]), Metric(*span_result["bcub"]["all"]), Metric(*span_result["ceafe"]["all"]))
+            if self.results_dir is None:
+                with tempfile.TemporaryDirectory() as temp_dir:
+                    self._conll_score(temp_dir, gold_word_conll_lines, pred_word_conll_lines, gold_span_conll_lines, pred_span_conll_lines)
+            else:
+                self._conll_score(self.results_dir, gold_word_conll_lines, pred_word_conll_lines, gold_span_conll_lines, pred_span_conll_lines)
             self._character_metric = self._evaluate_sequence(gold_character, pred_character, 1)
+    
+    @property
+    def span_score(self) -> float:
+        self._score()
+        return self._average_conll_f1()[1]
+    
+    @property
+    def word_score(self) -> float:
+        self._score()
+        return self._average_conll_f1()[0]
 
     def __repr__(self) -> str:
         self._score()
         word_score, span_score = self._average_conll_f1()
-        d = f"Word: {word_score:.4f}, Span: {span_score:.4f}, Character: {self._character_metric}"
+        d = f"coref avg F1: word={word_score:.1f}, span={span_score:.1f}, character: {self._character_metric}"
         return d
