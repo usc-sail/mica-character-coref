@@ -1,7 +1,5 @@
 """Evaluate coreference using official conll-2012 scripts
 """
-# pyright: reportGeneralTypeIssues=false
-
 from mica_text_coref.coref.movie_coref.data import CorefDocument
 
 from collections import defaultdict
@@ -87,7 +85,7 @@ def convert_to_conll(document: CorefDocument, clusters: list[set[tuple[int, int]
 
     return conll_lines
 
-def evaluate_conll(reference_scorer: str, gold_conll_lines: list[str], pred_conll_lines: list[str], gold_file: str, pred_file: str, remove = True) -> dict[str, dict[str, tuple[float, float, float]]]:
+def evaluate_conll(reference_scorer: str, gold_conll_lines: list[str], pred_conll_lines: list[str], gold_file: str, pred_file: str) -> dict[str, dict[str, tuple[float, float, float]]]:
     """Evaluate coreference using conll reference scorer. gold_conll_lines contain the gold annotations, and pred_conll_lines contain the predicted labels.
 
     Args:
@@ -134,10 +132,5 @@ def evaluate_conll(reference_scorer: str, gold_conll_lines: list[str], pred_conl
         else:
             metric = match.group(8)
             n_score_pattern_rows = 0
-
-    # Remove the conll files
-    if remove:
-        os.remove(gold_file)
-        os.remove(pred_file)
 
     return result
