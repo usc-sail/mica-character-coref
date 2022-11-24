@@ -1,5 +1,4 @@
-"""Python class including PyTorch modules that find character coreference chains
-in movie screenplay document.
+"""Python class including PyTorch modules that find character coreference chains in movie screenplay document.
 """
 from mica_text_coref.coref.movie_coref.coreference.encoder import Encoder
 from mica_text_coref.coref.movie_coref.coreference.character_recognizer import CharacterRecognizer
@@ -73,6 +72,11 @@ class MovieCoreference:
         self.pairwise_encoder.load_state_dict(weights["pw"])
         self.fine_scorer.load_state_dict(weights["a_scorer"])
         self.span_predictor.load_state_dict(weights["sp"])
+
+    def save_weights(self, weights_path: str):
+        weights = dict(bert=self.bert.state_dict(), we=self.encoder.state_dict(), rough_scorer=self.coarse_scorer.state_dict(), pw=self.pairwise_encoder.state_dict(), 
+                       a_scorer=self.fine_scorer.state_dict(), sp=self.span_predictor.state_dict())
+        torch.save(weights, weights_path)
 
     def bert_parameters(self):
         return self.bert.parameters()
