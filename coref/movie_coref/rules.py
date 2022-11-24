@@ -3,8 +3,7 @@
 
 import numpy as np
 import re
-import tqdm
-
+    
 class ClusterNode:
     """Graph of clusters with edges connecting co-referring clusters."""
     def __init__(self, cluster_id: int):
@@ -16,8 +15,7 @@ class ClusterNode:
         self.neighbors.add(other)
         other.neighbors.add(self)
 
-def _keep(flags: list[bool], clusters: list[set[tuple[int, int]]], conjunction = True) -> (
-    list[set[tuple[int, int]]]):
+def _keep(flags: list[bool], clusters: list[set[tuple[int, int]]], conjunction = True) -> list[set[tuple[int, int]]]:
     """Retain cluster if atleast one of its mention has all True word flags. If conjunction is
     False, mention should have atleast one True word flag.
 
@@ -44,14 +42,12 @@ def _keep(flags: list[bool], clusters: list[set[tuple[int, int]]], conjunction =
             speaker_clusters.append(cluster)
     return speaker_clusters
 
-def keep_speakers(parse_tags: list[str], clusters: list[set[tuple[int, int]]]) -> (
-    list[set[tuple[int, int]]]):
+def keep_speakers(parse_tags: list[str], clusters: list[set[tuple[int, int]]]) -> list[set[tuple[int, int]]]:
     """Retain speaker clusters."""
     is_speaker = [tag == "C" for tag in parse_tags]
     return _keep(is_speaker, clusters)
 
-def keep_persons(ner_tags: list[str], clusters: list[set[tuple[int, int]]]) -> (
-    list[set[tuple[int, int]]]):
+def keep_persons(ner_tags: list[str], clusters: list[set[tuple[int, int]]]) -> list[set[tuple[int, int]]]:
     """Retain person clusters."""
     is_person = [tag == "PERSON" for tag in ner_tags]
     return _keep(is_person, clusters)
@@ -84,8 +80,7 @@ def merge_speakers(words: list[str], parse_tags: list[str], clusters: list[set[t
 
     return _clusters
 
-def filter_mentions(mentions: set[tuple[int, int]], clusters: list[set[tuple[int, int]]]
-    ) -> list[set[tuple[int, int]]]:
+def filter_mentions(mentions: set[tuple[int, int]], clusters: list[set[tuple[int, int]]]) -> list[set[tuple[int, int]]]:
     """Filter mentions in clusters by the given mentions list."""
     _clusters = []
     for cluster in clusters:
