@@ -30,6 +30,7 @@ class SpanPredictor(nn.Module):
 
     @device.setter
     def device(self, device: torch.device):
+        self.to(device)
         self._device = device
     
     def forward(

@@ -19,6 +19,7 @@ class FineScorer(nn.Module):
     
     @device.setter
     def device(self, device: torch.device):
+        self.to(device)
         self._device = device
 
     def _get_pair_matrix(
