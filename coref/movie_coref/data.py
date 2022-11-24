@@ -135,6 +135,9 @@ class CorefDocument:
         self.subword_ids: list[int]
         self.word_to_subword_offset: list[list[int]]
         self.subword_dataloader: DataLoader
+        self.predicted_word_clusters: list[list[int]]
+        self.predicted_span_clusters: list[list[list[int]]]
+        self.predicted_heads: list[int]
         
         if json is not None:
             self.movie = json["movie"]
