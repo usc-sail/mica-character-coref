@@ -171,9 +171,10 @@ def wl_evaluate(reference_scorer: str, config_file: str, weights: str, batch_siz
     movie_to_pred_clusters: dict[str, list[set[tuple[int, int]]]] = {}
 
     # Read predictions
+    device = "cuda:0" if use_gpu else "cpu"
     with jsonlines.open(output_file + ".jsonlines") as reader:
         pred_docs = {doc["document_id"]: doc for doc in reader}
-    pt = torch.load(output_file + ".pt")
+    pt = torch.load(output_file + ".pt", map_location=device)
     corpus = CorefCorpus(input_file)
     gold_docs = {doc.movie: doc for doc in corpus}
 
@@ -188,8 +189,6 @@ def wl_evaluate(reference_scorer: str, config_file: str, weights: str, batch_siz
     
     # Loop over movie and parts
     for movie, n_parts in movie_to_n_parts.items():
-        print(movie)
-
         # Merge predictions
         corefs, inds, offsets, head2span = [], [], [], {}
         for i in range(1, n_parts + 1):
@@ -201,9 +200,7 @@ def wl_evaluate(reference_scorer: str, config_file: str, weights: str, batch_siz
             head2span.update(_head2span)
         overlap_lens = [offsets[i][1] - offsets[i + 1][0] for i in range(n_parts - 1)]
         coref_lens = [len(coref) for coref in corefs]
-        print(f"\t{n_parts} parts, sub-document lens = {coref_lens}, overlap lens = {overlap_lens}")
         coref, ind = split_and_merge.combine_coref_scores(corefs, inds, overlap_lens, merge_strategy)
-        print(f"\tmerged document len = {len(coref)}, coref shape = {coref.shape}, ind shape = {ind.shape}")
 
         # Get predicted clusters
         word_clusters = clusterize(coref, ind)
@@ -217,7 +214,6 @@ def wl_evaluate(reference_scorer: str, config_file: str, weights: str, batch_siz
                 span_clusters.append(span_cluster)
         n_word_mentions = sum([len(cluster) for cluster in word_clusters])
         n_span_mentions = sum([len(cluster) for cluster in span_clusters])
-        print(f"\t{n_word_mentions} word mentions, {n_span_mentions} span mentions, {len(word_clusters)} word clusters, {len(span_clusters)} span clusters")
 
         gold_doc = gold_docs[movie]
         gold_clusters = [set([(mention.begin, mention.end) for mention in mentions]) for mentions in gold_doc.clusters.values()]

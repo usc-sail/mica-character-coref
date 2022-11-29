@@ -41,7 +41,12 @@ flags.DEFINE_bool("use_gpu", default=False, help="Use cuda:0 gpu if available")
 
 def main(argv):
     # Exit if extra command-line args are given
-    if len(argv) > 1: sys.exit("Extra command-line arguments.")
+    if len(argv) > 1:
+        print("Extra command-line arguments.")
+        return
+
+    print(f"preprocess={FLAGS.preprocess} genre={FLAGS.wl_genre} entity={FLAGS.entity} merge_speakers={FLAGS.merge_speakers} provide_gold_mentions={FLAGS.provide_gold_mentions} "
+          f"remove_gold_singletons={FLAGS.remove_gold_singletons} split_len={FLAGS.split_len} overlap_len={FLAGS.overlap_len} merge_strategy={FLAGS.merge_strategy}")
 
     # Preprocess, Partition, Input File, Output File
     subdir = "regular" if FLAGS.preprocess == "none" else FLAGS.preprocess
