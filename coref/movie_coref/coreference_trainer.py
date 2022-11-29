@@ -43,6 +43,7 @@ class CoreferenceTrainer:
         train_file: str,
         dev_file: str,
         weights_file: str,
+        test_movie: str = None,
         tag_embedding_size: int = 16,
         gru_nlayers: int = 1,
         gru_hidden_size: int = 256,
@@ -60,6 +61,9 @@ class CoreferenceTrainer:
         max_epochs: int = 20,
         patience: int = 3,
         train_document_len: int = 5120,
+        test_document_len: int = 5120,
+        test_overlap_len: int = 512,
+        test_merge_strategy: str = "max",
         subword_batch_size: int = 8,
         cr_seq_len: int = 256,
         cr_batch_size: int = 16,
@@ -84,6 +88,7 @@ class CoreferenceTrainer:
             train_file: file path of the training screenplays
             dev_file: file path of the development screenplays
             weights_file: file path of the pretrained word-level coreference model
+            test_movie: train set movie left-out for cross validation, if none entire train set is used
             tag_embedding_size: embedding size of parse, pos, and ner tags in the character recognition model
             gru_nlayers: number of gru layers in the character recognition model
             gru_hidden_size: gru hidden size in the character recognition model
@@ -101,6 +106,9 @@ class CoreferenceTrainer:
             max_epochs: maximum number of epochs to train the model
             patience: maximum number of epochs to wait for dev performance to improve before early stopping
             train_document_len: size of the train subdocuments in words
+            test_document_len: size of the test subdocuments in words
+            test_overlap_len: size of overlap between adjacent test subdocuments in words
+            test_merge_strategy: strategy to merge coref scores of adjacent test subdocuments
             subword_batch_size: number of subword sequences in batch
             cr_seq_len: sequence length for character recognizer model
             cr_batch_size: number of sequences in a character recognition batch
@@ -123,6 +131,7 @@ class CoreferenceTrainer:
         self.train_file = train_file
         self.dev_file = dev_file
         self.weights_file = weights_file
+        self.test_movie = test_movie
         self.tag_embedding_size = tag_embedding_size
         self.gru_nlayers = gru_nlayers
         self.gru_hidden_size = gru_hidden_size
@@ -140,6 +149,9 @@ class CoreferenceTrainer:
         self.max_epochs = max_epochs
         self.patience = patience
         self.train_document_len = train_document_len
+        self.test_document_len = test_document_len
+        self.test_overlap_len = test_overlap_len
+        self.test_merge_strategy = test_merge_strategy
         self.subword_batch_size = subword_batch_size
         self.cr_seq_len = cr_seq_len
         self.cr_batch_size = cr_batch_size
@@ -210,6 +222,13 @@ class CoreferenceTrainer:
         if self.warmup_epochs >= 0:
             self.cr_scheduler = get_linear_schedule_with_warmup(self.cr_optimizer, self.warmup_epochs * len(self.train_corpus), len(self.train_corpus) * self.max_epochs)
             self.coref_scheduler = get_linear_schedule_with_warmup(self.coref_optimizer, self.warmup_epochs * len(self.train_corpus), len(self.train_corpus) * self.max_epochs)
+
+    def _separate_movie(self, corpus: CorefCorpus, movie: str) -> tuple[CorefCorpus, CorefCorpus]:
+        """Separate movie from corpus for leave-one-movie-out cross validation"""
+        _corpus1, _corpus2 = CorefCorpus(), CorefCorpus()
+        _corpus1.documents = [doc for doc in corpus if doc.movie != movie]
+        _corpus2.documents = [doc for doc in corpus if doc.movie == movie]
+        return _corpus1, _corpus2
 
     def _split_screenplay(self, document: CorefDocument, split_len: int, overlap_len: int, exclude_subdocuments_with_no_clusters: bool = True, verbose = False):
         """Split screenplay document into smaller documents
@@ -717,6 +736,7 @@ class CoreferenceTrainer:
     
     def _eval(self, corpus: CorefCorpus, name: str) -> tuple[CorefResult, float, float, float]:
         """Evaluate model on corpus and return metric results, average character loss, average coreference loss, and average conll coreference F1 (span)"""
+        torch.cuda.empty_cache()
         self.model.eval()
         with torch.no_grad():
             result = CorefResult(self.reference_scorer_file, self.output_dir, name)
@@ -729,11 +749,23 @@ class CoreferenceTrainer:
                 result.add(_result)
             return result, float(np.mean(character_losses)), float(np.mean(coref_losses)), float(result.span_score)
     
-    def _eval_and_log(self) -> tuple[float, float, float, float]:
-        """Evaluate and log, return character + coref loss for dev and train set, and average F1 score of dev and train set. If train set is not evaluated, train loss and score in -inf"""
+    def _eval_and_log(self) -> tuple[float, float, float, float, float, float]:
+        """Evaluate and log, return character + coref loss and average F1 score of dev, train set, and test set. 
+        If train set is not evaluated, train loss and score in -inf. If test_movie is none, test loss and score is -inf.
+
+        Returns:
+            dev_loss, train_loss, test_loss, dev_score, train_score, test_score
+        """
         dev_result, dev_cr_loss, dev_coref_loss, dev_span_score = self._eval(self.dev_corpus, "dev")
         self._log(f"dev corpus: character_loss = {dev_cr_loss:.4f}, coref_loss = {dev_coref_loss:.4f}, {dev_result}")
         dev_loss = dev_cr_loss + dev_coref_loss
+        if self.test_corpus:
+            test_result, test_cr_loss, test_coref_loss, test_span_score = self._eval(self.test_corpus, "test")
+            self._log(f"test corpus: character_loss = {test_cr_loss:.4f}, coref_loss = {test_coref_loss:.4f}, {test_result}")
+            test_loss = test_cr_loss + test_coref_loss
+        else:
+            test_span_score = -np.inf
+            test_loss = -np.inf
         if self.evaluate_train:
             train_result, train_cr_loss, train_coref_loss, train_span_score = self._eval(self.train_corpus, "train")
             self._log(f"train corpus: character_loss = {train_cr_loss:.4f}, coref_loss = {train_coref_loss:.4f}, {train_result}")
@@ -741,9 +773,9 @@ class CoreferenceTrainer:
         else:
             train_span_score = -np.inf
             train_loss = -np.inf
-        return dev_loss, train_loss, dev_span_score, train_span_score
+        return dev_loss, train_loss, test_loss, dev_span_score, train_span_score, test_span_score
 
-    def _save(self, dev_loss: float, train_loss: float, dev_score: float, train_score: float):
+    def _save(self, dev_loss: float, train_loss: float, test_loss: float, dev_score: float, train_score: float, test_score: float):
         """Save model weights and predictions"""
         if self.save_model:
             model_file = os.path.join(self.output_dir, "movie_coref.pt")
@@ -751,7 +783,10 @@ class CoreferenceTrainer:
         if self.save_predictions:
             dev_file = os.path.join(self.output_dir, "dev.jsonlines")
             train_file = os.path.join(self.output_dir, "train.jsonlines")
-            args = [[self.dev_corpus, dev_file], [self.train_corpus, train_file]] if self.evaluate_train else [[self.dev_corpus, dev_file]]
+            test_file = os.path.join(self.output_dir, "test.jsonlines")
+            args = [[self.dev_corpus, dev_file]]
+            if self.evaluate_train: args.append([self.train_corpus, train_file])
+            if self.test_corpus: args.append([self.test_corpus, test_file])
             for corpus, file in args:
                 with jsonlines.open(file, "w") as writer:
                     for doc in corpus:
@@ -759,11 +794,12 @@ class CoreferenceTrainer:
                         data = dict(movie=doc.movie, rater=doc.rater, token=doc.token, parse=doc.parse, pos=doc.pos, ner=doc.ner, is_pronoun=doc.is_pronoun, is_punctuation=doc.is_punctuation,
                                     speaker=doc.speaker, gold=gold_clusters, pred_word=doc.predicted_word_clusters, pred_span=doc.predicted_span_clusters, pred_head=doc.predicted_heads)
                         writer.write(data)
-            for arg in ["gold", "pred"]:
-                src = os.path.join(self.output_dir, f"{arg}_epoch.span.dev.conll")
-                dst = os.path.join(self.output_dir, f"{arg}.span.dev.conll")
-                if os.path.exists(src):
-                    shutil.copy2(src, dst)
+            for name in ["dev", "test"]:
+                for arg in ["gold", "pred"]:
+                    src = os.path.join(self.output_dir, f"{arg}_epoch.span.{name}.conll")
+                    dst = os.path.join(self.output_dir, f"{arg}.span.{name}.conll")
+                    if os.path.exists(src):
+                        shutil.copy2(src, dst)
         if self.save_log:
             result_file = os.path.join(self.output_dir, "result.yaml")
             result = dict(character_recognition=dict(tag_embedding_size=self.tag_embedding_size, gru_nlayers=self.gru_nlayers, gru_hidden_size=self.gru_hidden_size, 
@@ -772,7 +808,8 @@ class CoreferenceTrainer:
                           coref_lr=self.coref_lr, weight_decay=self.weight_decay, train_document_len=self.train_document_len, subword_batch_size=self.subword_batch_size, cr_seq_len=self.cr_seq_len,
                           cr_batch_size=self.cr_batch_size, fn_batch_size=self.fn_batch_size, sp_batch_size=self.sp_batch_size, add_cr_to_coarse=self.add_cr_to_coarse,
                           filter_mentions_by_cr=self.filter_mentions_by_cr, remove_singleton_cr=self.remove_singleton_cr, epoch=self.epoch, dev_loss=round(dev_loss, 4), dev_score=round(dev_score, 3),
-                          train_loss=round(train_loss, 4), train_score=round(train_score, 3), preprocess=self.preprocess, warmup=self.warmup_epochs)
+                          train_loss=round(train_loss, 4), train_score=round(train_score, 3), test_loss=round(test_loss, 4), test_score=round(test_score, 3), preprocess=self.preprocess, 
+                          warmup=self.warmup_epochs)
             with open(result_file, "w") as file:
                 yaml.dump(result, file)
 
@@ -787,7 +824,7 @@ class CoreferenceTrainer:
             plt.xlabel("epoch")
             plt.ylabel("loss")
             plt.legend()
-            plt.suptitle("Loss")
+            plt.title("Loss")
             plt.subplot(1, 2, 2)
             if not np.all(np.array(train_scores) == -np.inf):
                 plt.plot(np.arange(len(train_scores)) + 1, train_scores, label="train", lw=4, color="b")
@@ -795,7 +832,7 @@ class CoreferenceTrainer:
             plt.xlabel("epoch")
             plt.ylabel("avg F1")
             plt.legend()
-            plt.suptitle("score")
+            plt.title("score")
             plt.savefig(loss_file)
             plt.close("all")
     
@@ -803,7 +840,7 @@ class CoreferenceTrainer:
         if self.output_dir is not None:
             for arg1 in ["word", "span"]:
                 for arg2 in ["gold", "pred"]:
-                    for arg3 in ["dev", "train"]:
+                    for arg3 in ["dev", "train", "test"]:
                         pth = os.path.join(self.output_dir, f"{arg2}_epoch.{arg1}.{arg3}.conll")
                         if os.path.exists(pth):
                             os.remove(pth)
@@ -834,7 +871,9 @@ class CoreferenceTrainer:
 
         # Load training set
         self._log("Loading training corpus")
-        self.train_corpus = CorefCorpus(self.train_file)
+        self.train_corpus, self.test_corpus = CorefCorpus(self.train_file), None
+        if self.test_movie is not None and any(doc.movie == self.test_movie for doc in self.train_corpus):
+            self.train_corpus, self.test_corpus = self._separate_movie(self.train_corpus, self.test_movie)
         self.train_corpus = self._prepare_corpus(self.train_corpus, self.train_document_len, 0, exclude_subdocuments_with_no_clusters=True)
 
         # Setting some model hyperparameters based on training set
@@ -847,6 +886,11 @@ class CoreferenceTrainer:
         self._log("Loading development corpus")
         self.dev_corpus = CorefCorpus(self.dev_file)
         self.dev_corpus = self._prepare_corpus(self.dev_corpus)
+
+        # Load testing set
+        if self.test_corpus:
+            self._log("Loading testing corpus")
+            self.test_corpus = self._prepare_corpus(self.test_corpus, self.test_document_len, self.test_overlap_len, exclude_subdocuments_with_no_clusters=False)
         self._log("\n")
 
         # Create optimizers
@@ -867,7 +911,7 @@ class CoreferenceTrainer:
             self._log(f"Epoch = {self.epoch}")
             self._train_and_log()
             if self.epoch > self.n_epochs_no_eval:
-                dev_loss, train_loss, dev_score, train_score = self._eval_and_log()
+                dev_loss, train_loss, test_loss, dev_score, train_score, test_score = self._eval_and_log()
                 dev_losses.append(dev_loss)
                 train_losses.append(train_loss)
                 dev_scores.append(dev_score)
@@ -875,7 +919,7 @@ class CoreferenceTrainer:
                 if dev_score > max_dev_score:
                     max_dev_score = dev_score
                     n_epochs_early_stopping = 0
-                    self._save(dev_loss, train_loss, dev_score, train_score)
+                    self._save(dev_loss, train_loss, test_loss, dev_score, train_score, test_score)
                 else:
                     n_epochs_early_stopping += 1
                 self._log(f"Dev score decreasing for {n_epochs_early_stopping} epochs, {self.patience - n_epochs_early_stopping} epochs left till early stop")
