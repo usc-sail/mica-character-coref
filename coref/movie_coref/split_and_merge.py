@@ -1,6 +1,6 @@
-"""Functions to split word-level json documents and merge coreference predictions from overlapping 
-documents.
+"""Functions to split word-level json documents and merge coreference predictions from overlapping documents.
 """
+from mica_text_coref.coref.movie_coref import data
 
 import collections
 import numpy as np
@@ -110,17 +110,19 @@ def split_screenplay(document: dict[str, Any], split_len: int, overlap_len: int,
         _document["sent_id"] = parse_ids
 
         if verbose:
-            print(f"{_document['document_id']}: {len(_document['cased_words'])} words, {n_mentions} mentions, {len(_document['clusters'])} clusters")
+            print(f"{_document['document_id']}: {len(_document['cased_words'])} words, {n_mentions} mentions, "
+                  f"{len(_document['clusters'])} clusters")
         yield _document
 
-def combine_coref_scores(corefs: list[torch.Tensor], inds: list[torch.Tensor], overlap_lens: list[int], strategy: str) -> tuple[torch.Tensor, torch.Tensor]:
+def combine_coref_scores(corefs: list[torch.Tensor], inds: list[torch.Tensor], overlap_lens: list[int],
+                         strategy: str) -> tuple[torch.Tensor, torch.Tensor]:
     """Combine corefs and inds into a single coref and ind tensor.
     
     Args:
         corefs: list[Tensor[*, k + 1]]
         inds: list[Tensor[*, k]]
         overlap_lens: list[int]
-        strategy: Can be one of "before", "after", "average", "max", "min", or "none"
+        strategy: Can be one of "pre", "post", "avg", "max", "min", or "none"
         
     Return:
         coref: Tensor[n, 2k + 1]
@@ -130,7 +132,8 @@ def combine_coref_scores(corefs: list[torch.Tensor], inds: list[torch.Tensor], o
     assert len(corefs) > 0, "Number of coref tensors should be atleast 1"
     assert len(corefs) == len(inds), "Number of coref tensors should equal number of indices tensors"
     if len(corefs) == 1: return corefs[0], inds[0]
-    assert len(overlap_lens) == len(corefs) - 1, "Number of overlap lengths should equal one less than the number of coref tensors"
+    assert len(overlap_lens) == len(corefs) - 1, ("Number of overlap lengths should equal one less than the number of "
+                                                  "coref tensors")
 
     # Intialize
     n = sum([len(coref) - overlap_len for coref, overlap_len in zip(corefs[:-1], overlap_lens)]) + len(corefs[-1])
@@ -139,30 +142,30 @@ def combine_coref_scores(corefs: list[torch.Tensor], inds: list[torch.Tensor], o
     coref = torch.full((n, 2*k), fill_value=-torch.inf, device=device)
     ind = torch.full((n, 2*k), fill_value=-1, device=device)
     coref_start, coref_end = 0, 0
-    overlap_lens.extend([0, 0])
+    ext_overlap_lens = overlap_lens + [0, 0]
 
     # Combine
     for i in range(len(corefs)):
-        assert len(corefs[i]) - overlap_lens[i - 1] - overlap_lens[i] > 0, "Atmost two segments should overlap"
-        coref_start, coref_end = coref_end, coref_end + len(corefs[i]) - overlap_lens[i - 1] - overlap_lens[i]
-        start, end = overlap_lens[i - 1], len(corefs[i]) - overlap_lens[i]
+        assert len(corefs[i]) - ext_overlap_lens[i - 1] - ext_overlap_lens[i] > 0, "Atmost two segments should overlap"
+        coref_start, coref_end = coref_end, coref_end + len(corefs[i]) - ext_overlap_lens[i - 1] - ext_overlap_lens[i]
+        start, end = ext_overlap_lens[i - 1], len(corefs[i]) - ext_overlap_lens[i]
 
         # Non-overlapping
         coref[coref_start: coref_end, :k] = corefs[i][start: end, 1:]
         ind[coref_start: coref_end, :k] = inds[i][start: end]
 
         # Overlapping
-        coref_start, coref_end = coref_end, coref_end + overlap_lens[i]
+        coref_start, coref_end = coref_end, coref_end + ext_overlap_lens[i]
         if strategy != "none" and i < len(corefs) - 1:
-            for j in range(overlap_lens[i]):
+            for j in range(ext_overlap_lens[i]):
                 heads_x, heads_y = inds[i][end + j].tolist(), inds[i + 1][j].tolist()
                 scores_x, scores_y = corefs[i][end + j, 1:].tolist(), corefs[i + 1][j, 1:].tolist()
                 head_to_score = {h: s for h, s in zip(heads_x, scores_x) if s != -torch.inf}
                 for h, s in zip(heads_y, scores_y):
                     if s != -torch.inf:
                         if h in head_to_score:
-                            if strategy == "after": head_to_score[h] = s
-                            elif strategy == "mean": head_to_score[h] = 0.5 * (head_to_score[h] + s)
+                            if strategy == "post": head_to_score[h] = s
+                            elif strategy == "avg": head_to_score[h] = 0.5 * (head_to_score[h] + s)
                             elif strategy == "max": head_to_score[h] = max(head_to_score[h], s)
                             elif strategy == "min": head_to_score[h] = min(head_to_score[h], s)
                         else: head_to_score[h] = s
@@ -177,3 +180,64 @@ def combine_coref_scores(corefs: list[torch.Tensor], inds: list[torch.Tensor], o
     dummy = torch.zeros((n, 1), device=coref.device)
     coref = torch.cat((dummy, coref), dim=1)
     return coref, ind
+
+def combine_character_scores(character_scores_arr: list[torch.Tensor], overlap_lens: list[int], 
+                             strategy: str) -> torch.Tensor:
+    """Combine list of character scores arrays into a single character scores array.
+
+    Args:
+        character_scores_arr: List of character scores array, each coming from a subdocument.
+        overlap_lens: List of number of overlapping words between successive subdocuments
+        strategy: Merging strategy, can be one of 'none', 'pre', 'post', 'max', 'min', or 'avg'.
+            The behavior of 'none' and 'pre' is the same here.
+    
+    Returns:
+        combined character scores: torch.Tensor
+    """
+    assert len(character_scores_arr) > 0, "Number of character scores arrays should be greater than 0"
+    if len(character_scores_arr) == 1:
+        return character_scores_arr[0]
+    assert len(overlap_lens) == len(character_scores_arr) - 1, ("Number of overlap lengths should be number of "
+                                                                "character scores arrays - 1")
+    n = (sum(len(character_scores) - overlap_len
+                for character_scores, overlap_len in zip(character_scores_arr[:-1], overlap_lens))
+        + len(character_scores_arr[-1]))
+    device = character_scores_arr[0].device
+    merged_character_scores = torch.zeros(n, device=device, dtype=float)
+    ext_overlap_lens = overlap_lens + [0, 0]
+    character_start, character_end = 0, 0
+
+    for i in range(len(character_scores_arr)):
+        assert len(character_scores_arr[i]) - ext_overlap_lens[i - 1] - ext_overlap_lens[i] > 0, (
+            "Atmost two segments should overlap")
+        character_start, character_end = character_end, (character_end + len(character_scores_arr[i])
+                                                         - ext_overlap_lens[i - 1] - ext_overlap_lens[i])
+        start, end = ext_overlap_lens[i - 1], len(character_scores_arr[i]) - ext_overlap_lens[i]
+        merged_character_scores[character_start: character_end] = character_scores_arr[i][start: end]
+        character_start, character_end = character_end, character_end + ext_overlap_lens[i]
+        if i < len(character_scores_arr) - 1 and ext_overlap_lens[i] > 0:
+            if strategy == "pre" or strategy == "none":
+                merged_character_scores[character_start: character_end] = character_scores_arr[i][-ext_overlap_lens[i]:]
+            elif strategy == "post":
+                merged_character_scores[character_start: character_end] = character_scores_arr[i + 1][:ext_overlap_lens[i]]
+            elif strategy == "avg":
+                merged_character_scores[character_start: character_end] = (
+                    character_scores_arr[i][-ext_overlap_lens[i]:]
+                    + character_scores_arr[i + 1][:ext_overlap_lens[i]])/2
+            elif strategy == "max":
+                merged_character_scores[character_start: character_end] = torch.max(
+                    character_scores_arr[i][-ext_overlap_lens[i]:], character_scores_arr[i + 1][:ext_overlap_lens[i]])
+            elif strategy == "min":
+                merged_character_scores[character_start: character_end] = torch.min(
+                    character_scores_arr[i][-ext_overlap_lens[i]:], character_scores_arr[i + 1][:ext_overlap_lens[i]])
+
+    return merged_character_scores
+
+def combine_head2spans(head2spans: list[dict[int, tuple[int, int, float]]]) -> dict[int, tuple[int, int, float]]:
+    """Combine list of head2span dictionaries."""
+    head2span = {}
+    for h2s in head2spans:
+        for head, (start, end, score) in h2s.items():
+            if head not in head2span or head2span[head][2] < score:
+                head2span[head] = (start, end, score)
+    return head2span
