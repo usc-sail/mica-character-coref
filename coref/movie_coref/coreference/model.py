@@ -26,12 +26,15 @@ class MovieCoreference:
         topk: int,
         bce_weight: float,
         dropout: float) -> None:
-        self.tokenizer: RobertaTokenizerFast = (RobertaTokenizerFast.from_pretrained("roberta-large", use_fast=True, add_prefix_space=True))
+        self.tokenizer: RobertaTokenizerFast = (RobertaTokenizerFast.from_pretrained("roberta-large", use_fast=True,
+                                                add_prefix_space=True))
         self.tokenizer_map = {".": ["."], ",": [","], "!": ["!"], "?": ["?"],":":[":"], ";":[";"], "'s": ["'s"]}
         self.bert: RobertaModel = RobertaModel.from_pretrained("roberta-large", add_pooling_layer=False)
         word_embedding_size = self.bert.config.hidden_size
         self.encoder = Encoder(word_embedding_size, dropout)
-        self.character_recognizer = CharacterRecognizer(word_embedding_size, tag_embedding_size, parsetag_size, postag_size, nertag_size, gru_nlayers, gru_hidden_size, gru_bidirectional, dropout)
+        self.character_recognizer = CharacterRecognizer(word_embedding_size, tag_embedding_size, parsetag_size,
+                                                        postag_size, nertag_size, gru_nlayers, gru_hidden_size,
+                                                        gru_bidirectional, dropout)
         self.pairwise_encoder = PairwiseEncoder(dropout)
         self.coarse_scorer = CoarseScorer(word_embedding_size, topk, dropout)
         self.fine_scorer = FineScorer(word_embedding_size, dropout)
@@ -58,14 +61,15 @@ class MovieCoreference:
     @property
     def training(self) -> bool:
         return self._training
+    
+    @property
+    def weights(self) -> dict[str, torch.Tensor]:
+        weights = dict(bert=self.bert.state_dict(), we=self.encoder.state_dict(),
+                       rough_scorer=self.coarse_scorer.state_dict(), pw=self.pairwise_encoder.state_dict(), 
+                       a_scorer=self.fine_scorer.state_dict(), sp=self.span_predictor.state_dict())
+        return weights
 
-    def _rename_keys(self, weights_dict: dict[str, torch.Tensor], renaming_schema: dict[str, str]) -> dict[str, torch.Tensor]:
-        for old_key, new_key in renaming_schema.items():
-            weights_dict[new_key] = weights_dict.pop(old_key)
-        return weights_dict
-
-    def load_weights(self, weights_path: str):
-        weights = torch.load(weights_path, map_location="cpu")
+    def load_weights(self, weights: dict[str, torch.Tensor]):
         self.bert.load_state_dict(weights["bert"], strict=False)
         self.encoder.load_state_dict(weights["we"])
         self.coarse_scorer.load_state_dict(weights["rough_scorer"])
@@ -73,10 +77,12 @@ class MovieCoreference:
         self.fine_scorer.load_state_dict(weights["a_scorer"])
         self.span_predictor.load_state_dict(weights["sp"])
 
+    def load_weights_from_file(self, weights_path: str):
+        weights = torch.load(weights_path, map_location="cuda:0")
+        self.load_weights(weights)
+
     def save_weights(self, weights_path: str):
-        weights = dict(bert=self.bert.state_dict(), we=self.encoder.state_dict(), rough_scorer=self.coarse_scorer.state_dict(), pw=self.pairwise_encoder.state_dict(), 
-                       a_scorer=self.fine_scorer.state_dict(), sp=self.span_predictor.state_dict())
-        torch.save(weights, weights_path)
+        torch.save(self.weights, weights_path)
 
     def bert_parameters(self):
         return self.bert.parameters()
@@ -85,10 +91,13 @@ class MovieCoreference:
         return self.character_recognizer.parameters()
 
     def coref_parameters(self):
-        return itertools.chain(self.encoder.parameters(), self.coarse_scorer.parameters(), self.pairwise_encoder.parameters(), self.fine_scorer.parameters(), self.span_predictor.parameters())
+        return itertools.chain(self.encoder.parameters(), self.coarse_scorer.parameters(),
+                               self.pairwise_encoder.parameters(), self.fine_scorer.parameters(),
+                               self.span_predictor.parameters())
 
     def modules(self):
-        return [self.bert, self.encoder, self.character_recognizer, self.coarse_scorer, self.pairwise_encoder, self.fine_scorer, self.span_predictor]
+        return [self.bert, self.encoder, self.character_recognizer, self.coarse_scorer, self.pairwise_encoder,
+                self.fine_scorer, self.span_predictor]
 
     def train(self):
         for module in self.modules():
