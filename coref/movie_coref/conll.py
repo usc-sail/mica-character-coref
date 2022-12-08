@@ -6,6 +6,8 @@ from collections import defaultdict
 import re
 import subprocess
 import os
+import hashlib
+import json
 
 def convert_to_conll(document: CorefDocument, clusters: list[set[tuple[int, int]]]) -> list[str]:
     """Create conll lines from clusters.
@@ -85,8 +87,10 @@ def convert_to_conll(document: CorefDocument, clusters: list[set[tuple[int, int]
 
     return conll_lines
 
-def evaluate_conll(reference_scorer: str, gold_conll_lines: list[str], pred_conll_lines: list[str], gold_file: str, pred_file: str) -> dict[str, dict[str, tuple[float, float, float]]]:
-    """Evaluate coreference using conll reference scorer. gold_conll_lines contain the gold annotations, and pred_conll_lines contain the predicted labels.
+def evaluate_conll(reference_scorer: str, gold_conll_lines: list[str], pred_conll_lines: list[str], gold_file: str,
+                   pred_file: str) -> dict[str, dict[str, tuple[float, float, float]]]:
+    """Evaluate coreference using conll reference scorer. gold_conll_lines contain the gold annotations, and
+    pred_conll_lines contain the predicted labels.
 
     Args:
         reference_scorer: Path to the perl scorer.
@@ -96,41 +100,55 @@ def evaluate_conll(reference_scorer: str, gold_conll_lines: list[str], pred_conl
         pred_file: File to which the pred_conll_lines will be saved.
 
     Returns:
-        Dictionary with metric names as keys: muc, bcubed, ceafe. Values are dictionaries with movie names as keys + "all" for micro-averaged values. Values of this inner movie-level
+        Dictionary with metric names as keys: muc, bcubed, ceafe. Values are dictionaries with movie names as keys +
+            "all" for micro-averaged values. Values of this inner movie-level
         dictionary is a tuple of 3 floats: precision, recall, f1.
     """
-    score_pattern = re.compile(r"Recall: \([0-9.]+ / [0-9.]+\) ([0-9.]+)%\s+Precision: \([0-9.]+ / [0-9.]+\) ([0-9.]+)%\s+F1: ([0-9.]+)%")
+    score_pattern = re.compile(
+        r"Recall: \([0-9.]+ / [0-9.]+\) ([0-9.]+)%\s+Precision: \([0-9.]+ / [0-9.]+\) ([0-9.]+)%\s+F1: ([0-9.]+)%")
     document_pattern = re.compile(r"====> (\w+);")
     metric_pattern = re.compile(r"METRIC (\w+):")
     pattern = re.compile(f"({score_pattern.pattern})|({document_pattern.pattern})|({metric_pattern.pattern})")
-
     with open(gold_file, "w") as f1, open(pred_file, "w") as f2:
         f1.writelines(gold_conll_lines)
         f2.writelines(pred_conll_lines)
-    cmd = [reference_scorer, "conll", gold_file, pred_file]
-    process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
-    stdout, _ = process.communicate()
-    process.wait()
-    stdout = stdout.decode("utf-8")
-    result = defaultdict(lambda: defaultdict(tuple[float, float, float]))
-
-    metric, movie, n_score_pattern_rows = "", "", 0
-    n_movies = len(set(map(lambda match: match.group(1), document_pattern.finditer(stdout))))
-
-    for match in pattern.finditer(stdout):
-        if match.group(1):
-            n_score_pattern_rows += 1
-            recall = float(match.group(2))
-            precision = float(match.group(3))
-            f1 = float(match.group(4))
-            if n_score_pattern_rows <= n_movies:
-                result[metric][movie] = (precision, recall, f1)
-            elif n_score_pattern_rows == n_movies + 2:
-                result[metric]["all"] = (precision, recall, f1)
-        elif match.group(5):
-            movie = match.group(6)
+    os.makedirs(os.path.join(os.getenv("DATA_DIR"), ".conll"), exist_ok=True)
+    with open(gold_file, "rb") as f1, open(pred_file, "rb") as f2:
+        bytes1, bytes2 = f1.read(), f2.read()
+        hash1, hash2 = hashlib.md5(bytes1).hexdigest(), hashlib.md5(bytes2).hexdigest()
+        file_ = os.path.join(os.getenv("DATA_DIR"), ".conll", f"{hash1}_{hash2}.json")
+        if os.path.exists(file_):
+            with open(file_) as fr:
+                result = json.load(fr)
         else:
-            metric = match.group(8)
-            n_score_pattern_rows = 0
-
+            cmd = [reference_scorer, "conll", gold_file, pred_file]
+            process = subprocess.Popen(cmd, stdout=subprocess.PIPE)
+            stdout, _ = process.communicate()
+            process.wait()
+            stdout = stdout.decode("utf-8")
+            result = defaultdict(lambda: defaultdict(tuple[float, float, float]))
+            metric, movie, n_score_pattern_rows = "", "", 0
+            n_movies = len(set(map(lambda match: match.group(1), document_pattern.finditer(stdout))))
+            for match in pattern.finditer(stdout):
+                if match.group(1):
+                    n_score_pattern_rows += 1
+                    recall = float(match.group(2))
+                    precision = float(match.group(3))
+                    f1 = float(match.group(4))
+                    if n_score_pattern_rows <= n_movies:
+                        result[metric][movie] = (precision, recall, f1)
+                    elif n_score_pattern_rows == n_movies + 2:
+                        result[metric]["all"] = (precision, recall, f1)
+                elif match.group(5):
+                    movie = match.group(6)
+                else:
+                    metric = match.group(8)
+                    n_score_pattern_rows = 0
+            write_result = {}
+            for metric, movie_metric in result.items():
+                write_result[metric] = {}
+                for movie, metrics in movie_metric.items():
+                    write_result[metric][movie] = list(metrics)
+            with open(file_, "w") as fw:
+                json.dump(write_result, fw)
     return result
