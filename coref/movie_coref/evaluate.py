@@ -1,90 +1,103 @@
-"""Evaluate coreference"""
+"""Evaluate output of movie coreference model"""
+from mica_text_coref.coref.movie_coref import data
+from mica_text_coref.coref.movie_coref import conll
 
-import math
-import typing
 import numpy as np
-from scipy.optimize import linear_sum_assignment
+import os
+import tempfile
 
-def trace(cluster: set, partition: list[set]):
-    remaining = set(cluster)
-    for a in partition:
-        common = remaining.intersection(a)
-        if common:
-            remaining.difference_update(common)
-            yield common
-    for x in sorted(remaining):
-        yield set((x,))
+def _evaluate_coreference(reference_scorer: str, gold_conll_lines: str, pred_conll_lines: str,
+                          gold_file: str, pred_file: str) -> data.CorefMetric:
+    """Evaluate coreference using the official perl conll-2012 scorer.
 
-def muc(key: list[set], response: list[set]) -> tuple[float, float, float, float]:
-    if all(len(k) == 1 for k in key) or all(len(r) == 1 for r in response):
-        return 0.0, 0.0, 0.0, 0.0
-    R_numer = sum(len(k) - sum(1 for _ in trace(k, response)) for k in key)
-    R_denom = sum(len(k) - 1 for k in key)
-    P_numer = sum(len(r) - sum(1 for _ in trace(r, key)) for r in response)
-    P_denom = sum(len(r) - 1 for r in response)
-    return R_numer, R_denom, P_numer, P_denom
+    Args:
+        reference_scorer: Filepath of the scorer
+        gold_conll_lines: CONLL lines of the ground truth
+        pred_conll_lines: CONLL lines of the model output
+        gold_file: Filepath where the gold CONLL file is saved
+        pred_file: Filepath where the pred CONLL file is saved
+    
+    Returns:
+        CorefMetric: A python object containing coreference metric scores (muc, bcub, ceafe)
+    """
+    result = conll.evaluate_conll(reference_scorer, gold_conll_lines, pred_conll_lines, gold_file, pred_file)
+    metric = data.CorefMetric()
+    metric.muc = data.Metric(*result["muc"]["all"])
+    metric.bcub = data.Metric(*result["bcub"]["all"])
+    metric.ceafe = data.Metric(*result["ceafe"]["all"])
+    return metric
 
-def b_cubed(key: list[set], response: list[set]) -> tuple[float, float, float, float]:
-    if sum(len(k) for k in key) == 0:
-        R_numer, R_denom = 0.0, 0.0
-    else:
-        R_numer = math.fsum(len(k.intersection(r)) ** 2 / len(k) for k in key for r in response)
-        R_denom = sum(len(k) for k in key)
-    if sum(len(r) for r in response) == 0:
-        P_numer, P_denom = 0.0, 0.0
-    else:
-        P_numer = math.fsum(len(r.intersection(k)) ** 2 / len(r) for r in response for k in key)
-        P_denom = sum(len(r) for r in response)
-    return R_numer, R_denom, P_numer, P_denom
+def _evaluate_character_heads(gold: list[int], pred: list[int]) -> data.Metric:
+    """Evaluate character head prediction.
 
-def ceaf(key: list[set], response: list[set], score: typing.Callable[[set, set], float]) -> tuple[float, float, float, float]:
-    if len(response) == 0 or len(key) == 0:
-        return 0.0, 0.0, 0.0, 0.0
-    else:
-        cost_matrix = np.array([[-score(k, r) for r in response] for k in key])
-        row_ind, col_ind = linear_sum_assignment(cost_matrix)
-        total_score = -cost_matrix[row_ind, col_ind].sum()
-        R_numer = P_numer = total_score
-        R_denom = math.fsum(score(k, k) for k in key)
-        P_denom = math.fsum(score(r, r) for r in response)
-        return R_numer, R_denom, P_numer, P_denom
+    Args:
+        gold: List of gold character head labels. Each list value is 0 or 1.
+        pred: List of predicted character head values from the model.
 
-def ceaf_m(key: list[set], response: list[set]) -> tuple[float, float, float, float]:
-    def Φ_3(k, r):
-        return len(k.intersection(r))
-    return ceaf(key, response, Φ_3)
+    Return:
+        Metric: A python object containing precision, recall, and F1 scores.
+    """
+    assert len(gold) == len(pred)
+    gold = np.array(gold)
+    pred = np.array(pred)
+    tp = ((gold == 1) & (pred == 1)).sum()
+    fp = ((gold != 1) & (pred == 1)).sum()
+    fn = ((gold == 1) & (pred != 1)).sum()
+    precision = float(100*tp/(tp + fp + 1e-23))
+    recall = float(100*tp/(tp + fn + 1e-23))
+    return data.Metric(precision, recall)
 
-def ceaf_e(key: list[set], response: list[set]) -> tuple[float, float, float, float]:
-    def Φ_4(k, r):
-        return 2 * len(k.intersection(r)) / (len(k) + len(r))
-    return ceaf(key, response, Φ_4)
+def evaluate(documents: list[data.CorefDocument], results: list[data.CorefResult], reference_scorer: str, 
+             output_dir: str = None, filename: str = "dev") -> data.MovieCorefMetric:
+    """Evaluate output of movie coreference model using the official perl conll-2012 scorer.
+    
+    CONLL files are written to 'output_dir' with 'filename' included in the file names.
+    If 'output_dir' is NONE, then temporary directories are used that are immediately deleted after.
 
-def find_prf_from_nds(r_numer: float, r_denom: float, p_numer: float, p_denom: float) -> tuple[float, float, float]:
-    r = 100 * r_numer / (1e-23 + r_denom)
-    p = 100 * p_numer / (1e-23 + p_denom)
-    f1 = 2 * p * r / (1e-23 + p + r)
-    return r, p, f1
+    Args:
+        documents: List of CorefDocument objects. Used to obtain gold cluster and character head values.
+        results: List of CorefResult objects. Used to obtain the predicted clusters and character heads.
+        reference_scorer: Filepath of the official perl conll-2012 scorer.
+        output_dir: Directory where CONLL files are written. If NONE, temporary directories are used.
+        filename: Text to be included in the CONLL filenames.
+    
+    Returns:
+        MovieCorefMetric: A python object containing coreference metric (muc, bcub, and ceafe) scores
+            for word-based and span-based clusters, and character head classification performance
+            score (precision, recall, and f1)
+    """
+    # create the gold/pred word/span conll lines, and gold/pred character head ids
+    assert len(documents) == len(results), ("documents (list[CorefDocument]) and results (list[CorefResult]) should be"
+                                            " of same length")
+    gold_word_conll_lines, gold_span_conll_lines, gold_character_ids = [], [], []
+    pred_word_conll_lines, pred_span_conll_lines, pred_character_ids = [], [], []
+    for document, result in zip(documents, results):
+        gold_word_clusters = [set((mention.head, mention.head) for mention in cluster)
+                                for cluster in document.clusters.values()]
+        gold_span_clusters = [set((mention.begin, mention.end) for mention in cluster)
+                                for cluster in document.clusters.values()]
+        pred_word_clusters = [set((word, word) for word in cluster) for cluster in result.predicted_word_clusters]
+        pred_span_clusters = result.predicted_span_clusters
+        gold_character_ids += document.word_head_ids
+        pred_character_ids += result.predicted_character_heads.tolist()
+        gold_word_conll_lines += conll.convert_to_conll(document, gold_word_clusters)
+        gold_span_conll_lines += conll.convert_to_conll(document, gold_span_clusters)
+        pred_word_conll_lines += conll.convert_to_conll(document, pred_word_clusters)
+        pred_span_conll_lines += conll.convert_to_conll(document, pred_span_clusters)
 
-def evaluate(movie_to_gold_clusters: dict[str, list[set[tuple[int, int]]]], movie_to_pred_clusters: dict[str, list[set[tuple[int, int]]]]) -> dict[str, dict[str, tuple[float, float, float]]]:
-    assert set(movie_to_gold_clusters.keys()) == set(movie_to_pred_clusters.keys())
-    all_muc_R_numer, all_muc_R_denom, all_muc_P_numer, all_muc_P_denom = 0, 0, 0, 0
-    all_b_cubed_R_numer, all_b_cubed_R_denom, all_b_cubed_P_numer, all_b_cubed_P_denom = 0, 0, 0, 0
-    all_ceaf_e_R_numer, all_ceaf_e_R_denom, all_ceaf_e_P_numer, all_ceaf_e_P_denom = 0, 0, 0, 0
-    result: dict[str, dict[str, tuple[float, float, float]]] = {}
-    for movie in movie_to_pred_clusters.keys():
-        gold_clusters, pred_clusters = movie_to_gold_clusters[movie], movie_to_pred_clusters[movie]
-        muc_R_numer, muc_R_denom, muc_P_numer, muc_P_denom = muc(gold_clusters, pred_clusters)
-        b_cubed_R_numer, b_cubed_R_denom, b_cubed_P_numer, b_cubed_P_denom = b_cubed(gold_clusters, pred_clusters)
-        ceaf_e_R_numer, ceaf_e_R_denom, ceaf_e_P_numer, ceaf_e_P_denom = ceaf_e(gold_clusters, pred_clusters)
-        all_muc_R_numer += muc_R_numer; all_muc_R_denom += muc_R_denom; all_muc_P_numer += muc_P_numer; all_muc_P_denom += muc_P_denom
-        all_b_cubed_R_numer += b_cubed_R_numer; all_b_cubed_R_denom += b_cubed_R_denom; all_b_cubed_P_numer += b_cubed_P_numer; all_b_cubed_P_denom += b_cubed_P_denom
-        all_ceaf_e_R_numer += ceaf_e_R_numer; all_ceaf_e_R_denom += ceaf_e_R_denom; all_ceaf_e_P_numer += ceaf_e_P_numer; all_ceaf_e_P_denom += ceaf_e_P_denom
-        result[movie] = {}
-        result[movie]["muc"] = find_prf_from_nds(muc_R_numer, muc_R_denom, muc_P_numer, muc_P_denom)
-        result[movie]["bcub"] = find_prf_from_nds(b_cubed_R_numer, b_cubed_R_denom, b_cubed_P_numer, b_cubed_P_denom)
-        result[movie]["ceafe"] = find_prf_from_nds(ceaf_e_R_numer, ceaf_e_R_denom, ceaf_e_P_numer, ceaf_e_P_denom)
-    result["all"] = {}
-    result["all"]["muc"] = find_prf_from_nds(all_muc_R_numer, all_muc_R_denom, all_muc_P_numer, all_muc_P_denom)
-    result["all"]["bcub"] = find_prf_from_nds(all_b_cubed_R_numer, all_b_cubed_R_denom, all_b_cubed_P_numer, all_b_cubed_P_denom)
-    result["all"]["ceafe"] = find_prf_from_nds(all_ceaf_e_R_numer, all_ceaf_e_R_denom, all_ceaf_e_P_numer, all_ceaf_e_P_denom)
-    return result
+    # evaluate coreference and character heads
+    movie_coref_metric = data.MovieCorefMetric()
+    with tempfile.TemporaryDirectory() as temp_dir:
+        if output_dir is None:
+            output_dir = temp_dir
+        gold_word_file = os.path.join(output_dir, f"gold_epoch.word.{filename}.conll")
+        gold_span_file = os.path.join(output_dir, f"gold_epoch.span.{filename}.conll")
+        pred_word_file = os.path.join(output_dir, f"pred_epoch.word.{filename}.conll")
+        pred_span_file = os.path.join(output_dir, f"pred_epoch.span.{filename}.conll")
+        movie_coref_metric.word_coref = _evaluate_coreference(
+            reference_scorer, gold_word_conll_lines, pred_word_conll_lines, gold_word_file, pred_word_file)
+        movie_coref_metric.span_coref = _evaluate_coreference(
+            reference_scorer, gold_span_conll_lines, pred_span_conll_lines, gold_span_file, pred_span_file)
+    movie_coref_metric.character = _evaluate_character_heads(gold_character_ids, pred_character_ids)
+
+    return movie_coref_metric
