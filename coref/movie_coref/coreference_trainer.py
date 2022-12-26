@@ -6,6 +6,7 @@ from mica_text_coref.coref.movie_coref import evaluate
 
 import bisect
 import collections
+import copy
 import gpustat
 import itertools
 import jsonlines
@@ -15,7 +16,7 @@ import matplotlib.pyplot as plt
 import numpy as np
 import os
 import random
-import copy
+import re
 import shutil
 import sys
 import torch
@@ -33,9 +34,6 @@ torch.cuda.manual_seed_all(value)
 torch.backends.cudnn.deterministic = True
 torch.backends.cudnn.benchmark = False  
 
-EvalOutput = tuple[float, data.MovieCorefMetric, list[data.CorefResult]]
-StrategyEvalOutput = list[tuple[float, data.MovieCorefMetric, data.CorefResult]]
-
 class CoreferenceTrainer:
     """Train movie coreference model"""
 
@@ -44,10 +42,11 @@ class CoreferenceTrainer:
         preprocess: str,
         output_dir: str,
         reference_scorer_file: str,
-        train_file: str,
-        dev_file: str,
+        full_length_scripts_file: str,
+        excerpts_file: str,
         weights_file: str,
-        test_movie: str = None,
+        train_excerpts: bool,
+        test_movie: str,
         tag_embedding_size: int = 16,
         gru_nlayers: int = 1,
         gru_hidden_size: int = 256,
@@ -60,11 +59,15 @@ class CoreferenceTrainer:
         bert_lr: float = 1e-5,
         character_lr: float = 1e-4,
         coref_lr: float = 1e-4,
-        warmup_epochs: float = None,
+        warmup_steps: int = -1,
         weight_decay: float = 0,
         max_epochs: int = 20,
         patience: int = 3,
         train_document_len: int = 5120,
+        train_overlap_len: int = 0,
+        dev_document_len: int = 5120,
+        dev_overlap_len: int = 512,
+        dev_merge_strategy: str = "avg",
         test_document_lens: list[int] = [1024, 2048, 3072, 4096, 5120],
         test_overlap_lens: list[int] = [0, 128, 256, 384, 512],
         test_merge_strategies: list[str] = ["none", "pre", "post", "max", "min", "avg"],
@@ -89,27 +92,32 @@ class CoreferenceTrainer:
             preprocess: type of preprocessing used on screenplays
             output_dir: directory where predictions, models, plots, and logs will be written
             reference_scorer_file: file path of the official conll-2012 coreference scorer
-            train_file: file path of the training screenplays
-            dev_file: file path of the development screenplays
+            full_length_scripts_file: file path of the full-length screenplays
+            excerpts_file: file path of the excerpts screenplays
             weights_file: file path of the pretrained word-level coreference model
-            test_movie: train set movie left-out for cross validation, if none entire train set is used
+            train_excerpts: train excerpts along with full-length scripts
+            test_movie: full-length script left out of training, if none all full-length scripts are used
             tag_embedding_size: embedding size of parse, pos, and ner tags in the character recognition model
             gru_nlayers: number of gru layers in the character recognition model
             gru_hidden_size: gru hidden size in the character recognition model
-            gru_bidirectional: if true, use bidirectional layers in the gru of the character recognition model
+            gru_bidirectional: use bidirectional layers in the gru of the character recognition model
             topk: number of top-scoring antecedents to retain for each word after coarse coreference scoring
             dropout: model-wide dropout probability
-            freeze_bert: if true, roberta transformer is not trained
-            genre: genre to use for pretrained word-level coreference model
+            freeze_bert: do not train transformer
+            genre: genre
             bce_weight: weight of binary cross entropy coreference loss
-            bert_lr: learning rate of the roberta transformer
+            bert_lr: learning rate of the transformer
             character_lr: learning rate of the character recognition model
-            coref_lr: learning rate of the coreference modules except the roberta transformer
-            warmup_epochs: number of epochs for the learning rate to ramp up, can be a fraction
+            coref_lr: learning rate of the coreference models
+            warmup_steps: number of training steps for the learning rate to ramp up, -1 means no scheduling done
             weight_decay: l2 regularization weight to use in Adam optimizer
             max_epochs: maximum number of epochs to train the model
             patience: maximum number of epochs to wait for dev performance to improve before early stopping
             train_document_len: size of the train subdocuments in words
+            train_overlap_len: overlap between adjacent train subdocuments in words
+            dev_document_len: size of the dev subdocuments in words
+            dev_overlap_len: overlap between adjacent dev subdocuments in words
+            dev_merge_strategy: merge strategy for dev subdocuments
             test_document_lens: size of the test subdocuments in words
             test_overlap_lens: size of overlap between adjacent test subdocuments in words
             test_merge_strategies: strategy to merge coref scores of adjacent test subdocuments
@@ -118,25 +126,24 @@ class CoreferenceTrainer:
             cr_batch_size: number of sequences in a character recognition batch
             fn_batch_size: number of word pairs in fine scoring batch
             sp_batch_size: number of heads in span prediction batch
-            evaluate_train: if true, evaluate training set as well
-            n_epochs_no_eval: initial number of epochs for which evaluation is not done, set it greater than zero if
-                the model is not stable in the initial few epochs
-            add_cr_to_coarse: if true, add character head scores to coarse scores
-            filter_mentions_by_cr: if true, only keep words whose character score is positive while constructing the
-                word clusters during inference
-            remove_singleton_cr: if true, remove singleton word clusters during inference
-            save_log: if true, save logs to file
-            save_model: if true, save model weights of the epoch with the best dev performance
-            save_predictions: if true, save model predictions of the epoch with the best dev performance
-            save_loss_curve: if true, save train and dev loss curve
+            evaluate_train: evaluate training set
+            n_epochs_no_eval: initial number of epochs for which evaluation is not done
+            add_cr_to_coarse: add character head scores to coarse scores
+            filter_mentions_by_cr: keep words whose character score is positive while creating the predicted word clusters
+            remove_singleton_cr: remove singleton word clusters during inference
+            save_log: save logs to file
+            save_model: save model weights of the epoch with the best dev performance
+            save_predictions: save model predictions of the epoch with the best dev performance
+            save_loss_curve: save train and dev loss curve
         """
-        # training vars
+        # trainer vars
         self.preprocess = preprocess
         self.output_dir = output_dir
         self.reference_scorer_file = reference_scorer_file
-        self.train_file = train_file
-        self.dev_file = dev_file
+        self.long_scripts = full_length_scripts_file
+        self.short_scripts = excerpts_file
         self.weights_file = weights_file
+        self.train_excerpts = train_excerpts
         self.test_movie = test_movie
         self.tag_embedding_size = tag_embedding_size
         self.gru_nlayers = gru_nlayers
@@ -150,11 +157,15 @@ class CoreferenceTrainer:
         self.bert_lr = bert_lr
         self.character_lr = character_lr
         self.coref_lr = coref_lr
-        self.warmup_epochs = warmup_epochs
+        self.warmup_steps = warmup_steps
         self.weight_decay = weight_decay
         self.max_epochs = max_epochs
         self.patience = patience
         self.train_document_len = train_document_len
+        self.train_overlap_len = train_overlap_len
+        self.dev_document_len = dev_document_len
+        self.dev_overlap_len = dev_overlap_len
+        self.dev_merge_strategy = dev_merge_strategy
         self.test_document_lens = test_document_lens
         self.test_overlap_lens = test_overlap_lens
         self.test_merge_strategies = test_merge_strategies
@@ -173,7 +184,7 @@ class CoreferenceTrainer:
         self.save_predictions = save_predictions
         self.save_loss_curve = save_loss_curve
 
-        # output dir
+        # create output dir if any of the save flags are true
         if save_log or save_model or save_predictions or save_loss_curve:
             os.makedirs(self.output_dir, exist_ok=True)
         else:
@@ -181,9 +192,8 @@ class CoreferenceTrainer:
         
         # logging
         self.logger = logging.getLogger("")
-        console_handler = logging.StreamHandler(sys.stdout)
         self.logger.handlers = []
-        self.logger.addHandler(console_handler)
+        self.logger.addHandler(logging.StreamHandler(sys.stdout))
         if save_log:
             self._add_log_file(os.path.join(self.output_dir, "train.log"))
         
@@ -195,8 +205,7 @@ class CoreferenceTrainer:
 
     def _add_log_file(self, log_file: str):
         """Add file handler to logger"""
-        file_handler = logging.FileHandler(log_file, mode="w")
-        self.logger.addHandler(file_handler)
+        self.logger.addHandler(logging.FileHandler(log_file, mode="w"))
 
     def _log(self, message: str):
         """Logger"""
@@ -216,24 +225,22 @@ class CoreferenceTrainer:
 
     def _create_optimizers(self):
         """Create optimizers. If freeze_bert is true, don't create the bert optimizer"""
+        max_training_steps = len(self.train_corpus) * self.max_epochs
         if self.freeze_bert:
             for param in self.model.bert_parameters():
                 param.requires_grad = False
         else:
             self.bert_optimizer = AdamW(self.model.bert_parameters(), lr=self.bert_lr, weight_decay=self.weight_decay)
-            if self.warmup_epochs >= 0:
-                self.bert_scheduler = get_linear_schedule_with_warmup(
-                    self.bert_optimizer, self.warmup_epochs * len(self.train_corpus),
-                    len(self.train_corpus) * self.max_epochs)
+            if self.warmup_steps >= 0:
+                self.bert_scheduler = get_linear_schedule_with_warmup(self.bert_optimizer, self.warmup_steps,
+                                                                      max_training_steps)
         self.cr_optimizer = AdamW(self.model.cr_parameters(), lr=self.character_lr, weight_decay=self.weight_decay)
         self.coref_optimizer = AdamW(self.model.coref_parameters(), lr=self.coref_lr, weight_decay=self.weight_decay)
-        if self.warmup_epochs >= 0:
-            self.cr_scheduler = get_linear_schedule_with_warmup(
-                self.cr_optimizer, self.warmup_epochs * len(self.train_corpus),
-                len(self.train_corpus) * self.max_epochs)
-            self.coref_scheduler = get_linear_schedule_with_warmup(
-                self.coref_optimizer, self.warmup_epochs * len(self.train_corpus),
-                len(self.train_corpus) * self.max_epochs)
+        if self.warmup_steps >= 0:
+            self.cr_scheduler = get_linear_schedule_with_warmup(self.cr_optimizer, self.warmup_steps,
+                                                                max_training_steps)
+            self.coref_scheduler = get_linear_schedule_with_warmup(self.coref_optimizer, self.warmup_steps,
+                                                                   max_training_steps)
 
     def _split_screenplay(self, document: data.CorefDocument, split_len: int, overlap_len: int, 
                           exclude_subdocuments_with_no_clusters: bool = True, verbose = False):
@@ -373,8 +380,8 @@ class CoreferenceTrainer:
             i = j
         subword_id_tensor = torch.LongTensor(subword_id_seqs).to(self.device)
         subword_mask_tensor = torch.FloatTensor(subword_mask_seqs).to(self.device)
-        document.subword_dataloader = DataLoader(TensorDataset(
-            subword_id_tensor, subword_mask_tensor), batch_size=self.subword_batch_size)
+        document.subword_dataloader = DataLoader(TensorDataset(subword_id_tensor, subword_mask_tensor),
+                                                 batch_size=self.subword_batch_size)
         if verbose:
             self._log(f"{document.movie}: {len(subword_id_seqs)} subword sequences")
 
@@ -397,10 +404,11 @@ class CoreferenceTrainer:
         if split_len is None:
             document_generator = corpus
         else:
-            document_generator = itertools.chain(*[self._split_screenplay(
-                document, split_len, overlap_len,
-                exclude_subdocuments_with_no_clusters=exclude_subdocuments_with_no_clusters, 
-                verbose=verbose) for document in corpus])
+            document_generator = itertools.chain(
+                                    *[self._split_screenplay(
+                                            document, split_len, overlap_len,
+                                            exclude_subdocuments_with_no_clusters=exclude_subdocuments_with_no_clusters, 
+                                            verbose=verbose) for document in corpus])
         for _document in document_generator:
             self._tokenize_document(_document, verbose=verbose)
             self._create_subword_dataloader(_document, verbose=verbose)
@@ -707,7 +715,7 @@ class CoreferenceTrainer:
         if sp_scores:
             sp_scores = torch.cat(sp_scores, dim=0)
         if self.model.training:
-            span_loss = self.model.sp_loss(sp_scores, starts, ends, self.avg_n_train_heads)
+            span_loss = self.model.sp_loss(sp_scores, starts, ends)
             result.span_loss = span_loss
         elif len(sp_scores) > 0:
             starts = sp_scores[:, :, 0].argmax(dim=1).tolist()
@@ -716,7 +724,7 @@ class CoreferenceTrainer:
             head2span = {head: (start, end, score) for head, start, end, score in zip(heads.tolist(), starts, ends,
                                                                                       max_sp_scores)}
             span_clusters = [set([head2span[head][:2] for head in cluster]) for cluster in word_clusters]
-            self._remove_repeated_mentions(span_clusters)
+            # self._remove_repeated_mentions(span_clusters)
             result.head2span = head2span
             result.predicted_span_clusters = span_clusters
 
@@ -726,11 +734,11 @@ class CoreferenceTrainer:
         """Update model weights"""
         if not self.freeze_bert:
             self.bert_optimizer.step()
-            if self.warmup_epochs >= 0:
+            if self.warmup_steps >= 0:
                 self.bert_scheduler.step()
         self.cr_optimizer.step()
         self.coref_optimizer.step()
-        if self.warmup_epochs >= 0:
+        if self.warmup_steps >= 0:
             self.cr_scheduler.step()
             self.coref_scheduler.step()
 
@@ -815,7 +823,8 @@ class CoreferenceTrainer:
         return merged_result
 
     def _eval_subdocuments_and_merge(self, document: data.CorefDocument, subdocument_corpus: data.CorefCorpus,
-                                     strategies: list[str], name: str) -> StrategyEvalOutput:
+                                     strategies: list[str], name: str, only_lea: bool) -> (
+                                        list[tuple[float, data.MovieCorefMetric, data.CorefResult]]):
         """Run model inference on the subdocuments of the corpus, merge results according to strategy, and evaluate
         output.
 
@@ -823,7 +832,8 @@ class CoreferenceTrainer:
             document: CorefDocument which was split to obtain the subdocuments.
             subdocument_corpus: CorefCorpus containing the subdocuments.
             strategies: Merge strategies.
-            name: "test_<document_len>_<overlap_len>" filename to be included in CONLL filenames.
+            name: filename to be included in CONLL filenames (for e.g. "<partition>_<document_len>_<overlap_len>")
+            only_lea: Only calculate LEA metric.
 
         Returns:
             A list of tuples, each tuple corresponding to a strategy and containing the following:
@@ -838,77 +848,97 @@ class CoreferenceTrainer:
             for subdocument in subdocument_corpus:
                 result = self._run(subdocument)
                 results.append(result)
-        strategy_tuples = []
+        eval_outputs = []
         tbar = tqdm.tqdm(strategies, unit="strategy")
         for strategy in tbar:
             tbar.set_description(strategy)
             strategy_result = self._merge(subdocument_corpus.documents, results, strategy)
-            strategy_metric = evaluate.evaluate([document], [strategy_result], self.reference_scorer_file,
-                                                self.output_dir, f"{name}_{strategy}")
-            loss = (strategy_result.character_loss + strategy_result.coref_loss).item()
-            strategy_tuples.append((loss, strategy_metric, strategy_result))
-        return strategy_tuples
-
-    def _test(self) -> dict[tuple[int, int], StrategyEvalOutput]:
-        """Test model on left-out-movie for each subdocument length, overlap length, and strategy"""
-        test_strategy_eval_output: dict[tuple[int, int], StrategyEvalOutput] = {}
-        tbar = tqdm.tqdm(self.test_document_and_overlap_len_to_corpus.items())
-        for (document_len, overlap_len), subdocument_corpus in tbar:
-            tbar.set_description(f"subdocument={document_len:<5d} overlap={overlap_len:<4d}::")
-            strategy_eval_output = self._eval_subdocuments_and_merge(
-                self.test_document, subdocument_corpus, self.test_merge_strategies,
-                f"test_{document_len}_{overlap_len}")
-            test_strategy_eval_output[(document_len, overlap_len)] = strategy_eval_output
-        for (document_len, overlap_len), eval_outputs in test_strategy_eval_output.items():
-            for strategy, eval_output in zip(self.test_merge_strategies, eval_outputs):
-                self._log(f"test:: subdocument={document_len:5d} overlap={overlap_len:4d} strategy={strategy:4s} "
-                            f"loss={eval_output[0]}, metric:{eval_output[1]}")
-        return test_strategy_eval_output
+            strategy_metric = self.evaluator.evaluate([document], [strategy_result], self.reference_scorer_file,
+                                                      only_lea=only_lea,
+                                                      remove_speaker_links=(self.preprocess != "nocharacters"),
+                                                      output_dir=self.output_dir, filename=f"{name}_{strategy}")
+            loss = float((strategy_result.character_loss + strategy_result.coref_loss).item())
+            eval_outputs.append((loss, strategy_metric, strategy_result))
+        return eval_outputs
     
-    def _eval_corpus(self, corpus: data.CorefCorpus, name: str) -> EvalOutput:
+    def _eval_corpus(self, corpus: data.CorefCorpus, name: str, only_lea: bool) -> (
+            tuple[float, data.MovieCorefMetric, list[data.CorefResult]]):
         """Run model inference on corpus and evaluate output
 
         Args:
             corpus: CorefCorpus to evaluate
             name: "train" or "dev"
+            only: Only calculate LEA metric.
         
         Returns:
-            loss: character loss + coreference loss
-            metric: MovieCorefMetric
+            loss: average character loss + coreference loss
+            metric: micro-averaged MovieCorefMetric
             results: List of CorefResult for each CorefDocument
         """
         torch.cuda.empty_cache()
         self.model.eval()
-        results = []
+        results: list[data.CorefResult] = []
         with torch.no_grad():
             for document in corpus:
                 result = self._run(document)
                 results.append(result)
-        movie_coref_metric = evaluate.evaluate(corpus.documents, results, self.reference_scorer_file,
-                                               self.output_dir, name)
+        movie_coref_metric = self.evaluator.evaluate(corpus.documents, results, self.reference_scorer_file,
+                                                     only_lea=only_lea, 
+                                                     remove_speaker_links=(self.preprocess != "nocharacters"),
+                                                     output_dir=self.output_dir, filename=name)
         character_loss = float(np.mean([result.character_loss.item() for result in results]))
         coref_loss = float(np.mean([result.coref_loss.item() for result in results]))
         return character_loss + coref_loss, movie_coref_metric, results
 
-    def _eval_dev(self) -> EvalOutput:
-        """Evaluate dev corpus and return evaluation output"""
-        dev_eval_output = self._eval_corpus(self.dev_corpus, "dev")
-        self._log(f"dev:: loss={dev_eval_output[0]:.4f}, metric:{dev_eval_output[1]}")
-        return dev_eval_output
-    
-    def _eval_train(self) -> EvalOutput:
-        """Evaluate train corpus and return evaluation output"""
-        train_eval_output = self._eval_corpus(self.train_corpus, "train")
+    def _eval_train(self, only_lea: bool) -> tuple[float, data.MovieCorefMetric, list[data.CorefResult]]:
+        """Evaluate train corpus"""
+        train_eval_output = self._eval_corpus(self.train_corpus, "train", only_lea)
         self._log(f"train:: loss={train_eval_output[0]:.4f}, metric:{train_eval_output[1]}")
         return train_eval_output
 
-    def _save_predictions(self, corpus: data.CorefCorpus, eval_output: EvalOutput, name: str):
-        """Save predictions"""
+    def _eval_dev(self, only_lea: bool) -> (tuple[float, data.MovieCorefMetric, list[data.CorefResult]]
+                                            | tuple[float, data.MovieCorefMetric, data.CorefResult]):
+        """Evaluate dev corpus"""
+        if self.training_mode == "lomo_excerpts":
+            dev_eval_outputs = self._eval_subdocuments_and_merge(
+                self.dev_document, self.dev_corpus, [self.dev_merge_strategy],
+                f"dev_{self.dev_document_len}_{self.dev_overlap_len}", only_lea)
+            dev_eval_output = dev_eval_outputs[0]
+        else:
+            dev_eval_output = self._eval_corpus(self.dev_corpus, "dev", only_lea)
+        self._log(f"dev:: loss={dev_eval_output[0]:.4f}, metric:{dev_eval_output[1]}")
+        return dev_eval_output
+    
+    def _eval_test(self, only_lea: bool) -> (
+            dict[tuple[int, int, str], tuple[float, data.MovieCorefMetric, data.CorefResult]]
+            | tuple[float, data.MovieCorefMetric, list[data.CorefResult]]):
+        """Evaluate test corpus"""
+        if self.training_mode == "lomo" or self.training_mode == "lomo_excerpts":
+            test_eval_output = {}
+            tbar = tqdm.tqdm(self.test_document_and_overlap_len_to_corpus.items())
+            for (document_len, overlap_len), subdocument_corpus in tbar:
+                tbar.set_description(f"subdocument={document_len:<5d} overlap={overlap_len:<4d}::")
+                eval_outputs = self._eval_subdocuments_and_merge(self.test_document, subdocument_corpus,
+                                                                 self.test_merge_strategies,
+                                                                 f"test_{document_len}_{overlap_len}", only_lea)
+                for eval_output, strategy in zip(eval_outputs, self.test_merge_strategies):
+                    test_eval_output[(document_len, overlap_len, strategy)] = eval_output
+            for (document_len, overlap_len, strategy), eval_output in test_eval_output.items():
+                self._log(f"test:: subdocument={document_len:5d} overlap={overlap_len:4d} strategy={strategy:4s} "
+                            f"loss={eval_output[0]:.4f}, metric:{eval_output[1]}")
+        else:
+            test_eval_output = self._eval_corpus(self.test_corpus, "test", only_lea)
+            self._log(f"test:: loss={test_eval_output[0]:.4f}, metric:{test_eval_output[1]}")
+        return test_eval_output
+
+    def _save_corpus_predictions(self, corpus: data.CorefCorpus,
+                                 eval_output: tuple[float, data.MovieCorefMetric, list[data.CorefResult]], name: str):
+        """Save predictions of evaluating a corpus"""
         file = os.path.join(self.output_dir, f"{name}.jsonlines")
         with jsonlines.open(file, "w") as writer:
             for doc, result in zip(corpus, eval_output[2]):
                 gold_clusters = [[[mention.begin, mention.end, mention.head] for mention in cluster]
-                                        for cluster in doc.clusters.values()]
+                                            for cluster in doc.clusters.values()]
                 pred_word_clusters = [sorted(word_cluster) for word_cluster in result.predicted_word_clusters]
                 pred_span_clusters = [sorted([list(span) for span in span_cluster])
                                             for span_cluster in result.predicted_span_clusters]
@@ -927,69 +957,84 @@ class CoreferenceTrainer:
                             pred_span=pred_span_clusters,
                             pred_head=pred_heads)
                 writer.write(data)
-
-    def _save_test_predictions(self):
-        """Save predictions of the test set"""
-        for (document_len, overlap_len), strategy_eval_output in (
-                self.test_document_and_overlap_len_to_eval_outputs.items()):
-            for strategy, eval_output in zip(self.test_merge_strategies, strategy_eval_output):
-                test_file = os.path.join(self.output_dir,
-                                            f"test_{document_len}_{overlap_len}_{strategy}.jsonlines")
-                with jsonlines.open(test_file, "w") as writer:
-                    gold_clusters = [[[mention.begin, mention.end, mention.head] for mention in cluster]
-                                            for cluster in self.test_document.clusters.values()]
-                    pred_word_clusters = [sorted(word_cluster)
-                                                for word_cluster in eval_output[2].predicted_word_clusters]
-                    pred_span_clusters = [sorted([list(span) for span in span_cluster])
-                                                for span_cluster in eval_output[2].predicted_span_clusters]
-                    pred_heads = eval_output[2].predicted_character_heads.tolist()
-                    data = dict(movie=self.test_document.movie,
-                                rater=self.test_document.rater,
-                                token=self.test_document.token,
-                                parse=self.test_document.parse,
-                                pos=self.test_document.pos,
-                                ner=self.test_document.ner,
-                                is_pronoun=self.test_document.is_pronoun,
-                                is_punctuation=self.test_document.is_punctuation,
-                                speaker=self.test_document.speaker,
-                                gold=gold_clusters,
-                                pred_word=pred_word_clusters,
-                                pred_span=pred_span_clusters,
-                                pred_head=pred_heads)
-                    writer.write(data)
         
         # Copy test CONLL files for gold and pred span clusters
         for arg in ["gold", "pred"]:
-            for document_len in self.test_document_lens:
-                for overlap_len in self.test_overlap_lens:
-                    for strategy in self.test_merge_strategies:
-                        name = f"test_{document_len}_{overlap_len}_{strategy}"
-                        src = os.path.join(self.output_dir, f"{arg}_epoch.span.{name}.conll")
-                        dst = os.path.join(self.output_dir, f"{name}.{arg}.conll")
-                        if os.path.exists(src):
-                            shutil.copy2(src, dst)
+            src = os.path.join(self.output_dir, f"{arg}_epoch.span.{name}.conll")
+            dst = os.path.join(self.output_dir, f"{name}.{arg}.conll")
+            if os.path.exists(src):
+                shutil.copy2(src, dst)
 
-    def _save_config(self):
+    def _save_subdocument_predictions(
+            self, eval_output_dict: dict[tuple[int, int, str], tuple[float, data.MovieCorefMetric, data.CorefResult]],
+            document: data.CorefDocument, name: str):
+        """Save predictions of evaluating a document at different document lengths, overlap lengths, and strategies"""
+        for (document_len, overlap_len, strategy), eval_output in eval_output_dict.items():
+            file_ = os.path.join(self.output_dir, f"{name}_{document_len}_{overlap_len}_{strategy}.jsonlines")
+            with jsonlines.open(file_, "w") as writer:
+                gold_clusters = [[[mention.begin, mention.end, mention.head] for mention in cluster]
+                                        for cluster in document.clusters.values()]
+                pred_word_clusters = [sorted(word_cluster)
+                                        for word_cluster in eval_output[2].predicted_word_clusters]
+                pred_span_clusters = [sorted([list(span) for span in span_cluster])
+                                        for span_cluster in eval_output[2].predicted_span_clusters]
+                pred_heads = eval_output[2].predicted_character_heads.tolist()
+                data = dict(movie=document.movie,
+                            rater=document.rater,
+                            token=document.token,
+                            parse=document.parse,
+                            pos=document.pos,
+                            ner=document.ner,
+                            is_pronoun=document.is_pronoun,
+                            is_punctuation=document.is_punctuation,
+                            speaker=document.speaker,
+                            gold=gold_clusters,
+                            pred_word=pred_word_clusters,
+                            pred_span=pred_span_clusters,
+                            pred_head=pred_heads)
+                writer.write(data)
+    
+            # Copy test CONLL files for gold and pred span clusters
+            for arg in ["gold", "pred"]:
+                filename = f"{name}_{document_len}_{overlap_len}_{strategy}"
+                src = os.path.join(self.output_dir, f"{arg}_epoch.span.{filename}.conll")
+                dst = os.path.join(self.output_dir, f"{filename}.{arg}.conll")
+                if os.path.exists(src):
+                    shutil.copy2(src, dst)
+
+    def _save_config(self, 
+                     train_eval_output: tuple[float, data.MovieCorefMetric, list[data.CorefResult]] | None,
+                     dev_eval_output: (tuple[float, data.MovieCorefMetric, list[data.CorefResult]]
+                                       | tuple[float, data.MovieCorefMetric, data.CorefResult]),
+                     test_eval_output: (dict[tuple[int, int, str], tuple[float, data.MovieCorefMetric, data.CorefResult]]
+                                        | tuple[float, data.MovieCorefMetric, list[data.CorefResult]]),
+                     dev_losses: list[float],
+                     dev_scores: list[float],
+                     train_losses: list[float],
+                     train_scores: list[float],
+                     best_epoch: int):
         """Save hyperparams config and metric scores"""
         result_file = os.path.join(self.output_dir, "result.yaml")
         train_metric_dict, test_metric_dict = {}, {}
-        if self.evaluate_train:
-            train_metric_dict = self.train_eval_output[1].todict()
-        if self.test_document_and_overlap_len_to_eval_outputs is not None:
-            for (document_len, overlap_len), eval_outputs in (
-                    self.test_document_and_overlap_len_to_eval_outputs.items()):
+        dev_metric_dict = dev_eval_output[1].todict()
+        if train_eval_output is not None:
+            train_metric_dict = train_eval_output[1].todict()
+        if isinstance(test_eval_output, dict):
+            for (document_len, overlap_len, strategy), eval_output in test_eval_output.items():
                 if document_len not in test_metric_dict:
                     test_metric_dict[document_len] = {}
                 if overlap_len not in test_metric_dict[document_len]:
                     test_metric_dict[document_len][overlap_len] = {}
-                for strategy, eval_output in zip(self.test_merge_strategies, eval_outputs):
-                    test_metric_dict[document_len][overlap_len][strategy] = eval_output[1].todict()
+                test_metric_dict[document_len][overlap_len][strategy] = eval_output[1].todict()
+        else:
+            test_metric_dict = test_eval_output[1].todict()
         result = dict(character_recognition=dict(tag_embedding_size=self.tag_embedding_size,
                                                  gru_nlayers=self.gru_nlayers,
                                                  gru_hidden_size=self.gru_hidden_size, 
                                                  gru_bidirectional=self.gru_bidirectional),
                       preprocess=self.preprocess,
                       test_movie=self.test_movie,
+                      train_excerpts=self.train_excerpts,
                       topk=self.topk,
                       dropout=self.dropout,
                       freeze_bert=self.freeze_bert,
@@ -998,10 +1043,17 @@ class CoreferenceTrainer:
                       bert_lr=self.bert_lr,
                       character_lr=self.character_lr,
                       coref_lr=self.coref_lr,
-                      warmup=self.warmup_epochs,
+                      warmup_steps=self.warmup_steps,
                       n_steps_per_epoch=len(self.train_corpus),
                       weight_decay=self.weight_decay,
                       train_document_len=self.train_document_len,
+                      train_overlap_len=self.train_overlap_len,
+                      dev_document_len=self.dev_document_len,
+                      dev_overlap_len=self.dev_overlap_len,
+                      dev_merge_strategy=self.dev_merge_strategy,
+                      test_document_lens=self.test_document_lens,
+                      test_overlap_lens=self.test_overlap_lens,
+                      test_merge_strategies=self.test_merge_strategies,
                       subword_batch_size=self.subword_batch_size,
                       cr_seq_len=self.cr_seq_len,
                       cr_batch_size=self.cr_batch_size,
@@ -1010,94 +1062,60 @@ class CoreferenceTrainer:
                       add_cr_to_coarse=self.add_cr_to_coarse,
                       filter_mentions_by_cr=self.filter_mentions_by_cr,
                       remove_singleton_cr=self.remove_singleton_cr,
-                      epoch=self.epoch,
+                      best_epoch=best_epoch,
                       max_epochs=self.max_epochs,
                       n_epochs_no_eval=self.n_epochs_no_eval,
-                      dev_losses=np.round(self.dev_losses, 4).tolist(),
-                      train_losses=np.round(self.train_losses, 4).tolist(),
-                      dev_scores=np.round(self.dev_scores, 4).tolist(),
-                      train_scores=np.round(self.train_scores, 4).tolist(),
-                      dev_metric=self.dev_eval_output[1].todict(),
+                      dev_losses=np.round(dev_losses, 4).tolist(),
+                      train_losses=np.round(train_losses, 4).tolist(),
+                      dev_scores=np.round(dev_scores, 4).tolist(),
+                      train_scores=np.round(train_scores, 4).tolist(),
+                      dev_metric=dev_metric_dict,
                       train_metric=train_metric_dict,
                       test_metric=test_metric_dict
                       )
         with open(result_file, "w") as file:
             yaml.dump(result, file)
 
-    def _save(self):
-        """Save model weights and predictions"""
-        # Save model weights
-        if self.save_model:
-            model_file = os.path.join(self.output_dir, "movie_coref.pt")
-            self.model.save_weights(model_file)
+    def _save_model(self):
+        model_file = os.path.join(self.output_dir, "movie_coref.pt")
+        self.model.save_weights(model_file)
 
-        # Save predictions
-        if self.save_predictions:
-            self._save_predictions(self.dev_corpus, self.dev_eval_output, "dev")
-            if self.evaluate_train:
-                self._save_predictions(self.train_corpus, self.train_eval_output, "train")
-
-            # Copy dev CONLL files for gold and pred span clusters
-            for arg in ["gold", "pred"]:
-                src = os.path.join(self.output_dir, f"{arg}_epoch.span.dev.conll")
-                dst = os.path.join(self.output_dir, f"dev.{arg}.conll")
-                if os.path.exists(src):
-                    shutil.copy2(src, dst)
-
-        # Save hyperparams used and best metric
-        if self.save_log:
-            self._save_config()
-
-    def _save_plot(self):
+    def _save_plot(self, dev_losses: list[float], dev_scores: list[float], train_losses: list[float],
+                   train_scores: list[float]):
         """Plot loss and score curves"""
-        if self.save_loss_curve:
-            loss_file = os.path.join(self.output_dir, "loss.png")
-            plt.figure(figsize=(8, 6))
-            plt.subplot(1, 2, 1)
-            if self.train_losses:
-                plt.plot(np.arange(len(self.train_losses)) + 1, self.train_losses, label="train", lw=4, color="b")
-            plt.plot(np.arange(len(self.dev_losses)) + 1, self.dev_losses, label="dev", lw=4, color="r")
-            plt.xlabel("epoch")
-            plt.ylabel("loss")
-            plt.legend()
-            plt.title("Loss")
-            plt.grid(visible=True, which="both", axis="both")
-            plt.subplot(1, 2, 2)
-            if self.train_scores:
-                plt.plot(np.arange(len(self.train_scores)) + 1, self.train_scores, label="train", lw=4, color="b")
-            plt.plot(np.arange(len(self.dev_scores)) + 1, self.dev_scores, label="dev", lw=4, color="r")
-            plt.xlabel("epoch")
-            plt.ylabel("avg F1")
-            plt.legend()
-            plt.title("score")
-            plt.grid(visible=True, which="both", axis="both")
-            plt.savefig(loss_file)
-            plt.close("all")
+        loss_file = os.path.join(self.output_dir, "loss.png")
+        plt.figure(figsize=(8, 6))
+        plt.subplot(1, 2, 1)
+        if train_losses:
+            plt.plot(np.arange(len(train_losses)) + 1, train_losses, label="train", lw=4, color="b")
+        plt.plot(np.arange(len(dev_losses)) + 1, dev_losses, label="dev", lw=4, color="r")
+        plt.xlabel("epoch")
+        plt.ylabel("loss")
+        plt.legend()
+        plt.title("Loss")
+        plt.grid(visible=True, which="both", axis="both")
+        plt.subplot(1, 2, 2)
+        if train_scores:
+            plt.plot(np.arange(len(train_scores)) + 1, train_scores, label="train", lw=4, color="b")
+        plt.plot(np.arange(len(dev_scores)) + 1 + max(0, self.n_epochs_no_eval), dev_scores, label="dev", lw=4,
+                 color="r")
+        plt.xlabel("epoch")
+        plt.ylabel("micro-average LEA F1")
+        plt.legend()
+        plt.title("score")
+        plt.grid(visible=True, which="both", axis="both")
+        plt.savefig(loss_file)
+        plt.close("all")
     
     def _clean(self):
         if self.output_dir is not None:
-            for arg1 in ["word", "span"]:
-                for arg2 in ["gold", "pred"]:
-                    for arg3 in ["dev", "train"]:
-                        path = os.path.join(self.output_dir, f"{arg2}_epoch.{arg1}.{arg3}.conll")
-                        if os.path.exists(path):
-                            os.remove(path)
-                    for document_len in self.test_document_lens:
-                        for overlap_len in self.test_overlap_lens:
-                            for strategy in self.test_merge_strategies:
-                                path = os.path.join(
-                                    self.output_dir,
-                                    f"{arg2}_epoch.{arg1}.test_{document_len}_{overlap_len}_{strategy}.conll")
-                                if os.path.exists(path):
-                                    os.remove(path)
+            for file_ in os.listdir(self.output_dir):
+                if re.search(r"epoch[\w\.]*conll$", file_) is not None:
+                    os.remove(os.path.join(self.output_dir, file_))
 
     def __call__(self):
-        self._log("")
-        self._log(self._gpu_usage())
-        max_left, max_right = -1, -1
-
         # Create model
-        self._log("\nInitializing model")
+        self._log("\n\nInitializing model")
         self.model = model.MovieCoreference(
             parsetag_size = len(data.parse_labelset),
             postag_size = len(data.pos_labelset),
@@ -1115,63 +1133,100 @@ class CoreferenceTrainer:
         self.model.load_weights_from_file(self.weights_file)
         self.model.device = self.device
 
-        # Load training set
-        self._log("Loading training corpus")
-        self.train_corpus = data.CorefCorpus(self.train_file)
-        self.test = self.test_movie is not None and any(doc.movie == self.test_movie for doc in self.train_corpus)
-        if self.test:
-            self.test_document = [document for document in self.train_corpus if document.movie == self.test_movie][0]
-            self.train_corpus.documents = [document for document in self.train_corpus 
-                                                        if document.movie != self.test_movie]
-        self.train_corpus = self._prepare_corpus(self.train_corpus, self.train_document_len, 0, 
+        # Load scripts
+        self._log("Loading scripts")
+        long_scripts = data.CorefCorpus(self.long_scripts)
+        short_scripts = data.CorefCorpus(self.short_scripts)
+
+        # Set training mode
+        # all: train on long scripts, early-stop on short scripts, test on short scripts
+        # lomo: train on long scripts except test movie, early-stop on short scripts, test on test movie
+        # lomo_excerpts: train on long and short scripts except test movie, early-stop on test movie, test on test movie
+        self.training_mode = "all"
+        if self.test_movie is not None:
+            self.training_mode = "lomo"
+        if self.train_excerpts:
+            self.training_mode = "lomo_excerpts"
+
+        # Set train, dev, and test corpus
+        if self.training_mode == "all":
+            self.train_corpus = long_scripts
+            self.dev_corpus = short_scripts
+            self.test_corpus = short_scripts
+        else:
+            rest_corpus = data.CorefCorpus()
+            lomo_corpus = data.CorefCorpus()
+            for document in long_scripts:
+                if document.movie == self.test_movie:
+                    lomo_corpus.append(document)
+                else:
+                    rest_corpus.append(document)
+            if self.training_mode == "lomo":
+                self.train_corpus = rest_corpus
+                self.dev_corpus = short_scripts
+            elif self.training_mode == "lomo_excerpts":
+                self.train_corpus = rest_corpus + short_scripts
+                self.dev_corpus = lomo_corpus
+            self.test_corpus = lomo_corpus
+        
+        # Prepare train corpus
+        self._log("Preparing train corpus")
+        self.train_corpus = self._prepare_corpus(self.train_corpus, self.train_document_len, self.train_overlap_len, 
                                                  exclude_subdocuments_with_no_clusters=True)
+        
+        # Prepare dev corpus
+        self._log("Preparing dev corpus")
+        if self.training_mode == "lomo_excerpts":
+            self.dev_document = self.dev_corpus.documents[0]
+            self.dev_corpus = self._prepare_corpus(self.dev_corpus, self.dev_document_len, self.dev_overlap_len,
+                                                   exclude_subdocuments_with_no_clusters=False)
+        else:
+            self.dev_corpus = self._prepare_corpus(self.dev_corpus)
+        
+        # Prepare test corpus
+        self._log("Preparing test corpus")
+        if self.training_mode == "lomo" or self.training_mode == "lomo_excerpts":
+            self.test_document = self.test_corpus.documents[0]
+            self.test_document_and_overlap_len_to_corpus: dict[tuple[int, int]: data.CorefCorpus] = {}
+            for document_len in self.test_document_lens:
+                for overlap_len in self.test_overlap_lens:
+                    corpus = self._prepare_corpus(self.test_corpus, document_len, overlap_len, 
+                                                  exclude_subdocuments_with_no_clusters=False)
+                    self.test_document_and_overlap_len_to_corpus[(document_len, overlap_len)] = corpus
+        else:
+            self.test_corpus = self.dev_corpus
+
 
         # Setting some model hyperparameters based on training set
-        self.avg_n_train_heads = self._find_avg_n_heads(self.train_corpus)
+        # TODO: Maybe replace average number of heads per document with the actual number of heads per document
+        self.model.avg_n_heads = self._find_avg_n_heads(self.train_corpus)
         max_left, max_right = self._find_max_n_words_left_and_right_of_head(self.train_corpus)
         self.model.span_predictor.max_left = max_left
         self.model.span_predictor.max_right = max_right
 
-        # Load development set
-        self._log("Loading development corpus")
-        self.dev_corpus = data.CorefCorpus(self.dev_file)
-        self.dev_corpus = self._prepare_corpus(self.dev_corpus)
-
-        # Load testing set
-        if self.test:
-            self._log("Loading testing corpus")
-            test_corpus = data.CorefCorpus()
-            test_corpus.documents = [self.test_document]
-            self.test_document_and_overlap_len_to_corpus: dict[tuple[int, int]: data.CorefCorpus] = {}
-            for document_len in self.test_document_lens:
-                for overlap_len in self.test_overlap_lens:
-                    corpus = self._prepare_corpus(test_corpus, document_len, overlap_len, 
-                                                  exclude_subdocuments_with_no_clusters=False)
-                    self.test_document_and_overlap_len_to_corpus[(document_len, overlap_len)] = corpus
-        self._log("\n")
-
         # Create optimizers
         self._create_optimizers()
 
-        # Evaluation and Early-stopping variables
+        # Create evaluator
+        self.evaluator = evaluate.Evaluator()
+
+        # Early-stopping variables
         max_dev_score = -np.inf
+        best_weights = None
+        best_epoch = 0
         n_epochs_early_stopping = 0
-        self.dev_losses, self.train_losses, self.dev_scores, self.train_scores = [], [], [], []
-        self.dev_eval_output: EvalOutput = None
-        self.train_eval_output: EvalOutput = None
-        self.test_document_and_overlap_len_to_eval_outputs: dict[tuple[int, int], StrategyEvalOutput] = None
+
+        # Running loss and score variables
+        dev_losses, dev_scores, train_losses, train_scores = [], [], [], []
+
+        # Epoch counter
         self.epoch = 0
-        self.best_weights = None
 
         # Evaluate with initial loaded weights to check if everything works
         # set n_epochs_no_eval to 0 to skip this step
         if self.epoch > self.n_epochs_no_eval:
-            self.dev_eval_output = self._eval_dev()
-            if self.evaluate_train:
-                self.train_eval_output = self._eval_train()
-            if self.test:
-                self.test_document_and_overlap_len_to_eval_outputs = self._test()
-            max_dev_score = self.dev_eval_output[1].span_score
+            dev_eval_output = self._eval_dev()
+            max_dev_score = dev_eval_output[1].span_lea_score
             self._log("\n")
 
         # Training loop
@@ -1180,19 +1235,19 @@ class CoreferenceTrainer:
             self._log(f"Epoch = {self.epoch}")
             self._train()
             if self.epoch > self.n_epochs_no_eval:
-                self.dev_eval_output = self._eval_dev()
-                self.dev_losses.append(self.dev_eval_output[0])
-                self.dev_scores.append(self.dev_eval_output[1].span_score)
+                dev_eval_output = self._eval_dev(only_lea=True)
+                dev_losses.append(dev_eval_output[0])
+                dev_scores.append(dev_eval_output[1].span_lea_score)
                 if self.evaluate_train:
-                    self.train_eval_output = self._eval_train()
-                    self.train_losses.append(self.train_eval_output[0])
-                    self.train_scores.append(self.train_eval_output[1].span_score)
-                dev_score = self.dev_eval_output[1].span_score
+                    train_eval_output = self._eval_train(only_lea=True)
+                    train_losses.append(train_eval_output[0])
+                    train_scores.append(train_eval_output[1].span_lea_score)
+                dev_score = dev_eval_output[1].span_lea_score
                 if dev_score > max_dev_score:
                     max_dev_score = dev_score
                     n_epochs_early_stopping = 0
-                    self._save()
-                    self.best_weights = copy.deepcopy(self.model.weights)
+                    best_weights = copy.deepcopy(self.model.weights)
+                    best_epoch = self.epoch
                 else:
                     n_epochs_early_stopping += 1
                 self._log(f"Dev score decreasing for {n_epochs_early_stopping} epochs, "
@@ -1200,20 +1255,48 @@ class CoreferenceTrainer:
                 if n_epochs_early_stopping == self.patience:
                     break
             self._log("\n")
-        
-        # Loss Curve
-        self._save_plot()
 
         # Test
-        if self.test:
-            self._log("\nTesting")
-            self.model.load_weights(self.best_weights)
-            self.dev_eval_output = self._eval_dev()
-            self.test_document_and_overlap_len_to_eval_outputs = self._test()
-            if self.save_predictions:
-                self._save_test_predictions()
-            if self.save_log:
-                self._save_config()
+        self._log("\nTesting")
+        self.model.load_weights(best_weights)
+        dev_eval_output = self._eval_dev(only_lea=False)
+        train_eval_output = None
+        if self.evaluate_train:
+            train_eval_output = self._eval_train(only_lea=False)
+        test_eval_output = self._eval_test(only_lea=False)
+
+        # Save hyperparameter values and metric scores
+        if self.save_log:
+            self._save_config(train_eval_output, dev_eval_output, test_eval_output, dev_losses, dev_scores,
+                              train_losses, train_scores, best_epoch)
+
+        # Save model
+        if self.save_model:
+            self._save_model()
+        
+        # Save predictions
+        if self.save_predictions:
+            # Save dev predictions
+            if self.training_mode == "lomo_excerpts":
+                self._save_subdocument_predictions(
+                    {(self.dev_document_len, self.dev_overlap_len, self.dev_merge_strategy):
+                        dev_eval_output}, self.dev_document, "dev")
+            else:
+                self._save_corpus_predictions(self.dev_corpus, dev_eval_output, "dev")
+
+            # Save train predictions
+            if self.evaluate_train:
+                self._save_corpus_predictions(self.train_corpus, train_eval_output, "train")
+
+            # Save test predictions
+            if self.training_mode == "all":
+                self._save_corpus_predictions(self.test_corpus, test_eval_output, "test")
+            else:
+                self._save_subdocument_predictions(test_eval_output, self.test_document, "test")
+
+        # Loss Curve
+        if self.save_loss_curve:
+            self._save_plot(dev_losses, dev_scores, train_losses, train_scores)
 
         # Clean
         self._clean()
