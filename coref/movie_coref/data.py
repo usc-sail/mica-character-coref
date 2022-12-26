@@ -216,6 +216,14 @@ class CorefCorpus:
 
     def __getitem__(self, i) -> CorefDocument:
         return self.documents[i]
+    
+    def append(self, doc: CorefDocument):
+        self.documents.append(doc)
+    
+    def __add__(self, other: "CorefCorpus") -> "CorefCorpus":
+        corpus = CorefCorpus()
+        corpus.documents = self.documents + other.documents
+        return corpus
 
 
 class GraphNode:
@@ -250,10 +258,13 @@ class CorefResult:
 
 class Metric:
     """General metric class for precision, recall, and F1"""
-    def __init__(self, precision, recall, f1=None):
-        self.precision = precision
-        self.recall = recall
-        self.f1 = 2 * self.precision * self.recall / (1e-23 + self.precision + self.recall) if f1 is None else f1
+    def __init__(self, recall: float = None, precision: float = None) -> None:
+        if recall is not None and precision is not None:
+            self.recall = float(100*recall)
+            self.precision = float(100*precision)
+            self.f1 = 2 * self.precision * self.recall / (1e-23 + self.precision + self.recall)
+        else:
+            self.recall = self.precision = self.f1 = None
     
     def __repr__(self) -> str:
         return (f"p={self.precision:.1f} r={self.recall:.1f} f1={self.f1:.1f}")
@@ -264,34 +275,43 @@ class Metric:
 class CorefMetric:
     """Metric for coreference resolution"""
     def __init__(self):
-        self.muc: Metric
-        self.bcub: Metric
-        self.ceafe: Metric
+        self.muc = Metric()
+        self.bcub = Metric()
+        self.ceafe = Metric()
+        self.lea = Metric()
 
     @property
-    def average_f1(self) -> float:
+    def conll_f1(self) -> float:
         return (self.muc.f1 + self.bcub.f1 + self.ceafe.f1)/3
 
     def todict(self) -> dict[str, dict[str, int]]:
-        return dict(muc=self.muc.todict(), bcub=self.bcub.todict(), ceafe=self.ceafe.todict())
+        return dict(muc=self.muc.todict(), bcub=self.bcub.todict(), ceafe=self.ceafe.todict(), lea=self.lea.todict())
 
 class MovieCorefMetric:
     """Metric for coreference resolution and character head prediction"""
     def __init__(self):
-        self.word_coref: CorefMetric
-        self.span_coref: CorefMetric
-        self.character: Metric
+        self.word_coref = CorefMetric()
+        self.span_coref = CorefMetric()
+        self.character = Metric()
 
     @property
-    def word_score(self) -> float:
-        return self.word_coref.average_f1
+    def word_conll_score(self) -> float:
+        return self.word_coref.conll_f1
 
     @property
-    def span_score(self) -> float:
-        return self.span_coref.average_f1
+    def span_conll_score(self) -> float:
+        return self.span_coref.conll_f1
+    
+    @property
+    def word_lea_score(self) -> float:
+        return self.word_coref.lea.f1
+
+    @property
+    def span_lea_score(self) -> float:
+        return self.span_coref.lea.f1
     
     def __repr__(self) -> str:
-        return f"Word={self.word_score:.1f}, Span={self.span_score:.1f}, Character={self.character.f1:.1f}"
+        return f"Word={self.word_lea_score:.1f}, Span={self.span_lea_score:.1f}, Character={self.character.f1:.1f}"
     
-    def todict(self) -> dict:
+    def todict(self) -> dict[str, dict[str, dict[str, int]] | dict[str, int]]:
         return dict(word=self.word_coref.todict(), span=self.span_coref.todict(), character=self.character.todict())

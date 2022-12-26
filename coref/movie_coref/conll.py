@@ -1,5 +1,4 @@
-"""Evaluate coreference using official conll-2012 scripts
-"""
+"""Evaluate coreference using official conll-2012 scripts"""
 from mica_text_coref.coref.movie_coref.data import CorefDocument
 
 from collections import defaultdict
@@ -8,7 +7,7 @@ import subprocess
 import os
 import hashlib
 import json
-
+    
 def convert_to_conll(document: CorefDocument, clusters: list[set[tuple[int, int]]]) -> list[str]:
     """Create conll lines from clusters.
 
