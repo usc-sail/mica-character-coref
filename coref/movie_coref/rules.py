@@ -52,11 +52,13 @@ def keep_persons(ner_tags: list[str], clusters: list[set[tuple[int, int]]]) -> l
     is_person = [tag == "PERSON" for tag in ner_tags]
     return _keep(is_person, clusters)
 
-def merge_speakers(words: list[str], parse_tags: list[str], clusters: list[set[tuple[int, int]]]) -> list[set[tuple[int, int]]]:
+def merge_speakers(words: list[str], parse_tags: list[str], clusters: list[set[tuple[int, int]]]) -> (
+        list[set[tuple[int, int]]]):
     """Merge clusters that contain speaker mentions with the same name."""
     cluster_nodes = [ClusterNode(i) for i in range(len(clusters))]
     parse_tags = np.array(parse_tags)
-    cluster_speakers = [set([re.sub(r"\([^\)]+\)", "", " ".join(words[i: j + 1])).upper().strip() for i, j in cluster if all(parse_tags[i: j + 1] == "C")]) for cluster in clusters]
+    cluster_speakers = [set([re.sub(r"\([^\)]+\)", "", " ".join(words[i: j + 1])).upper().strip()
+                             for i, j in cluster if all(parse_tags[i: j + 1] == "C")]) for cluster in clusters]
 
     for i in range(len(clusters)):
         for j in range(i + 1, len(clusters)):
@@ -92,3 +94,23 @@ def filter_mentions(mentions: set[tuple[int, int]], clusters: list[set[tuple[int
 def remove_singleton_clusters(clusters: list[set[tuple[int, int]]]) -> list[set[tuple[int, int]]]:
     """Remove clusters containing one mention."""
     return list(filter(lambda cluster: len(cluster) > 1, clusters))
+
+def remove_speaker_links(clusters: list[tuple[int, int]], parse: list[str]) -> list[tuple[int, int]]:
+    """Remove mentions from cluster if it contains a word with speaker parse tag.
+
+    Args:
+        clusters (list[set]): List of clusters.
+        parse (list): List of word-level parse tags.
+    
+    Return:
+        List of clusters.
+    """
+    clusters_ = []
+    for cluster in clusters:
+        cluster_ = set()
+        for begin, end in cluster:
+            if np.all(parse[begin: end + 1] != "C"):
+                cluster_.add((begin, end))
+        if cluster_:
+            clusters_.append(cluster_)
+    return clusters_
