@@ -52,7 +52,7 @@ class CorefModel:  # pylint: disable=too-many-instance-attributes
                  config_path: str,
                  section: str,
                  epochs_trained: int = 0,
-                 use_gpu: bool = False):
+                 build_optimizers: bool = True):
         """
         A newly created model is set to evaluation mode.
 
@@ -64,7 +64,6 @@ class CorefModel:  # pylint: disable=too-many-instance-attributes
             use_gpu (bool): use cuda:0 gpu
         """
         self.config = CorefModel._load_config(config_path, section)
-        self.config.device = "cuda:0" if use_gpu else "cpu"
         self.config.data_dir = os.path.join(os.getenv("DATA_DIR"), self.config.data_dir)
         self.config.train_data = os.path.join(os.getenv("DATA_DIR"), self.config.train_data)
         self.config.dev_data = os.path.join(os.getenv("DATA_DIR"), self.config.dev_data)
@@ -73,7 +72,8 @@ class CorefModel:  # pylint: disable=too-many-instance-attributes
         self.epochs_trained = epochs_trained
         self._docs: Dict[str, List[Doc]] = {}
         self._build_model()
-        self._build_optimizers()
+        if build_optimizers:
+            self._build_optimizers()
         self._set_training(False)
         self._coref_criterion = CorefLoss(self.config.bce_loss_weight)
         self._span_criterion = torch.nn.CrossEntropyLoss(reduction="sum")
