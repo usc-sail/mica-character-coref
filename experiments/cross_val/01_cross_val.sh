@@ -1,4 +1,5 @@
 #!/bin/bash
+# Run cross validation experiments with different hyperparameters with fixed dev set (dev set = 3 short excerpts)
 
 if [ $# -lt 2 ]; then
     echo -e "Usage:\n./cross_val.sh MOVIE DOCUMENT_LEN"
