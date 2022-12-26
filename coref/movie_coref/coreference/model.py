@@ -40,6 +40,7 @@ class MovieCoreference:
         self.fine_scorer = FineScorer(word_embedding_size, dropout)
         self.span_predictor = SpanPredictor(word_embedding_size, dropout)
         self.bce_weight = bce_weight
+        self.avg_n_heads = 5120
         self._device = torch.device("cpu")
         self._training = False
 
@@ -65,12 +66,15 @@ class MovieCoreference:
     @property
     def weights(self) -> dict[str, torch.Tensor]:
         weights = dict(bert=self.bert.state_dict(), we=self.encoder.state_dict(),
-                       rough_scorer=self.coarse_scorer.state_dict(), pw=self.pairwise_encoder.state_dict(), 
-                       a_scorer=self.fine_scorer.state_dict(), sp=self.span_predictor.state_dict())
+                       cr=self.character_recognizer.state_dict(), rough_scorer=self.coarse_scorer.state_dict(),
+                       pw=self.pairwise_encoder.state_dict(), a_scorer=self.fine_scorer.state_dict(),
+                       sp=self.span_predictor.state_dict())
         return weights
 
     def load_weights(self, weights: dict[str, torch.Tensor]):
         self.bert.load_state_dict(weights["bert"], strict=False)
+        if "cr" in weights:
+            self.character_recognizer.load_state_dict(weights["cr"])
         self.encoder.load_state_dict(weights["we"])
         self.coarse_scorer.load_state_dict(weights["rough_scorer"])
         self.pairwise_encoder.load_state_dict(weights["pw"])
@@ -123,8 +127,7 @@ class MovieCoreference:
         loss = bce_loss_fn(scores, labels)
         return loss
 
-    def sp_loss(self, scores: torch.FloatTensor, starts: torch.LongTensor, ends: torch.LongTensor, 
-        avg_n_heads: int) -> torch.Tensor:
+    def sp_loss(self, scores: torch.FloatTensor, starts: torch.LongTensor, ends: torch.LongTensor) -> torch.Tensor:
         """Span Prediction Loss.
 
         Args:
@@ -137,5 +140,5 @@ class MovieCoreference:
             span prediction loss: Tensor
         """
         loss_fn = CrossEntropyLoss(reduction="sum")
-        loss = (loss_fn(scores[:, :, 0], starts) + loss_fn(scores[:, :, 1], ends)) / avg_n_heads / 2
+        loss = (loss_fn(scores[:, :, 0], starts) + loss_fn(scores[:, :, 1], ends)) / (self.avg_n_heads * 2)
         return loss

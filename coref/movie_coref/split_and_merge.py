@@ -129,6 +129,7 @@ def combine_coref_scores(corefs: list[torch.Tensor], inds: list[torch.Tensor], o
         top_indices: Tensor[n, 2k]
     """
     # Assertions
+    assert strategy in ["pre", "post", "avg", "max", "min", "none"], "Invalid strategy"
     assert len(corefs) > 0, "Number of coref tensors should be atleast 1"
     assert len(corefs) == len(inds), "Number of coref tensors should equal number of indices tensors"
     if len(corefs) == 1: return corefs[0], inds[0]

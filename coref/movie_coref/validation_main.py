@@ -1,5 +1,4 @@
-"""Main function to validate raters' annotations against reference
-"""
+"""Main function to validate raters' annotations against reference"""
 
 from absl import flags
 from absl import app
