@@ -47,8 +47,11 @@ flags.DEFINE_enum("test_movie", default="none",
                   enum_values=["avengers_endgame", "dead_poets_society", "john_wick", "prestige", "quiet_place",
                                "zootopia", "none"],
                   help="Left out movie used for testing.")
+flags.DEFINE_bool("hierarchical", default=False, help="Run hierarchical inference.")
 
 # Hyperparameters
+flags.DEFINE_integer("topk", default=50, help="Maximum number of preceding antecedents to retain after coarse scoring.")
+flags.DEFINE_integer("repk", default=3, help="Number of representative mentions to sample per cluster.")
 flags.DEFINE_bool("freeze_bert", default=False, help="Freeze transformer.")
 flags.DEFINE_enum("genre", default="wb", enum_values=["bc", "bn", "mz", "nw", "pt", "tc", "wb"], help="Genre.")
 flags.DEFINE_float("bce_weight", default=0.5, help="Weight of the BCE coreference loss.")
@@ -85,7 +88,6 @@ flags.DEFINE_bool("remove_singleton_cr", default=True,
                   help="Remove predicted word-level clusters containing a single predicted character head.")
 
 # Model
-flags.DEFINE_integer("topk", default=50, help="Maximum number of preceding antecedents to retain after coarse scoring.")
 flags.DEFINE_integer("gru_nlayers", default=1, help="Number of GRU layers.")
 flags.DEFINE_integer("gru_hidden_size", default=256, help="Hidden size of GRU.")
 flags.DEFINE_bool("gru_bi", default=True, help="Bidirectional GRU layers.")
@@ -133,6 +135,8 @@ def main(argv):
         output_dir += "_" + FLAGS.test_movie
     if FLAGS.train_excerpts:
         output_dir += "_excerpts"
+    if FLAGS.hierarchical:
+        output_dir += "_hi"
     output_dir += f"_{os.getpid()}"
 
     # Get the full-length and excerpts screenplays
@@ -149,11 +153,13 @@ def main(argv):
         weights_file=FLAGS.weights_file,
         train_excerpts=FLAGS.train_excerpts,
         test_movie=FLAGS.test_movie,
+        hierarchical=FLAGS.hierarchical,
         tag_embedding_size=FLAGS.tag_embedding_size,
         gru_nlayers=FLAGS.gru_nlayers,
         gru_hidden_size=FLAGS.gru_hidden_size,
         gru_bidirectional=FLAGS.gru_bi,
         topk=FLAGS.topk,
+        n_representative_mentions=FLAGS.repk,
         dropout=FLAGS.dropout,
         freeze_bert=FLAGS.freeze_bert,
         genre=FLAGS.genre,
