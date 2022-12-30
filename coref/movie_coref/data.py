@@ -227,9 +227,9 @@ class CorefCorpus:
 
 
 class GraphNode:
-    """Graph of character mention heads with edges connecting co-referring head words."""
-    def __init__(self, word_id: int):
-        self.id = word_id
+    """Graph used for DFS"""
+    def __init__(self, id_: int):
+        self.id = id_
         self.neighbors: set[GraphNode] = set()
         self.visited = False
 
@@ -250,6 +250,9 @@ class CorefResult:
         self.character_scores: torch.Tensor
         self.coref_scores: torch.Tensor
         self.top_indices: torch.Tensor
+        self.representative_mentions_embedding: torch.Tensor
+        self.representative_mentions_position: torch.Tensor
+        self.representative_mentions_character_scores: torch.Tensor
         self.head2span: dict[int, tuple[int, int, float]] = {}
         self.predicted_character_heads: np.ndarray
         self.predicted_word_clusters: list[set[int]] = []
