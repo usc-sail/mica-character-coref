@@ -60,11 +60,14 @@ class FineScorer(nn.Module):
 
     def forward(
         self,
-        all_embeddings: torch.Tensor,
-        embeddings: torch.Tensor,
-        features: torch.Tensor,
-        indices: torch.Tensor,
-        scores: torch.Tensor) -> torch.Tensor:
+        all_embeddings: torch.Tensor = None,
+        embeddings: torch.Tensor = None,
+        features: torch.Tensor = None,
+        indices: torch.Tensor = None,
+        scores: torch.Tensor = None,
+        pair_matrix: torch.Tensor = None) -> torch.Tensor:
+        if pair_matrix is not None:
+            return self._ffnn(pair_matrix)
         # [batch_size, n_ants, pair_emb]
         pair_matrix = self._get_pair_matrix(
             all_embeddings, embeddings, features, indices)
