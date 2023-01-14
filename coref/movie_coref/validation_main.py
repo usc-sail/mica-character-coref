@@ -8,20 +8,15 @@ import pandas as pd
 from scorch import scores
 
 FLAGS = flags.FLAGS
-proj_dir = os.getcwd()
-flags.DEFINE_multi_string(
-    "rater",
-    default=[os.path.join(proj_dir, f"data/movie_coref/validation/{name}.csv")
-                for name in ["athashree", "chakor", "prithvi"]],
-    help="Rater csv annotation file(s).")
-flags.DEFINE_string(
-    "reference",
-    default=os.path.join(proj_dir, "data/movie_coref/validation/reference.csv"),
-    help="Reference csv annotation file.")
+data_dir = os.getenv("DATA_DIR")
+flags.DEFINE_multi_string("rater", default=[os.path.join(data_dir, f"mica_text_coref/movie_coref/validation/{name}.csv") 
+                                            for name in ["athashree", "chakor", "prithvi"]], 
+                          help="Rater csv annotation file(s).")
+flags.DEFINE_string("reference", default=os.path.join(data_dir, "mica_text_coref/movie_coref/validation/reference.csv"),
+                    help="Reference csv annotation file.")
 
 def validate(raters_csv_files: list[str], reference_csv_file: str):
-    """Calculate conll-F1 scores between rater and reference annotations.
-    """
+    """Calculate conll-F1 scores between rater and reference annotations."""
     name_and_clusters = []
     reference_clusters = None
 
@@ -44,9 +39,9 @@ def validate(raters_csv_files: list[str], reference_csv_file: str):
     for name, clusters in name_and_clusters:
         conll_f1 = scores.conll2012(reference_clusters, clusters)
         conll_f1s.append(conll_f1)
-        print(f"rater {name:20s}: conll-F1 against reference = {conll_f1:.2f}")
+        print(f"rater {name:20s}: conll-F1 against reference = {conll_f1:.4f}")
     average_conll_f1 = sum(conll_f1s)/len(conll_f1s)
-    print(f"average conll-F1 = {average_conll_f1:.2f}")
+    print(f"average conll-F1 = {average_conll_f1:.4f}")
 
 def main(argv):
     validate(FLAGS.rater, FLAGS.reference)

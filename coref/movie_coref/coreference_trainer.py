@@ -57,6 +57,7 @@ class CoreferenceTrainer:
         n_representative_mentions: int = 3,
         dropout: float = 0,
         freeze_bert: bool = False,
+        load_bert: bool = True,
         genre: str = "wb",
         bce_weight: float = 0.5,
         bert_lr: float = 1e-5,
@@ -109,6 +110,7 @@ class CoreferenceTrainer:
             n_representative_mentions: number of representative mentions per cluster
             dropout: model-wide dropout probability
             freeze_bert: do not train transformer
+            load_bert: load transformer weights from pretrained word-level coreference model, otherwise use roberta-large
             genre: genre
             bce_weight: weight of binary cross entropy coreference loss
             bert_lr: learning rate of the transformer
@@ -158,6 +160,7 @@ class CoreferenceTrainer:
         self.topk = topk
         self.repk = n_representative_mentions
         self.dropout = dropout
+        self.load_bert = load_bert
         self.freeze_bert = freeze_bert
         self.genre = genre
         self.bce_weight = bce_weight
@@ -1306,7 +1309,10 @@ class CoreferenceTrainer:
                       test_movie=self.test_movie,
                       train_excerpts=self.train_excerpts,
                       topk=self.topk,
+                      repk=self.repk,
+                      hierarchical=self.hierarchical,
                       dropout=self.dropout,
+                      load_bert=self.load_bert,
                       freeze_bert=self.freeze_bert,
                       genre=self.genre,
                       bce_weight=self.bce_weight,
@@ -1401,7 +1407,7 @@ class CoreferenceTrainer:
 
         # Load model weights
         self._log("\nLoading model weights from word-level-coref model")
-        self.model.load_weights_from_file(self.weights_file)
+        self.model.load_weights_from_file(self.weights_file, self.load_bert)
         self.model.device = self.device
 
         # Load scripts

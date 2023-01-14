@@ -71,8 +71,9 @@ class MovieCoreference:
                        sp=self.span_predictor.state_dict())
         return weights
 
-    def load_weights(self, weights: dict[str, torch.Tensor]):
-        self.bert.load_state_dict(weights["bert"], strict=False)
+    def load_weights(self, weights: dict[str, torch.Tensor], load_bert=True):
+        if load_bert:
+            self.bert.load_state_dict(weights["bert"], strict=False)
         if "cr" in weights:
             self.character_recognizer.load_state_dict(weights["cr"])
         self.encoder.load_state_dict(weights["we"])
@@ -81,9 +82,9 @@ class MovieCoreference:
         self.fine_scorer.load_state_dict(weights["a_scorer"])
         self.span_predictor.load_state_dict(weights["sp"])
 
-    def load_weights_from_file(self, weights_path: str):
+    def load_weights_from_file(self, weights_path: str, load_bert=True):
         weights = torch.load(weights_path, map_location="cuda:0")
-        self.load_weights(weights)
+        self.load_weights(weights, load_bert=load_bert)
 
     def save_weights(self, weights_path: str):
         torch.save(self.weights, weights_path)

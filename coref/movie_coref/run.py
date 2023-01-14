@@ -22,7 +22,6 @@ from absl import app
 import datetime
 import os
 import pytz
-import yaml
 
 FLAGS = flags.FLAGS
 proj_dir = os.path.join(os.getenv("PROJ_DIR"), "mica_text_coref")
@@ -52,6 +51,8 @@ flags.DEFINE_bool("hierarchical", default=False, help="Run hierarchical inferenc
 # Hyperparameters
 flags.DEFINE_integer("topk", default=50, help="Maximum number of preceding antecedents to retain after coarse scoring.")
 flags.DEFINE_integer("repk", default=3, help="Number of representative mentions to sample per cluster.")
+flags.DEFINE_bool("load_bert", default=True, help="Load transformer weights from word-level coreference model, "
+                                                  "otherwise regular roberta-large weights are used.")
 flags.DEFINE_bool("freeze_bert", default=False, help="Freeze transformer.")
 flags.DEFINE_enum("genre", default="wb", enum_values=["bc", "bn", "mz", "nw", "pt", "tc", "wb"], help="Genre.")
 flags.DEFINE_float("bce_weight", default=0.5, help="Weight of the BCE coreference loss.")
@@ -162,6 +163,7 @@ def main(argv):
         n_representative_mentions=FLAGS.repk,
         dropout=FLAGS.dropout,
         freeze_bert=FLAGS.freeze_bert,
+        load_bert=FLAGS.load_bert,
         genre=FLAGS.genre,
         bce_weight=FLAGS.bce_weight,
         bert_lr=FLAGS.bert_lr,
