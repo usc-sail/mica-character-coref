@@ -1,4 +1,6 @@
 #!/bin/bash
+# preprocess_arr=(regular addsays nocharacters)
+# bert_lr_arr=(1e-5 2e-5 5e-5)
 
 preprocess=$1
 bert_lr=$2

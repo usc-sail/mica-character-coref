@@ -1,16 +1,15 @@
 #!/bin/bash
-# dev_document_len_arr=(2048 3072 4096 5120 8192 10240 20480)
+# genre, bce_weight
 
 dev_document_len=$1
-dev_overlap_len_arr=(0 128 256 512 1024)
+dev_overlap_len=$2
 test_movie_arr=(avengers_endgame dead_poets_society john_wick prestige quiet_place zootopia)
+genre_arr=(bc bn mz nw pt tc wb)
+bce_weight_arr=(0 0.25 0.5 0.75 1)
 
-for test_movie in ${test_movie_arr[@]}; do
-for dev_overlap_len in ${dev_overlap_len_arr[@]}; do
-    python coref/movie_coref/run.py \
-        --output_dir=/scratch1/sbaruah/mica_text_coref/movie_coref/results/coreference/cross_val_excerpts_Dec26/ \
+py="python coref/movie_coref/run.py \
+        --output_dir=/scratch1/sbaruah/mica_text_coref/movie_coref/results/coreference/cross_val_excerpts_Jan02/ \
         --input_type=regular \
-        --test_movie=$test_movie \
         --bert_lr=2e-5 \
         --character_lr=2e-4 \
         --coref_lr=2e-4 \
@@ -30,5 +29,13 @@ for dev_overlap_len in ${dev_overlap_len_arr[@]}; do
         --noeval_train \
         --save_log \
         --save_predictions \
-        --save_loss_curve
-done; done;
+        --save_loss_curve"
+
+for test_movie in ${test_movie_arr[@]}; do
+    for genre in ${genre_arr[@]}; do
+        $py --test_movie=$test_movie --genre=$genre
+    done;
+    for bce_weight in ${bce_weight_arr[@]}; do
+        $py --test_movie=$test_movie --bce_weight=$bce_weight
+    done;
+done;
