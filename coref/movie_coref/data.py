@@ -163,7 +163,8 @@ class CorefDocument:
             self.clusters = {}
             for character, mentions in json["clusters"].items():
                 mentions = set([Mention(*x) for x in mentions])
-                self.clusters[character] = mentions
+                if mentions:
+                    self.clusters[character] = mentions
 
             # Filling in the derived fields
             self.parse_ids = [parse_labelset[x] for x in self.parse]
