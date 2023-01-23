@@ -327,7 +327,7 @@ def wl_evaluate(input_file: str,
                     setting_to_gold_lines[setting].extend(conll.convert_to_conll(gold_doc, gold_clusters))
                     setting_to_pred_lines[setting].extend(conll.convert_to_conll(gold_doc, pred_clusters))
 
-    for setting in setting_to_movie_to_pred_clusters.keys():
+    for setting in tqdm.tqdm(setting_to_movie_to_pred_clusters.keys(), unit="setting"):
         movie_to_gold_clusters = setting_to_movie_to_gold_clusters[setting]
         movie_to_pred_clusters = setting_to_movie_to_pred_clusters[setting]
         if lea:
