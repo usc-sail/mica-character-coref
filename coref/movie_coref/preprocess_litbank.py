@@ -32,10 +32,10 @@ for file in tqdm.tqdm(os.listdir(os.path.join(lrec_dir, "data/original/conll")))
                 continue
             elif not line.strip():
                 if sent_offsets:
-                    if sent_offsets[-1][1] < len(words):
-                        sent_offsets.append([sent_offsets[-1][1], len(words)])
+                    if sent_offsets[-1][1] < len(words) - 1:
+                        sent_offsets.append([sent_offsets[-1][1] + 1, len(words) - 1])
                 else:
-                    sent_offsets.append([0, len(words)])
+                    sent_offsets.append([0, len(words) - 1])
             else:
                 word = line.split()[3]
                 coref = line.split()[-1]
@@ -67,7 +67,7 @@ for file in tqdm.tqdm(os.listdir(os.path.join(lrec_dir, "data/original/conll")))
         
         texts = []
         for i, j in sent_offsets:
-            sentence = words[i: j]
+            sentence = words[i: j + 1]
             text = " ".join(sentence)
             texts.append(text)
         docs = list(nlp.pipe(texts, batch_size=64))
@@ -111,7 +111,7 @@ for book in tqdm.tqdm(litbank_data):
     pos = []
     n = 0
     for (i, j), doc in zip(book["sent_offset"], book["docs"]):
-        sentence = words[i: j]
+        sentence = words[i: j + 1]
         k = 0
         spacy_word_id_to_litbank_word_id = {}
         for l, word in enumerate(sentence):
