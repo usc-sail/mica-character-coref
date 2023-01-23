@@ -9,7 +9,7 @@ import math
 import numpy as np
 import os
 import re
-import scipy
+from scipy.optimize import linear_sum_assignment
 import subprocess
 import tempfile
 import typing
@@ -161,7 +161,7 @@ class Evaluator:
             return 0.0, 0.0, 0.0, 0.0
         else:
             cost_matrix = np.array([[-score(k, r) for r in response] for k in key])
-            row_ind, col_ind = scipy.linear_sum_assignment(cost_matrix)
+            row_ind, col_ind = linear_sum_assignment(cost_matrix)
             total_score = -cost_matrix[row_ind, col_ind].sum()
             R_numer = P_numer = total_score
             R_denom = math.fsum(score(k, k) for k in key)
