@@ -39,6 +39,11 @@ flags.DEFINE_string("output_dir", default=os.path.join(data_dir, "movie_coref/re
                     help="Directory to save model weights, predictions, metrics, loss curves, and logs.")
 flags.DEFINE_string("reference_scorer", default=os.path.join(proj_dir, "coref/movie_coref/scorer/v8.01/scorer.pl"),
                     help="Path of conll reference scorer.")
+flags.DEFINE_string("litbank_file", default=os.path.join(data_dir, "litbank/books.jsonlines"), 
+                    help="Filepath of preprocessed LitBank")
+flags.DEFINE_string("litbank_folds_dir", 
+                    default=os.path.join(os.getenv("DATA_DIR"), "lrec2020-coref/data/litbank_tenfold_splits"), 
+                    help="Directory containing data splits of LitBank for 10-fold cross validation")
 
 # Training Mode
 flags.DEFINE_bool("train_excerpts", default=False, help="Train excerpts.")
@@ -47,6 +52,9 @@ flags.DEFINE_enum("test_movie", default="none",
                                "zootopia", "none"],
                   help="Left out movie used for testing.")
 flags.DEFINE_bool("hierarchical", default=False, help="Run hierarchical inference.")
+flags.DEFINE_bool("litbank", default=False, help="Train LitBank")
+flags.DEFINE_integer("litbank_fold", default=0, lower_bound=0, upper_bound=9, 
+                     help="Fold index for LitBank cross validation training")
 
 # Hyperparameters
 flags.DEFINE_integer("topk", default=50, help="Maximum number of preceding antecedents to retain after coarse scoring.")
@@ -134,6 +142,8 @@ def main(argv):
     output_dir = os.path.join(FLAGS.output_dir, time)
     if FLAGS.test_movie != "none":
         output_dir += "_" + FLAGS.test_movie
+    if FLAGS.litbank:
+        output_dir += f"_fold{FLAGS.litbank_fold}"
     if FLAGS.train_excerpts:
         output_dir += "_excerpts"
     if FLAGS.hierarchical:
@@ -151,10 +161,14 @@ def main(argv):
         reference_scorer_file=FLAGS.reference_scorer,
         full_length_scripts_file=full_lengths_file,
         excerpts_file=excerpts_file,
+        litbank_file=FLAGS.litbank_file,
+        litbank_folds_dir=FLAGS.litbank_folds_dir,
         weights_file=FLAGS.weights_file,
         train_excerpts=FLAGS.train_excerpts,
         test_movie=FLAGS.test_movie,
         hierarchical=FLAGS.hierarchical,
+        litbank=FLAGS.litbank,
+        litbank_fold=FLAGS.litbank_fold,
         tag_embedding_size=FLAGS.tag_embedding_size,
         gru_nlayers=FLAGS.gru_nlayers,
         gru_hidden_size=FLAGS.gru_hidden_size,

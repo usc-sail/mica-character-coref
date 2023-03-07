@@ -25,6 +25,7 @@ from torch.utils.data import TensorDataset, DataLoader
 from torch.optim import AdamW
 from transformers.optimization import get_linear_schedule_with_warmup
 import tqdm
+import typing
 import yaml
 
 value = 2023
@@ -33,7 +34,9 @@ np.random.seed(value)
 torch.manual_seed(value)
 torch.cuda.manual_seed_all(value)
 torch.backends.cudnn.deterministic = True
-torch.backends.cudnn.benchmark = False  
+torch.backends.cudnn.benchmark = False
+
+EvalResult: typing.TypeAlias = tuple[float, data.MovieCorefMetric, list[data.CorefResult]]
 
 class CoreferenceTrainer:
     """Train movie coreference model"""
@@ -45,10 +48,14 @@ class CoreferenceTrainer:
         reference_scorer_file: str,
         full_length_scripts_file: str,
         excerpts_file: str,
+        litbank_file: str,
+        litbank_folds_dir: str,
         weights_file: str,
         train_excerpts: bool,
         test_movie: str,
         hierarchical: bool,
+        litbank: bool,
+        litbank_fold: int,
         tag_embedding_size: int = 16,
         gru_nlayers: int = 1,
         gru_hidden_size: int = 256,
@@ -98,10 +105,14 @@ class CoreferenceTrainer:
             reference_scorer_file: file path of the official conll-2012 coreference scorer
             full_length_scripts_file: file path of the full-length screenplays
             excerpts_file: file path of the excerpts screenplays
+            litbank_file: file path of the processed LitBank corpus
+            litbank_folds_dir: directory containing file ids of the LitBank folds for cross validation
             weights_file: file path of the pretrained word-level coreference model
             train_excerpts: train excerpts along with full-length scripts
             test_movie: full-length script left out of training, if none all full-length scripts are used
             hierarchical: use hierarchical model during inference
+            litbank: train litbank
+            litbank_fold: fold index to train for litbank
             tag_embedding_size: embedding size of parse, pos, and ner tags in the character recognition model
             gru_nlayers: number of gru layers in the character recognition model
             gru_hidden_size: gru hidden size in the character recognition model
@@ -149,10 +160,14 @@ class CoreferenceTrainer:
         self.reference_scorer_file = reference_scorer_file
         self.long_scripts = full_length_scripts_file
         self.short_scripts = excerpts_file
+        self.litbank_books = litbank_file
+        self.litbank_folds_dir = litbank_folds_dir
         self.weights_file = weights_file
         self.train_excerpts = train_excerpts
         self.test_movie = test_movie
         self.hierarchical = hierarchical
+        self.train_litbank = litbank
+        self.litbank_fold = litbank_fold
         self.tag_embedding_size = tag_embedding_size
         self.gru_nlayers = gru_nlayers
         self.gru_hidden_size = gru_hidden_size
@@ -271,40 +286,57 @@ class CoreferenceTrainer:
         n_clusters = len(document.clusters)
         if verbose:
             self._log(f"{document.movie}: {n_words} words, {n_mentions} mentions, {n_clusters} clusters")
-        doc_offsets: list[tuple[int, int]] = []
         sentence_offsets = np.array(document.sentence_offsets)
 
         # find segment boundaries
         segment_boundaries = np.zeros(len(document.token), dtype=int)
-        i = 0
-        parse_tags = document.parse
-        while i < len(document.token):
-            if parse_tags[i] in "SNC":
-                j = i + 1
-                while j < len(document.token) and parse_tags[j] == parse_tags[i]:
-                    j += 1
+        if self.training_mode.startswith("litbank"):
+            for i, _ in document.sentence_offsets:
                 segment_boundaries[i] = 1
-                i = j
-            else:
-                i += 1
-        segment_boundaries[0] = 1
+        else:
+            i = 0
+            parse_tags = document.parse
+            while i < len(document.token):
+                if parse_tags[i] in "SNC":
+                    j = i + 1
+                    while j < len(document.token) and parse_tags[j] == parse_tags[i]:
+                        j += 1
+                    segment_boundaries[i] = 1
+                    i = j
+                else:
+                    i += 1
+            segment_boundaries[0] = 1
 
         # find subdocument offsets
+        doc_offsets: list[tuple[int, int]] = []
         i = 0
+        prevj = 0
         while i < len(document.token):
             j = min(i + split_len, len(document.token))
             if j < len(document.token):
-                while j >= i and segment_boundaries[j] == 0:
+                while j >= prevj and segment_boundaries[j] == 0:
                     j -= 1
                 k = j - overlap_len
-                while k >= i and segment_boundaries[k] == 0:
+                while k >= prevj and segment_boundaries[k] == 0:
                     k -= 1
                 nexti = k
             else:
                 nexti = j
+            prevj = j
             assert i < nexti, "Document length is 0!"
             doc_offsets.append((i, j))
             i = nexti
+        
+        # assert at most two subdocuments overlap
+        for i in range(len(doc_offsets)):
+            if i > 1:
+                i0, j0 = doc_offsets[i-2]
+                i1, j1 = doc_offsets[i-1]
+                i2, j2 = doc_offsets[i]
+                assert i0 < i1 <= j0 < i2 <= j1 < j2, (
+                    f"at most two subdocuments should overlap doc={document.movie}, document_len={split_len}, "
+                    f"overlap_len={overlap_len}, doc_offsets={doc_offsets}")
+                
         
         # split screenplay into subdocument according to offsets
         for k, (i, j) in enumerate(doc_offsets):
@@ -354,6 +386,17 @@ class CoreferenceTrainer:
                 self._log(f"{_document.movie}: {len(_document.token)} words, {n_mentions} mentions, "
                           f"{len(_document.clusters)} clusters")
             yield _document
+    
+    def _split_screenplay_trial(self, document: data.CorefDocument, split_len: int, overlap_len: int, 
+                                exclude_subdocuments_with_no_clusters: bool = True, verbose = False):
+        try:
+            for subdocument in self._split_screenplay(document, split_len, overlap_len, 
+                                                      exclude_subdocuments_with_no_clusters, verbose):
+                yield subdocument
+        except:
+            for subdocument in self._split_screenplay(document, 2 * split_len, overlap_len, 
+                                                      exclude_subdocuments_with_no_clusters, verbose):
+                yield subdocument
 
     def _tokenize_document(self, document: data.CorefDocument, verbose = False):
         """Tokenize the words of the document into subwords"""
@@ -415,7 +458,7 @@ class CoreferenceTrainer:
             document_generator = corpus
         else:
             document_generator = itertools.chain(
-                                    *[self._split_screenplay(
+                                    *[self._split_screenplay_trial(
                                             document, split_len, overlap_len,
                                             exclude_subdocuments_with_no_clusters=exclude_subdocuments_with_no_clusters, 
                                             verbose=verbose) for document in corpus])
@@ -1015,15 +1058,14 @@ class CoreferenceTrainer:
         merged_result.predicted_span_clusters = span_clusters
         return merged_result
 
-    def _eval_subdocuments_and_merge(self, document: data.CorefDocument, subdocument_corpus: data.CorefCorpus,
-                                     strategies: list[str], name: str, only_lea: bool) -> (
-                                        list[tuple[float, data.MovieCorefMetric, data.CorefResult]]):
-        """Run model inference on the subdocuments of the corpus, merge results according to strategy, and evaluate
-        output.
+    def _eval_subdocuments_and_merge(self, documents: list[data.CorefDocument], 
+                                     subdocument_corpora: list[data.CorefCorpus], strategies: list[str], name: str, 
+                                     only_lea: bool) -> list[EvalResult]:
+        """Run fusion-based inference.
 
         Args:
-            document: CorefDocument which was split to obtain the subdocuments.
-            subdocument_corpus: CorefCorpus containing the subdocuments.
+            documents: List of CorefDocuments which was split to obtain the subdocuments.
+            subdocument_corpora: List of CorefCorpus containing overlapping subdocuments.
             strategies: Merge strategies.
             name: filename to be included in CONLL filenames (for e.g. "<partition>_<document_len>_<overlap_len>")
             only_lea: Only calculate LEA metric.
@@ -1032,34 +1074,73 @@ class CoreferenceTrainer:
             A list of tuples, each tuple corresponding to a strategy and containing the following:
                 loss: character loss + coreference loss
                 metric: MovieCorefMetric
-                results: CorefResult
+                results: List of CorefResults
         """
         self.model.eval()
-        results = []
+        document_results = []
         with torch.no_grad():
-            for subdocument in subdocument_corpus:
-                result = self._run(subdocument)
-                results.append(result)
+            for subdocument_corpus in subdocument_corpora:
+                results = []
+                for subdocument in subdocument_corpus:
+                    result = self._run(subdocument)
+                    results.append(result)
+                document_results.append(results)
         eval_outputs = []
         tbar = tqdm.tqdm(strategies, unit="strategy")
         for strategy in tbar:
             tbar.set_description(strategy)
-            strategy_result = self._merge(subdocument_corpus.documents, results, strategy)
-            strategy_metric = self.evaluator.evaluate([document], [strategy_result], self.reference_scorer_file,
-                                                      only_lea=only_lea,
-                                                      remove_speaker_links=(self.preprocess != "nocharacters"),
-                                                      output_dir=self.output_dir, filename=f"{name}_{strategy}")
-            loss = float((strategy_result.character_loss + strategy_result.coref_loss).item())
-            eval_outputs.append((loss, strategy_metric, strategy_result))
+            strategy_results: list[data.CorefResult] = []
+            for subdocument_corpus, results in zip(subdocument_corpora, document_results):
+                strategy_result = self._merge(subdocument_corpus.documents, results, strategy)
+                strategy_results.append(strategy_result)
+            strategy_metric = self.evaluator.evaluate(
+                                documents, strategy_results, self.reference_scorer_file, only_lea=only_lea,
+                                remove_speaker_links=((self.preprocess != "nocharacters") 
+                                                      and (not self.training_mode.startswith("litbank"))),
+                                output_dir=self.output_dir, filename=f"{name}_{strategy}")
+            character_loss = float(np.mean([result.character_loss.item() for result in strategy_results]))
+            coref_loss = float(np.mean([result.coref_loss.item() for result in strategy_results]))
+            loss = character_loss + coref_loss
+            eval_outputs.append((loss, strategy_metric, strategy_results))
         return eval_outputs
     
-    def _eval_corpus(self, corpus: data.CorefCorpus, name: str, only_lea: bool) -> (
-            tuple[float, data.MovieCorefMetric, list[data.CorefResult]]):
-        """Run model inference on corpus and evaluate output
+    def _eval_hierarchical(self, documents: list[data.CorefDocument], subdocument_corpora: list[data.CorefCorpus], 
+                           name: str, only_lea: bool) -> EvalResult:
+        """Run hierarchical inference.
+
+        Args:
+            documents: List of CorefDocuments to evaluate
+            corpus: List of CorefCorpus containing non-overlapping subdocuments
+            name: filename to be included in CONLL filenames
+            only: Only calculate LEA metric.
+        
+        Returns:
+            loss: average character loss + coreference loss
+            metric: micro-averaged MovieCorefMetric
+            results: List of CorefResult for each CorefDocument
+        """
+        self.model.eval()
+        with torch.no_grad():
+            results: list[data.CorefResult] = []
+            for document, corpus in zip(documents, subdocument_corpora):
+                result = self._run_hierarchical(document, corpus)
+                results.append(result)
+        movie_coref_metric = self.evaluator.evaluate(
+                                documents, results, self.reference_scorer_file, only_lea=only_lea,
+                                remove_speaker_links=((self.preprocess != "nocharacters")
+                                                      and (not self.training_mode.startswith("litbank"))),
+                                output_dir=self.output_dir, filename=name)
+        character_loss = float(np.mean([result.character_loss.item() for result in results]))
+        coref_loss = float(np.mean([result.coref_loss.item() for result in results]))
+        loss = character_loss + coref_loss
+        return loss, movie_coref_metric, results
+
+    def _eval_corpus(self, corpus: data.CorefCorpus, name: str, only_lea: bool) -> EvalResult:
+        """Run simple inference.
 
         Args:
             corpus: CorefCorpus to evaluate
-            name: "train" or "dev"
+            name: filename to be included in CONLL filenames
             only: Only calculate LEA metric.
         
         Returns:
@@ -1073,72 +1154,68 @@ class CoreferenceTrainer:
             for document in corpus:
                 result = self._run(document)
                 results.append(result)
-        movie_coref_metric = self.evaluator.evaluate(corpus.documents, results, self.reference_scorer_file,
-                                                     only_lea=only_lea, 
-                                                     remove_speaker_links=(self.preprocess != "nocharacters"),
-                                                     output_dir=self.output_dir, filename=name)
+        movie_coref_metric = self.evaluator.evaluate(
+                                corpus.documents, results, self.reference_scorer_file, only_lea=only_lea, 
+                                remove_speaker_links=((self.preprocess != "nocharacters")
+                                                      and (not self.training_mode.startswith("litbank"))),
+                                output_dir=self.output_dir, filename=name)
         character_loss = float(np.mean([result.character_loss.item() for result in results]))
         coref_loss = float(np.mean([result.coref_loss.item() for result in results]))
         return character_loss + coref_loss, movie_coref_metric, results
-    
-    def _eval_hierarchical(self, document: data.CorefDocument, corpus: data.CorefCorpus,
-                           name: str, only_lea: bool) -> tuple[float, data.MovieCorefMetric, data.CorefResult]:
-        """Run hierarchical model inference on document
 
-        Args:
-            document: CorefDocument to evaluate
-            corpus: CorefCorpus containing non-overlapping subdocuments
-            name: "train" or "dev"
-            only: Only calculate LEA metric.
-        
-        Returns:
-            loss: average character loss + coreference loss
-            metric: micro-averaged MovieCorefMetric
-            results: List of CorefResult for each CorefDocument
-        """
-        self.model.eval()
-        with torch.no_grad():
-            result = self._run_hierarchical(document, corpus)
-        movie_coref_metric = self.evaluator.evaluate([document], [result], self.reference_scorer_file,
-                                                     only_lea=only_lea,
-                                                     remove_speaker_links=(self.preprocess != "nocharacters"),
-                                                     output_dir=self.output_dir, filename=name)
-        loss = float((result.coref_loss + result.character_loss).item())
-        return loss, movie_coref_metric, result
-
-    def _eval_train(self, only_lea: bool) -> tuple[float, data.MovieCorefMetric, list[data.CorefResult]]:
+    def _eval_train(self, only_lea: bool) -> EvalResult:
         """Evaluate train corpus"""
         train_eval_output = self._eval_corpus(self.train_corpus, "train", only_lea)
         self._log(f"train:: loss={train_eval_output[0]:.4f}, metric:{train_eval_output[1]}")
         return train_eval_output
 
-    def _eval_dev(self, only_lea: bool) -> (tuple[float, data.MovieCorefMetric, list[data.CorefResult]]
-                                            | tuple[float, data.MovieCorefMetric, data.CorefResult]):
+    def _eval_dev(self, only_lea: bool) -> EvalResult:
         """Evaluate dev corpus"""
         if self.training_mode == "lomo_excerpts":
             dev_eval_outputs = self._eval_subdocuments_and_merge(
-                self.dev_document, self.dev_corpus, [self.dev_merge_strategy],
+                [self.dev_document], [self.dev_corpus], [self.dev_merge_strategy],
                 f"dev_{self.dev_document_len}_{self.dev_overlap_len}", only_lea)
             dev_eval_output = dev_eval_outputs[0]
         elif self.training_mode == "lomo_excerpts_hi":
-            dev_eval_output = self._eval_hierarchical(self.dev_document, self.dev_corpus,
+            dev_eval_output = self._eval_hierarchical([self.dev_document], [self.dev_corpus],
                                                       f"dev_{self.dev_document_len}", only_lea)
         else:
             dev_eval_output = self._eval_corpus(self.dev_corpus, "dev", only_lea)
         self._log(f"dev:: loss={dev_eval_output[0]:.4f}, metric:{dev_eval_output[1]}")
         return dev_eval_output
     
-    def _eval_test(self, only_lea: bool) -> (
-            dict[tuple[int, int, str], tuple[float, data.MovieCorefMetric, data.CorefResult]]
-            | dict[int, tuple[float, data.MovieCorefMetric, data.CorefResult]]
-            | tuple[float, data.MovieCorefMetric, list[data.CorefResult]]):
+    def _eval_test(self, only_lea: bool) -> (dict[tuple[int, int, str], EvalResult]
+                                            | dict[int, EvalResult]
+                                            | EvalResult):
         """Evaluate test corpus"""
-        if self.training_mode == "lomo" or self.training_mode == "lomo_excerpts":
-            test_eval_output = {}
+        if self.training_mode == "litbank":
+            test_eval_output: dict[tuple[int, int, str], EvalResult] = {}
+            tbar = tqdm.tqdm(self.litbank_test_document_and_overlap_len_to_corpora.items())
+            for (document_len, overlap_len), corpora in tbar:
+                tbar.set_description(f"subdocument={document_len:<5d} overlap={overlap_len:<4d}::")
+                eval_outputs = self._eval_subdocuments_and_merge(
+                                    self.litbank_test_documents, corpora, self.test_merge_strategies,
+                                    f"test_{document_len}_{overlap_len}", only_lea)
+                for eval_output, strategy in zip(eval_outputs, self.test_merge_strategies):
+                    test_eval_output[(document_len, overlap_len, strategy)] = eval_output
+            for (document_len, overlap_len, strategy), eval_output in test_eval_output.items():
+                self._log(f"test:: subdocument={document_len:5d} overlap={overlap_len:4d} strategy={strategy:4s} "
+                            f"loss={eval_output[0]:.4f}, metric:{eval_output[1]}")
+        elif self.training_mode == "litbank_hi":
+            test_eval_output: dict[int, EvalResult] = {}
+            tbar = tqdm.tqdm(self.litbank_test_document_len_to_corpora.items())
+            for document_len, corpora in tbar:
+                eval_output = self._eval_hierarchical(self.litbank_test_documents, corpora, f"test_{document_len}", 
+                                                      only_lea)
+                test_eval_output[document_len] = eval_output
+            for document_len, eval_output in test_eval_output.items():
+                self._log(f"test:: subdocument={document_len:5d} loss={eval_output[0]:.4f}, metric:{eval_output[1]}")
+        elif self.training_mode == "lomo" or self.training_mode == "lomo_excerpts":
+            test_eval_output: dict[tuple[int, int, str], EvalResult] = {}
             tbar = tqdm.tqdm(self.test_document_and_overlap_len_to_corpus.items())
             for (document_len, overlap_len), subdocument_corpus in tbar:
                 tbar.set_description(f"subdocument={document_len:<5d} overlap={overlap_len:<4d}::")
-                eval_outputs = self._eval_subdocuments_and_merge(self.test_document, subdocument_corpus,
+                eval_outputs = self._eval_subdocuments_and_merge([self.test_document], [subdocument_corpus],
                                                                  self.test_merge_strategies,
                                                                  f"test_{document_len}_{overlap_len}", only_lea)
                 for eval_output, strategy in zip(eval_outputs, self.test_merge_strategies):
@@ -1147,136 +1224,24 @@ class CoreferenceTrainer:
                 self._log(f"test:: subdocument={document_len:5d} overlap={overlap_len:4d} strategy={strategy:4s} "
                             f"loss={eval_output[0]:.4f}, metric:{eval_output[1]}")
         elif self.training_mode == "lomo_excerpts_hi":
-            test_eval_output = {}
+            test_eval_output: dict[int, EvalResult] = {}
             tbar = tqdm.tqdm(self.test_document_len_to_corpus.items())
             for document_len, subdocument_corpus in tbar:
                 tbar.set_description(f"subdocument={document_len:<5d}::")
-                eval_output = self._eval_hierarchical(self.test_document, subdocument_corpus,
+                eval_output = self._eval_hierarchical([self.test_document], [subdocument_corpus],
                                                       f"test_{document_len}", only_lea)
                 test_eval_output[document_len] = eval_output
             for document_len, eval_output in test_eval_output.items():
-                self._log(f"test:: subdocument={document_len:5d} "
-                          f"loss={eval_output[0]:.4f}, metric:{eval_output[1]}")
+                self._log(f"test:: subdocument={document_len:5d} loss={eval_output[0]:.4f}, metric:{eval_output[1]}")
         else:
-            test_eval_output = self._eval_corpus(self.test_corpus, "test", only_lea)
+            test_eval_output: EvalResult = self._eval_corpus(self.test_corpus, "test", only_lea)
             self._log(f"test:: loss={test_eval_output[0]:.4f}, metric:{test_eval_output[1]}")
         return test_eval_output
 
-    def _save_corpus_predictions(self, corpus: data.CorefCorpus,
-                                 eval_output: tuple[float, data.MovieCorefMetric, list[data.CorefResult]], name: str):
-        """Save predictions of evaluating a corpus"""
-        file = os.path.join(self.output_dir, f"{name}.jsonlines")
-        with jsonlines.open(file, "w") as writer:
-            for doc, result in zip(corpus, eval_output[2]):
-                gold_clusters = [[[mention.begin, mention.end, mention.head] for mention in cluster]
-                                            for cluster in doc.clusters.values()]
-                pred_word_clusters = [sorted(word_cluster) for word_cluster in result.predicted_word_clusters]
-                pred_span_clusters = [sorted([list(span) for span in span_cluster])
-                                            for span_cluster in result.predicted_span_clusters]
-                pred_heads = result.predicted_character_heads.tolist()
-                data = dict(movie=doc.movie,
-                            rater=doc.rater,
-                            token=doc.token,
-                            parse=doc.parse,
-                            pos=doc.pos,
-                            ner=doc.ner,
-                            is_pronoun=doc.is_pronoun,
-                            is_punctuation=doc.is_punctuation,
-                            speaker=doc.speaker,
-                            gold=gold_clusters,
-                            pred_word=pred_word_clusters,
-                            pred_span=pred_span_clusters,
-                            pred_head=pred_heads)
-                writer.write(data)
-        
-        # Copy test CONLL files for gold and pred span clusters
-        for arg in ["gold", "pred"]:
-            src = os.path.join(self.output_dir, f"{arg}_epoch.span.{name}.conll")
-            dst = os.path.join(self.output_dir, f"{name}.{arg}.conll")
-            if os.path.exists(src):
-                shutil.copy2(src, dst)
-
-    def _save_subdocument_predictions(
-            self, eval_output_dict: dict[tuple[int, int, str], tuple[float, data.MovieCorefMetric, data.CorefResult]],
-            document: data.CorefDocument, name: str):
-        """Save predictions of evaluating a document at different document lengths, overlap lengths, and strategies"""
-        for (document_len, overlap_len, strategy), eval_output in eval_output_dict.items():
-            file_ = os.path.join(self.output_dir, f"{name}_{document_len}_{overlap_len}_{strategy}.jsonlines")
-            with jsonlines.open(file_, "w") as writer:
-                gold_clusters = [[[mention.begin, mention.end, mention.head] for mention in cluster]
-                                        for cluster in document.clusters.values()]
-                pred_word_clusters = [sorted(word_cluster)
-                                        for word_cluster in eval_output[2].predicted_word_clusters]
-                pred_span_clusters = [sorted([list(span) for span in span_cluster])
-                                        for span_cluster in eval_output[2].predicted_span_clusters]
-                pred_heads = eval_output[2].predicted_character_heads.tolist()
-                data = dict(movie=document.movie,
-                            rater=document.rater,
-                            token=document.token,
-                            parse=document.parse,
-                            pos=document.pos,
-                            ner=document.ner,
-                            is_pronoun=document.is_pronoun,
-                            is_punctuation=document.is_punctuation,
-                            speaker=document.speaker,
-                            gold=gold_clusters,
-                            pred_word=pred_word_clusters,
-                            pred_span=pred_span_clusters,
-                            pred_head=pred_heads)
-                writer.write(data)
-    
-            # Copy test CONLL files for gold and pred span clusters
-            for arg in ["gold", "pred"]:
-                filename = f"{name}_{document_len}_{overlap_len}_{strategy}"
-                src = os.path.join(self.output_dir, f"{arg}_epoch.span.{filename}.conll")
-                dst = os.path.join(self.output_dir, f"{filename}.{arg}.conll")
-                if os.path.exists(src):
-                    shutil.copy2(src, dst)
-    
-    def _save_subdocument_hierarchical_predictions(
-            self, eval_output_dict: dict[int, tuple[float, data.MovieCorefMetric, data.CorefResult]],
-            document: data.CorefDocument, name: str):
-        """Save predictions of evaluating a document at different document lengths hierarchically"""
-        for document_len, eval_output in eval_output_dict.items():
-            file_ = os.path.join(self.output_dir, f"{name}_{document_len}.jsonlines")
-            with jsonlines.open(file_, "w") as writer:
-                gold_clusters = [[[mention.begin, mention.end, mention.head] for mention in cluster]
-                                        for cluster in document.clusters.values()]
-                pred_word_clusters = [sorted(word_cluster)
-                                        for word_cluster in eval_output[2].predicted_word_clusters]
-                pred_span_clusters = [sorted([list(span) for span in span_cluster])
-                                        for span_cluster in eval_output[2].predicted_span_clusters]
-                pred_heads = eval_output[2].predicted_character_heads.tolist()
-                data = dict(movie=document.movie,
-                            rater=document.rater,
-                            token=document.token,
-                            parse=document.parse,
-                            pos=document.pos,
-                            ner=document.ner,
-                            is_pronoun=document.is_pronoun,
-                            is_punctuation=document.is_punctuation,
-                            speaker=document.speaker,
-                            gold=gold_clusters,
-                            pred_word=pred_word_clusters,
-                            pred_span=pred_span_clusters,
-                            pred_head=pred_heads)
-                writer.write(data)
-    
-            # Copy test CONLL files for gold and pred span clusters
-            for arg in ["gold", "pred"]:
-                filename = f"{name}_{document_len}"
-                src = os.path.join(self.output_dir, f"{arg}_epoch.span.{filename}.conll")
-                dst = os.path.join(self.output_dir, f"{filename}.{arg}.conll")
-                if os.path.exists(src):
-                    shutil.copy2(src, dst)
-
     def _save_config(self, 
-                     train_eval_output: tuple[float, data.MovieCorefMetric, list[data.CorefResult]] | None,
-                     dev_eval_output: (tuple[float, data.MovieCorefMetric, list[data.CorefResult]]
-                                       | tuple[float, data.MovieCorefMetric, data.CorefResult]),
-                     test_eval_output: (dict[tuple[int, int, str], tuple[float, data.MovieCorefMetric, data.CorefResult]]
-                                        | dict[int, tuple[float, data.MovieCorefMetric, data.CorefResult]]
-                                        | tuple[float, data.MovieCorefMetric, list[data.CorefResult]]),
+                     train_eval_output: EvalResult | None, 
+                     dev_eval_output: EvalResult,
+                     test_eval_output: dict[tuple[int, int, str], EvalResult] | dict[int, EvalResult] | EvalResult,
                      dev_losses: list[float],
                      dev_scores: list[float],
                      train_losses: list[float],
@@ -1289,14 +1254,14 @@ class CoreferenceTrainer:
         dev_metric_dict = dev_eval_output[1].todict()
         if train_eval_output is not None:
             train_metric_dict = train_eval_output[1].todict()
-        if self.training_mode == "lomo" or self.training_mode == "lomo_excerpts":
+        if self.training_mode == "lomo" or self.training_mode == "lomo_excerpts" or self.training_mode == "litbank":
             for (document_len, overlap_len, strategy), eval_output in test_eval_output.items():
                 if document_len not in test_metric_dict:
                     test_metric_dict[document_len] = {}
                 if overlap_len not in test_metric_dict[document_len]:
                     test_metric_dict[document_len][overlap_len] = {}
                 test_metric_dict[document_len][overlap_len][strategy] = eval_output[1].todict()
-        elif self.training_mode == "lomo_excerpts_hi":
+        elif self.training_mode == "lomo_excerpts_hi" or self.training_mode == "litbank_hi":
             for document_len, eval_output in test_eval_output.items():
                 test_metric_dict[document_len] = eval_output[1].todict()
         else:
@@ -1311,6 +1276,8 @@ class CoreferenceTrainer:
                       topk=self.topk,
                       repk=self.repk,
                       hierarchical=self.hierarchical,
+                      litbank=self.train_litbank,
+                      litbank_fold=self.litbank_fold,
                       dropout=self.dropout,
                       load_bert=self.load_bert,
                       freeze_bert=self.freeze_bert,
@@ -1352,6 +1319,113 @@ class CoreferenceTrainer:
                       )
         with open(result_file, "w") as file:
             yaml.dump(result, file)
+
+    def _save_corpus_predictions(self, corpus: data.CorefCorpus, eval_output: EvalResult, name: str):
+        """Save predictions of evaluating a corpus"""
+        file = os.path.join(self.output_dir, f"{name}.jsonlines")
+        with jsonlines.open(file, "w") as writer:
+            for doc, result in zip(corpus, eval_output[2]):
+                gold_clusters = [[[mention.begin, mention.end, mention.head] for mention in cluster]
+                                            for cluster in doc.clusters.values()]
+                pred_word_clusters = [sorted(word_cluster) for word_cluster in result.predicted_word_clusters]
+                pred_span_clusters = [sorted([list(span) for span in span_cluster])
+                                            for span_cluster in result.predicted_span_clusters]
+                pred_heads = result.predicted_character_heads.tolist()
+                data = dict(movie=doc.movie,
+                            rater=doc.rater,
+                            token=doc.token,
+                            parse=doc.parse,
+                            pos=doc.pos,
+                            ner=doc.ner,
+                            is_pronoun=doc.is_pronoun,
+                            is_punctuation=doc.is_punctuation,
+                            speaker=doc.speaker,
+                            gold=gold_clusters,
+                            pred_word=pred_word_clusters,
+                            pred_span=pred_span_clusters,
+                            pred_head=pred_heads)
+                writer.write(data)
+        
+        # Copy test CONLL files for gold and pred span clusters
+        for arg in ["gold", "pred"]:
+            src = os.path.join(self.output_dir, f"{arg}_epoch.span.{name}.conll")
+            dst = os.path.join(self.output_dir, f"{name}.{arg}.conll")
+            if os.path.exists(src):
+                shutil.copy2(src, dst)
+
+    def _save_subdocument_predictions(self, eval_output_dict: dict[tuple[int, int, str], EvalResult],
+                                      documents: list[data.CorefDocument], name: str):
+        """Save predictions of evaluating a document at different document lengths, overlap lengths, and strategies"""
+        for (document_len, overlap_len, strategy), eval_output in eval_output_dict.items():
+            file_ = os.path.join(self.output_dir, f"{name}_{document_len}_{overlap_len}_{strategy}.jsonlines")
+            with jsonlines.open(file_, "w") as writer:
+                for document, result in zip(documents, eval_output[2]):
+                    gold_clusters = [[[mention.begin, mention.end, mention.head] for mention in cluster]
+                                            for cluster in document.clusters.values()]
+                    pred_word_clusters = [sorted(word_cluster)
+                                            for word_cluster in result.predicted_word_clusters]
+                    pred_span_clusters = [sorted([list(span) for span in span_cluster])
+                                            for span_cluster in result.predicted_span_clusters]
+                    pred_heads = result.predicted_character_heads.tolist()
+                    data = dict(movie=document.movie,
+                                rater=document.rater,
+                                token=document.token,
+                                parse=document.parse,
+                                pos=document.pos,
+                                ner=document.ner,
+                                is_pronoun=document.is_pronoun,
+                                is_punctuation=document.is_punctuation,
+                                speaker=document.speaker,
+                                gold=gold_clusters,
+                                pred_word=pred_word_clusters,
+                                pred_span=pred_span_clusters,
+                                pred_head=pred_heads)
+                    writer.write(data)
+    
+            # Copy test CONLL files for gold and pred span clusters
+            for arg in ["gold", "pred"]:
+                filename = f"{name}_{document_len}_{overlap_len}_{strategy}"
+                src = os.path.join(self.output_dir, f"{arg}_epoch.span.{filename}.conll")
+                dst = os.path.join(self.output_dir, f"{filename}.{arg}.conll")
+                if os.path.exists(src):
+                    shutil.copy2(src, dst)
+    
+    def _save_subdocument_hierarchical_predictions(self, eval_output_dict: dict[int, EvalResult],
+                                                   documents: list[data.CorefDocument], name: str):
+        """Save predictions of evaluating a document at different document lengths hierarchically"""
+        for document_len, eval_output in eval_output_dict.items():
+            file_ = os.path.join(self.output_dir, f"{name}_{document_len}.jsonlines")
+            with jsonlines.open(file_, "w") as writer:
+                for document, result in zip(documents, eval_output[2]):
+                    gold_clusters = [[[mention.begin, mention.end, mention.head] for mention in cluster]
+                                            for cluster in document.clusters.values()]
+                    pred_word_clusters = [sorted(word_cluster)
+                                            for word_cluster in result.predicted_word_clusters]
+                    pred_span_clusters = [sorted([list(span) for span in span_cluster])
+                                            for span_cluster in result.predicted_span_clusters]
+                    pred_heads = result.predicted_character_heads.tolist()
+                    data = dict(movie=document.movie,
+                                rater=document.rater,
+                                token=document.token,
+                                parse=document.parse,
+                                pos=document.pos,
+                                ner=document.ner,
+                                is_pronoun=document.is_pronoun,
+                                is_punctuation=document.is_punctuation,
+                                speaker=document.speaker,
+                                gold=gold_clusters,
+                                pred_word=pred_word_clusters,
+                                pred_span=pred_span_clusters,
+                                pred_head=pred_heads)
+                    writer.write(data)
+    
+            # Copy test CONLL files for gold and pred span clusters
+            for arg in ["gold", "pred"]:
+                filename = f"{name}_{document_len}"
+                src = os.path.join(self.output_dir, f"{arg}_epoch.span.{filename}.conll")
+                dst = os.path.join(self.output_dir, f"{filename}.{arg}.conll")
+                if os.path.exists(src):
+                    shutil.copy2(src, dst)
 
     def _save_model(self):
         model_file = os.path.join(self.output_dir, "movie_coref.pt")
@@ -1414,6 +1488,7 @@ class CoreferenceTrainer:
         self._log("Loading scripts")
         long_scripts = data.CorefCorpus(self.long_scripts)
         short_scripts = data.CorefCorpus(self.short_scripts)
+        litbank = data.CorefCorpus(self.litbank_books)
 
         # Set training mode
         # all: train on long scripts, early-stop on short scripts, test on short scripts
@@ -1427,9 +1502,36 @@ class CoreferenceTrainer:
                 self.training_mode = "lomo_excerpts"
                 if self.hierarchical:
                     self.training_mode = "lomo_excerpts_hi"
+        if self.train_litbank:
+            self.training_mode = "litbank"
+            if self.hierarchical:
+                self.training_mode = "litbank_hi"
 
         # Set train, dev, and test corpus
-        if self.training_mode == "all":
+        if self.training_mode == "litbank" or self.training_mode == "litbank_hi":
+            self.train_corpus = data.CorefCorpus()
+            self.dev_corpus = data.CorefCorpus()
+            self.test_corpus = data.CorefCorpus()
+            train_ids, dev_ids, test_ids = [], [], []
+            with open(os.path.join(self.litbank_folds_dir, str(self.litbank_fold), "train.ids")) as fr:
+                for line in fr:
+                    line = line.strip()
+                    if line:
+                        train_ids.append(line[:-len("_brat.tsv")])
+            with open(os.path.join(self.litbank_folds_dir, str(self.litbank_fold), "dev.ids")) as fr:
+                for line in fr:
+                    line = line.strip()
+                    if line:
+                        dev_ids.append(line[:-len("_brat.tsv")])
+            with open(os.path.join(self.litbank_folds_dir, str(self.litbank_fold), "test.ids")) as fr:
+                for line in fr:
+                    line = line.strip()
+                    if line:
+                        test_ids.append(line[:-len("_brat.tsv")])
+            self.train_corpus.documents = [document for document in litbank if document.movie in train_ids]
+            self.dev_corpus.documents = [document for document in litbank if document.movie in dev_ids]
+            self.test_corpus.documents = [document for document in litbank if document.movie in test_ids]
+        elif self.training_mode == "all":
             self.train_corpus = long_scripts
             self.dev_corpus = short_scripts
             self.test_corpus = short_scripts
@@ -1451,12 +1553,17 @@ class CoreferenceTrainer:
         
         # Prepare train corpus
         self._log("Preparing train corpus")
-        self.train_corpus = self._prepare_corpus(self.train_corpus, self.train_document_len, self.train_overlap_len, 
-                                                 exclude_subdocuments_with_no_clusters=True)
+        if self.training_mode.startswith("litbank"):
+            self.train_corpus = self._prepare_corpus(self.train_corpus)
+        else:
+            self.train_corpus = self._prepare_corpus(self.train_corpus, self.train_document_len, self.train_overlap_len, 
+                                                     exclude_subdocuments_with_no_clusters=True)
         
         # Prepare dev corpus
         self._log("Preparing dev corpus")
-        if self.training_mode == "lomo_excerpts" or self.training_mode == "lomo_excerpts_hi":
+        if self.training_mode.startswith("litbank"):
+            self.dev_corpus = self._prepare_corpus(self.dev_corpus)
+        elif self.training_mode == "lomo_excerpts" or self.training_mode == "lomo_excerpts_hi":
             self.dev_document = self.dev_corpus.documents[0]
             if self.training_mode == "lomo_excerpts":
                 self.dev_corpus = self._prepare_corpus(self.dev_corpus, self.dev_document_len, self.dev_overlap_len,
@@ -1469,12 +1576,35 @@ class CoreferenceTrainer:
         
         # Prepare test corpus
         self._log("Preparing test corpus")
-        if (self.training_mode == "lomo" 
+        if self.training_mode.startswith("litbank"):
+            self.litbank_test_documents = self.test_corpus.documents
+            if self.training_mode == "litbank":
+                self.litbank_test_document_and_overlap_len_to_corpora: dict[tuple[int, int], list[data.CorefCorpus]] = {}
+                for document_len in self.test_document_lens:
+                    for overlap_len in self.test_overlap_lens:
+                        corpora = []
+                        for test_document in self.litbank_test_documents:
+                            corpus = data.CorefCorpus()
+                            corpus.documents = [test_document]
+                            corpus = self._prepare_corpus(corpus, document_len, overlap_len, 
+                                                          exclude_subdocuments_with_no_clusters=False)
+                            corpora.append(corpus)
+                        self.litbank_test_document_and_overlap_len_to_corpora[(document_len, overlap_len)] = corpora
+            else:
+                self.litbank_test_document_len_to_corpora: dict[int, list[data.CorefCorpus]] = {}
+                for document_len in self.test_document_lens:
+                    corpora = []
+                    for test_document in self.litbank_test_documents:
+                        corpus = self._prepare_corpus(self.test_corpus, document_len, 0, 
+                                                      exclude_subdocuments_with_no_clusters=False)
+                        corpora.append(corpus)
+                    self.litbank_test_document_len_to_corpora[document_len] = corpora
+        elif (self.training_mode == "lomo" 
                 or self.training_mode == "lomo_excerpts"
                 or self.training_mode == "lomo_excerpts_hi"):
             self.test_document = self.test_corpus.documents[0]
             if self.training_mode == "lomo" or self.training_mode == "lomo_excerpts":
-                self.test_document_and_overlap_len_to_corpus: dict[tuple[int, int]: data.CorefCorpus] = {}
+                self.test_document_and_overlap_len_to_corpus: dict[tuple[int, int], data.CorefCorpus] = {}
                 for document_len in self.test_document_lens:
                     for overlap_len in self.test_overlap_lens:
                         corpus = self._prepare_corpus(self.test_corpus, document_len, overlap_len, 
@@ -1580,10 +1710,10 @@ class CoreferenceTrainer:
             if self.training_mode == "lomo_excerpts":
                 self._save_subdocument_predictions(
                     {(self.dev_document_len, self.dev_overlap_len, self.dev_merge_strategy):
-                        dev_eval_output}, self.dev_document, "dev")
+                        dev_eval_output}, [self.dev_document], "dev")
             elif self.training_mode == "lomo_excerpts_hi":
                 self._save_subdocument_hierarchical_predictions({self.dev_document_len: dev_eval_output},
-                                                                self.dev_document, "dev")
+                                                                [self.dev_document], "dev")
             else:
                 self._save_corpus_predictions(self.dev_corpus, dev_eval_output, "dev")
 
@@ -1592,12 +1722,16 @@ class CoreferenceTrainer:
                 self._save_corpus_predictions(self.train_corpus, train_eval_output, "train")
 
             # Save test predictions
-            if self.training_mode == "all":
-                self._save_corpus_predictions(self.test_corpus, test_eval_output, "test")
+            if self.training_mode == "lomo_excerpts":
+                self._save_subdocument_predictions(test_eval_output, [self.test_document], "test")
+            elif self.training_mode == "litbank":
+                self._save_subdocument_predictions(test_eval_output, self.litbank_test_documents, "test")
             elif self.training_mode == "lomo_excerpts_hi":
-                self._save_subdocument_hierarchical_predictions(test_eval_output, self.test_document, "test")
+                self._save_subdocument_hierarchical_predictions(test_eval_output, [self.test_document], "test")
+            elif self.training_mode == "litbank_hi":
+                self._save_subdocument_hierarchical_predictions(test_eval_output, self.litbank_test_documents, "test")
             else:
-                self._save_subdocument_predictions(test_eval_output, self.test_document, "test")
+                self._save_corpus_predictions(self.test_corpus, test_eval_output, "test")
 
         # Loss Curve
         if self.save_loss_curve:
