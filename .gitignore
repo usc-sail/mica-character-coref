@@ -129,7 +129,7 @@ dmypy.json
 .pyre/
 
 # data
-/data
+**/data/word_coref_weights.pt
 
 # coreference scorer downloaded from conll-2012 scripts
 coref/seq_coref/scorer/
