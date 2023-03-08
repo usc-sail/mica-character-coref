@@ -142,9 +142,13 @@ carc/
 
 # vscode workspace
 *.code-workspace
+**/.vscode
 
 # research code repository
 **/coref/
 
 # research experiments
 **/experiments/
+
+# top level init
+**/__init__.py

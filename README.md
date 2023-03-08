@@ -5,9 +5,7 @@ We have submitted the work to ACL 2023.
 
 Please cite the following paper if you find it useful. Thanks:)
 
-```
-To be filled after acceptance to a coreference :pray:
-```
+[To be filled after acceptance to a conference :pray:]
 
 This paper builds upon our prior work - [Annotation and Evaluation of Coreference Resolution in Screenplays](https://aclanthology.org/2021.findings-acl.176/).
 
