@@ -138,7 +138,13 @@ coref/seq_coref/scorer/
 /run.sh
 
 # slurm jobs
-/carc
+carc/
 
 # vscode workspace
 *.code-workspace
+
+# research code repository
+**/coref/
+
+# research experiments
+**/experiments/
