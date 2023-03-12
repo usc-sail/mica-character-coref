@@ -152,3 +152,9 @@ carc/
 
 # top level init
 **/__init__.py
+
+# zip files
+**/*.zip
+
+# pytorch model files
+**/*.pt

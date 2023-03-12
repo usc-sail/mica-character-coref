@@ -11,6 +11,132 @@ import tqdm
 import unidecode
 from copy import deepcopy
 
+def preprocess_scripts(script_files: list[str], parse_files: list[str], output_file: str, gpu_device = -1):
+    """Preprocess scripts and parse files into json files for coreference resolution."""
+    # Initialize spacy model
+    if gpu_device >= 0:
+        spacy.require_gpu(gpu_id=gpu_device) # type: ignore
+    nlp = spacy.load("en_core_web_sm")
+
+    # initialize movie data
+    movie_data = []
+
+    # loop over script and parse files
+    for script_file, parse_file in zip(script_files, parse_files):
+
+        # read parse file
+        with open(parse_file, "r") as fr:
+            tags = fr.read().strip().split("\n")
+        
+        # read script file
+        with open(script_file, "r") as fr:
+            script_lines = fr.read().strip().split("\n")
+        
+        # assert number of script lines equal the number of tags
+        assert len(script_lines) == len(tags), (f"Number of script lines ({len(script_lines)}) do not equal number of "
+                                                f"parse tags ({len(tags)}) for script file = {script_file} and parse "
+                                                f"file = {parse_file}")
+        
+        # Extract segments from script lines (adjacent lines with same movieparser tags)
+        i = 0
+        segment_texts, segment_tags = [], []
+        while i < len(script_lines):
+            j = i + 1
+            while j < len(script_lines) and tags[j] == tags[i]:
+                j += 1
+            segment = re.sub(r"\s+", " ", " ".join(script_lines[i: j]).strip())
+            segment = (" ".join(nltk.wordpunct_tokenize(segment))).strip()
+            segment = re.sub(r"\s+", " ", segment.strip())
+            if segment:
+                segment_texts.append(segment)
+                segment_tags.append(tags[i])
+            i = j
+        
+        # Process each segment through spacy pipeline
+        docs = nlp.pipe(segment_texts, batch_size=10200)
+
+        # Extract tokens, part-of-speech tag, named entity tag, parse tag, and sentence id of each token
+        tokens, token_postags, token_nertags, token_tags, token_sentids, token_dep_headids, token_dep_tags = (
+            [], [], [], [], [], [] ,[])
+        c, s = 0, 0
+        for i, doc in enumerate(docs):
+            for sent in doc.sents:
+                for stoken in sent:
+                    text = stoken.text
+                    ascii_text = unidecode.unidecode(text, errors="ignore").strip()
+                    postag = stoken.tag_
+                    nertag = stoken.ent_type_
+                    if not nertag:
+                        nertag = "-"
+                    token_sentid = s
+                    tokens.append(ascii_text)
+                    token_sentids.append(token_sentid)
+                    token_tags.append(segment_tags[i])
+                    token_postags.append(postag)
+                    token_nertags.append(nertag)
+                    token_dep_headids.append(stoken.head.i + c)
+                    token_dep_tags.append(stoken.dep_)
+                s += 1
+            c += len(doc)
+
+        # Create speakers array
+        speakers = np.full(len(tokens), fill_value="-", dtype=object)
+        i = 0
+        while i < len(tokens):
+            if token_tags[i] == "C":
+                j = i + 1
+                while j < len(tokens) and token_tags[j] == token_tags[i]:
+                    j += 1
+                k = j
+                utterance_token_indices = []
+                while k < len(tokens) and token_tags[k] not in "SC":
+                    if token_tags[k] in "DE":
+                        utterance_token_indices.append(k)
+                    k += 1
+                if utterance_token_indices:
+                    speaker = " ".join(tokens[i: j])
+                    cleaned_speaker = re.sub(r"\([^\)]+\)", "", speaker).strip()
+                    speaker = cleaned_speaker if cleaned_speaker else speaker
+                    for l in utterance_token_indices:
+                        speakers[l] = speaker
+                i = k
+            else:
+                i += 1
+        speakers = speakers.tolist()
+        
+        # Find sentence offsets
+        sentence_offsets: list[list[int]] = []
+        i = 0
+        while i < len(token_sentids):
+            j = i + 1
+            while j < len(token_sentids) and token_sentids[i] == token_sentids[j]:
+                j += 1
+            sentence_offsets.append([i, j - 1])
+            i = j
+
+        # Create movie json
+        movie_data.append({
+            "movie": os.path.basename(script_file),
+            "rater": "example",
+            "token": tokens,
+            "pos": token_postags,
+            "ner": token_nertags,
+            "parse": token_tags,
+            "speaker": speakers,
+            "dep_head": token_dep_headids,
+            "dep": token_dep_tags,
+            "sent_offset": sentence_offsets,
+            "clusters": {}
+        })
+    
+    # write jsonlines
+    with jsonlines.open(output_file, "w") as writer:
+        for obj in movie_data:
+            writer.write(obj)
+
+    # return movie data
+    return movie_data
+
 def convert_screenplay_and_coreference_annotation_to_json(screenplay_parse_file: str, 
     movie_and_raters_file: str, screenplays_dir: str, annotations_dir: str, output_dir: str,
     spacy_model = "en_core_web_sm", spacy_gpu_device = -1):

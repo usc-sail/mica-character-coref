@@ -1,6 +1,6 @@
 # Character Coreference Resolution in Movie Screenplays
 
-This repository contains the source code and data for the paper [Character Coreference Resolution in Movie Screenplays](https://www.overleaf.com/read/skdkjymdqswk).
+This repository contains the source code and data for the paper [Character Coreference Resolution in Movie Screenplays](https://www.overleaf.com/read/skdkjymdqswk). \
 We have submitted the work to ACL 2023.
 
 Please cite the following paper if you find it useful. Thanks:)
@@ -17,3 +17,12 @@ Create a python 3 conda environment from the `env.yml` file.
 conda env create --file env.yml
 ```
 
+## Training
+
+## Prediction
+
+Given a movie script
+
+``
+
+``

@@ -12,7 +12,7 @@ import torch
 from torch.nn import BCEWithLogitsLoss, CrossEntropyLoss
 from transformers import RobertaTokenizerFast, RobertaModel # type: ignore
 
-class MovieCoreference:
+class MovieCoreferenceModel:
 
     def __init__(
         self,

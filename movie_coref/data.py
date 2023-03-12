@@ -226,6 +226,9 @@ class CorefCorpus:
         corpus.documents = self.documents + other.documents
         return corpus
 
+    def __nonzero__(self) -> bool:
+        return len(self.documents) > 0
+
 
 class GraphNode:
     """Graph used for DFS"""

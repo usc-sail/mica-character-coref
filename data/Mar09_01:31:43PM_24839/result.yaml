@@ -1,0 +1,97 @@
+add_cr_to_coarse: true
+bce_weight: 0.5
+bert_lr: 2.0e-05
+best_epoch: 0
+character_lr: 0.0002
+character_recognition:
+  gru_bidirectional: true
+  gru_hidden_size: 256
+  gru_nlayers: 1
+  tag_embedding_size: 16
+coref_lr: 0.0002
+cr_batch_size: 64
+cr_seq_len: 256
+document_len: 5120
+dropout: 0.0
+filter_mentions_by_cr: false
+fn_batch_size: 64
+freeze_bert: false
+genre: wb
+hierarchical: false
+load_bert: true
+max_epochs: 8
+merge_strategy: avg
+n_epochs_no_eval: 0
+n_steps_per_epoch: 44
+overlap_len: 2048
+preprocess: regular
+remove_singleton_cr: true
+repk: 3
+sp_batch_size: 64
+subword_batch_size: 64
+test_gpu_memory: []
+test_losses: []
+test_metric: {}
+test_movie: none
+test_scores: []
+topk: 50
+train_document_len: 5120
+train_losses:
+- 0.414
+- 0.1723
+- 0.1349
+- 0.1136
+- 0.1051
+- 0.0934
+- 0.0895
+- 0.0878
+train_metric:
+  character:
+    f1: 96.801
+    precision: 94.085
+    recall: 99.678
+  span:
+    bcub:
+      f1: 89.789
+      precision: 89.636
+      recall: 89.942
+    ceafe:
+      f1: 73.226
+      precision: 75.854
+      recall: 70.775
+    lea:
+      f1: 89.454
+      precision: 89.33
+      recall: 89.578
+    muc:
+      f1: 96.432
+      precision: 96.474
+      recall: 96.389
+  word:
+    bcub:
+      f1: 89.649
+      precision: 89.389
+      recall: 89.91
+    ceafe:
+      f1: 72.993
+      precision: 75.612
+      recall: 70.549
+    lea:
+      f1: 89.313
+      precision: 89.082
+      recall: 89.545
+    muc:
+      f1: 96.341
+      precision: 96.326
+      recall: 96.357
+train_scores:
+- 70.1784
+- 79.5171
+- 85.8208
+- 86.8242
+- 87.6465
+- 89.1497
+- 89.3619
+- 89.4541
+warmup_steps: 50.0
+weight_decay: 0.001
