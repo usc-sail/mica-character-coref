@@ -10,8 +10,7 @@ from scorch import scores
 import statistics
 
 FLAGS = flags.FLAGS
-flags.DEFINE_string("data_dir", default=None, required=True,
-                    help="Data directory containing the reference annotations directory.")
+flags.DEFINE_string("data_dir", default="data", help="Data directory containing the reference annotations directory.")
 evaluator = evaluate.Evaluator()
 
 def validate(raters_csv_files: list[str], reference_csv_file: str):

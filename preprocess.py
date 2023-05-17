@@ -9,7 +9,7 @@ from absl import flags
 import os
 
 FLAGS = flags.FLAGS
-flags.DEFINE_string("data_dir", default=None, required=True, help="Data directory containing screenplays and parsed "
+flags.DEFINE_string("data_dir", default="data", help="Data directory containing screenplays and parsed "
                     "screenplays. Screenplays should end in '_script.txt' and its parsed file should end in "
                     "'_parse.txt' with the same prefix.")
 flags.DEFINE_bool("gold", default=False, help="Set if data directory contains annotations (only use it for "
