@@ -29,7 +29,7 @@ def preprocess_scripts(script_files: list[str], parse_files: list[str], output_f
             tags = fr.read().strip().split("\n")
         
         # read script file
-        with open(script_file, "r") as fr:
+        with open(script_file, "r", encoding="utf-8") as fr:
             script_lines = fr.read().strip().split("\n")
         
         # assert number of script lines equal the number of tags
