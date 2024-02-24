@@ -49,6 +49,7 @@ class MovieCoreference:
         preprocess: str = "regular",
         output_dir: str = None, # type: ignore
         reference_scorer_file: str = None, # type: ignore
+        preprocessed_data = None,
         full_length_scripts_file: str = None, # type: ignore
         excerpts_file: str = None, # type: ignore
         weights_file: str = None, # type: ignore
@@ -86,10 +87,10 @@ class MovieCoreference:
         add_cr_to_coarse: bool = True,
         filter_mentions_by_cr: bool = False,
         remove_singleton_cr: bool = True,
-        save_log: bool = True,
+        save_log: bool = False,
         save_model: bool = False,
-        save_predictions: bool = True,
-        save_loss_curve: bool = True
+        save_predictions: bool = False,
+        save_loss_curve: bool = False
         ) -> None:
         """Initialize coreference trainer
 
@@ -143,6 +144,7 @@ class MovieCoreference:
         self.preprocess = preprocess
         self.output_dir = output_dir
         self.reference_scorer_file = reference_scorer_file
+        self.preprocessed_data = preprocessed_data
         self.long_scripts = full_length_scripts_file
         self.short_scripts = excerpts_file
         self.weights_file = weights_file
@@ -1335,13 +1337,19 @@ class MovieCoreference:
 
         # Load scripts
         self._log("Loading scripts")
-        corpus = data.CorefCorpus(self.long_scripts)
+        if self.preprocessed_data is not None:
+            corpus = data.CorefCorpus(data=self.preprocessed_data)
+        else:
+            corpus = data.CorefCorpus(file=self.long_scripts)
 
         # Read movie data separately to write predictions
-        with jsonlines.open(self.long_scripts, "r") as fr:
-            movie_data = []
-            for obj in fr:
-                movie_data.append(obj)
+        if self.preprocessed_data is not None:
+            movie_data = self.preprocessed_data
+        else:
+            with jsonlines.open(self.long_scripts, "r") as fr:
+                movie_data = []
+                for obj in fr:
+                    movie_data.append(obj)
 
         # Loop over each movie script
         for document, obj in tqdm.tqdm(zip(corpus, movie_data), desc="coref prediction", total=len(corpus)):
@@ -1369,10 +1377,13 @@ class MovieCoreference:
             obj["clusters"] = [[list(mention) for mention in cluster] for cluster in result.predicted_span_clusters]
         
         # write predictions
-        output_file = self.long_scripts
-        output_file = re.sub(r"\.jsonl$", ".coref_output.jsonl", output_file)
-        with jsonlines.open(output_file, "w") as fw:
-            fw.write_all(movie_data)
+        if self.long_scripts is not None:
+            output_file = self.long_scripts
+            output_file = re.sub(r"\.jsonl$", ".coref_output.jsonl", output_file)
+            with jsonlines.open(output_file, "w") as fw:
+                fw.write_all(movie_data)
+        
+        return movie_data
 
     def train_and_evaluate(self):
         """Train movie character coreference model and evaluate."""
@@ -1383,7 +1394,10 @@ class MovieCoreference:
 
         # Load scripts
         self._log("Loading scripts")
-        long_scripts = data.CorefCorpus(self.long_scripts)
+        if self.preprocessed_data:
+            long_scripts = data.CorefCorpus(data=self.preprocessed_data)
+        else:
+            long_scripts = data.CorefCorpus(self.long_scripts)
         short_scripts = data.CorefCorpus(self.short_scripts)
 
         # Divide scripts into train and test corpus

@@ -205,12 +205,15 @@ class CorefDocument:
 
 class CorefCorpus:
     """CorefCorpus is a list of CorefDocuments."""
-    def __init__(self, file: str | None = None) -> None:
+    def __init__(self, file: str | None = None, data = None) -> None:
         self.documents: list[CorefDocument] = []
         if file is not None:
             with jsonlines.open(file) as reader:
                 for json in reader:
                     self.documents.append(CorefDocument(json))
+        elif data is not None:
+            for json in data:
+                self.documents.append(CorefDocument(json))
 
     def __len__(self) -> int:
         return len(self.documents)

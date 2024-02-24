@@ -11,7 +11,7 @@ import tqdm
 import unidecode
 from copy import deepcopy
 
-def preprocess_scripts(script_files: list[str], parse_files: list[str], output_file: str, gpu_device = -1):
+def preprocess_scripts(script_files: list[str], parse_files: list[str], output_file = None, gpu_device = -1):
     """Preprocess scripts and parse files into json files for coreference resolution."""
     # Initialize spacy model
     if gpu_device >= 0:
@@ -130,9 +130,10 @@ def preprocess_scripts(script_files: list[str], parse_files: list[str], output_f
         })
     
     # write jsonlines
-    with jsonlines.open(output_file, "w") as writer:
-        for obj in movie_data:
-            writer.write(obj) # type: ignore
+    if output_file is not None:
+        with jsonlines.open(output_file, "w") as writer:
+            for obj in movie_data:
+                writer.write(obj) # type: ignore
 
     # return movie data
     return movie_data
