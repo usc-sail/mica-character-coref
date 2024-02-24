@@ -150,9 +150,6 @@ carc/
 # research experiments
 **/experiments/
 
-# top level init
-**/__init__.py
-
 # zip files
 **/*.zip
 
