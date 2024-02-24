@@ -1,5 +1,5 @@
 """Evaluate coreference using official conll-2012 scripts"""
-from movie_coref.data import CorefDocument
+from .data import CorefDocument
 
 from collections import defaultdict
 import re

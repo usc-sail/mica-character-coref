@@ -1,11 +1,11 @@
 """Train movie coreference model on single GPU"""
 # pyright: reportGeneralTypeIssues=false
 
-from movie_coref.coreference import model
-from movie_coref import data
-from movie_coref import split_and_merge
-from movie_coref import evaluate
-from movie_coref import gpu_usage
+from .coreference import model
+from . import data
+from . import split_and_merge
+from . import evaluate
+from . import gpu_usage
 
 import bisect
 import collections

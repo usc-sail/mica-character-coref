@@ -4,8 +4,8 @@ import data
 import evaluate
 import rules
 import split_and_merge
-from coref.word_level_coref.coref import CorefModel
-from coref.word_level_coref.coref import tokenizer_customization
+from ..coref.word_level_coref.coref import CorefModel
+from ..coref.word_level_coref.coref import tokenizer_customization
 
 import collections
 import copy

@@ -1,5 +1,5 @@
 """Main entry point for baseline calculation of full-length movie scripts"""
-from mica_text_coref.coref.movie_coref import baseline
+from movie_coref import baseline
 
 from absl import app
 from absl import flags

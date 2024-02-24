@@ -1,7 +1,7 @@
 """Evaluator class for coreference resolution and character head prediction."""
-from movie_coref import conll
-from movie_coref import data
-from movie_coref import rules
+from . import conll
+from . import data
+from . import rules
 
 import collections
 import json

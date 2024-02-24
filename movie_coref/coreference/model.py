@@ -1,11 +1,11 @@
 """Python class including PyTorch modules that find character coreference chains in movie screenplay document.
 """
-from movie_coref.coreference.encoder import Encoder
-from movie_coref.coreference.character_recognizer import CharacterRecognizer
-from movie_coref.coreference.pairwise_encoder import PairwiseEncoder
-from movie_coref.coreference.coarse_scorer import CoarseScorer
-from movie_coref.coreference.fine_scorer import FineScorer
-from movie_coref.coreference.span_predictor import SpanPredictor
+from .encoder import Encoder
+from .character_recognizer import CharacterRecognizer
+from .pairwise_encoder import PairwiseEncoder
+from .coarse_scorer import CoarseScorer
+from .fine_scorer import FineScorer
+from .span_predictor import SpanPredictor
 
 import itertools
 import torch
