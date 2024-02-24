@@ -1,4 +1,6 @@
 """Train movie coreference model on single GPU"""
+# pyright: reportGeneralTypeIssues=false
+
 from movie_coref.coreference import model
 from movie_coref import data
 from movie_coref import split_and_merge
@@ -34,8 +36,8 @@ random.seed(value)
 np.random.seed(value)
 torch.manual_seed(value)
 torch.cuda.manual_seed_all(value)
-torch.backends.cudnn.deterministic = True
-torch.backends.cudnn.benchmark = False
+torch.backends.cudnn.deterministic = True # type: ignore
+torch.backends.cudnn.benchmark = False # type: ignore
 
 EvalResult: typing.TypeAlias = tuple[float, data.MovieCorefMetric, data.CorefResult]
 
@@ -45,12 +47,12 @@ class MovieCoreference:
     def __init__(
         self,
         preprocess: str = "regular",
-        output_dir: str = None,
-        reference_scorer_file: str = None,
-        full_length_scripts_file: str = None,
-        excerpts_file: str = None,
-        weights_file: str = None,
-        test_movie: str = None,
+        output_dir: str = None, # type: ignore
+        reference_scorer_file: str = None, # type: ignore
+        full_length_scripts_file: str = None, # type: ignore
+        excerpts_file: str = None, # type: ignore
+        weights_file: str = None, # type: ignore
+        test_movie: str = None, # type: ignore
         hierarchical: bool = False,
         tag_embedding_size: int = 16,
         gru_nlayers: int = 1,

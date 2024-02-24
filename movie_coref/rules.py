@@ -56,9 +56,10 @@ def merge_speakers(words: list[str], parse_tags: list[str], clusters: list[set[t
         list[set[tuple[int, int]]]):
     """Merge clusters that contain speaker mentions with the same name."""
     cluster_nodes = [ClusterNode(i) for i in range(len(clusters))]
-    parse_tags = np.array(parse_tags)
+    parse_tags = np.array(parse_tags) # type: ignore
     cluster_speakers = [set([re.sub(r"\([^\)]+\)", "", " ".join(words[i: j + 1])).upper().strip()
-                             for i, j in cluster if all(parse_tags[i: j + 1] == "C")]) for cluster in clusters]
+                             for i, j in cluster if all(parse_tags[i: j + 1] == "C")]) # type: ignore
+                             for cluster in clusters]
 
     for i in range(len(clusters)):
         for j in range(i + 1, len(clusters)):

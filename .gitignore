@@ -158,3 +158,6 @@ carc/
 
 # pytorch model files
 **/*.pt
+
+test.ipynb
+test.jsonlines

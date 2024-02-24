@@ -35,16 +35,21 @@ def validate(raters_csv_files: list[str], reference_csv_file: str):
     
     conll_f1s = []
     lea_f1s = []
+    muc_f1s = []
     for name, clusters in name_and_clusters:
+        muc_f1 = scores.muc(reference_clusters, clusters)[0]
         conll_f1 = scores.conll2012(reference_clusters, clusters)
         rN, rD, pN, pD = evaluator._lea(reference_clusters, clusters)
         recall, precision = rN/rD, pN/pD
         lea_f1 = statistics.harmonic_mean([recall, precision])
         conll_f1s.append(conll_f1)
         lea_f1s.append(lea_f1)
-        print(f"rater {name:20s}: conll-F1 = {conll_f1:.4f} lea-F1 = {lea_f1:.4f}")
+        muc_f1s.append(muc_f1)
+        print(f"rater {name:20s}: conll-F1 = {conll_f1:.4f} lea-F1 = {lea_f1:.4f} muc-F1 = {muc_f1:.4f}")
     average_conll_f1 = sum(conll_f1s)/len(conll_f1s)
     print(f"average conll-F1 = {average_conll_f1:.4f}")
+    average_muc_f1 = sum(muc_f1s)/len(muc_f1s)
+    print(f"average muc-F1 = {average_muc_f1:.4f}")
     average_lea_f1 = sum(lea_f1s)/len(lea_f1s)
     print(f"average lea-F1 = {average_lea_f1:.4f}")
 

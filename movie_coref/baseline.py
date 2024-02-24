@@ -1,11 +1,11 @@
 """Baselines for movie coreference resolution. Run a pre-trained neural coreference resolution model on the scripts."""
-from mica_text_coref.coref.movie_coref import conll
-from mica_text_coref.coref.movie_coref import data
-from mica_text_coref.coref.movie_coref import evaluate
-from mica_text_coref.coref.movie_coref import rules
-from mica_text_coref.coref.movie_coref import split_and_merge
-from mica_text_coref.coref.word_level_coref.coref import CorefModel
-from mica_text_coref.coref.word_level_coref.coref import tokenizer_customization
+import conll
+import data
+import evaluate
+import rules
+import split_and_merge
+from coref.word_level_coref.coref import CorefModel
+from coref.word_level_coref.coref import tokenizer_customization
 
 import collections
 import copy

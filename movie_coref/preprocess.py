@@ -53,13 +53,13 @@ def preprocess_scripts(script_files: list[str], parse_files: list[str], output_f
             i = j
         
         # Process each segment through spacy pipeline
-        docs = nlp.pipe(segment_texts, batch_size=10200)
+        docs = nlp.pipe(segment_texts, batch_size=512)
 
         # Extract tokens, part-of-speech tag, named entity tag, parse tag, and sentence id of each token
         tokens, token_postags, token_nertags, token_tags, token_sentids, token_dep_headids, token_dep_tags = (
             [], [], [], [], [], [] ,[])
         c, s = 0, 0
-        for i, doc in enumerate(docs):
+        for i, doc in tqdm.tqdm(enumerate(docs), total=len(segment_texts)):
             for sent in doc.sents:
                 for stoken in sent:
                     text = stoken.text
@@ -132,7 +132,7 @@ def preprocess_scripts(script_files: list[str], parse_files: list[str], output_f
     # write jsonlines
     with jsonlines.open(output_file, "w") as writer:
         for obj in movie_data:
-            writer.write(obj)
+            writer.write(obj) # type: ignore
 
     # return movie data
     return movie_data
@@ -416,7 +416,7 @@ def convert_screenplay_and_coreference_annotation_to_json(screenplay_parse_file:
                 print(f"writing to {jsonlines_file}")
                 with jsonlines.open(jsonlines_file, "w") as writer:
                     for d in write_data:
-                        writer.write(d)
+                        writer.write(d) # type: ignore
 
 def remove_characters(movie_data: list[dict[str, any]]) -> list[dict[str, any]]:
     """Removes character names preceding an utterance.

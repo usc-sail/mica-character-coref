@@ -1,7 +1,7 @@
 """Evaluator class for coreference resolution and character head prediction."""
-from mica_text_coref.coref.movie_coref import conll
-from mica_text_coref.coref.movie_coref import data
-from mica_text_coref.coref.movie_coref import rules
+from movie_coref import conll
+from movie_coref import data
+from movie_coref import rules
 
 import collections
 import json

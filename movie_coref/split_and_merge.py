@@ -1,7 +1,5 @@
 """Functions to split word-level json documents and merge coreference predictions from overlapping documents.
 """
-from mica_text_coref.coref.movie_coref import data
-
 import collections
 import numpy as np
 import torch
@@ -204,7 +202,7 @@ def combine_character_scores(character_scores_arr: list[torch.Tensor], overlap_l
                 for character_scores, overlap_len in zip(character_scores_arr[:-1], overlap_lens))
         + len(character_scores_arr[-1]))
     device = character_scores_arr[0].device
-    merged_character_scores = torch.zeros(n, device=device, dtype=float)
+    merged_character_scores = torch.zeros(n, device=device, dtype=float) # type: ignore
     ext_overlap_lens = overlap_lens + [0, 0]
     character_start, character_end = 0, 0
 
