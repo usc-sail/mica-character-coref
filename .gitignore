@@ -128,33 +128,15 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# data
-**/data/word_coref_weights.pt
-
-# coreference scorer downloaded from conll-2012 scripts
-coref/seq_coref/scorer/
-
-# run file
-/run.sh
-
 # slurm jobs
 carc/
 
 # vscode workspace
 *.code-workspace
-**/.vscode
+.vscode/
 
 # research code repository
-**/coref/
+coref/
 
 # research experiments
-**/experiments/
-
-# zip files
-**/*.zip
-
-# pytorch model files
-**/*.pt
-
-test.ipynb
-test.jsonlines
+experiments/
