@@ -128,15 +128,6 @@ dmypy.json
 # Pyre type checker
 .pyre/
 
-# slurm jobs
-carc/
-
 # vscode workspace
 *.code-workspace
 .vscode/
-
-# research code repository
-coref/
-
-# research experiments
-experiments/
