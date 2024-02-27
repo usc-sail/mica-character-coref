@@ -22,7 +22,7 @@ def preprocess_scripts(script_files: list[str], parse_files: list[str], output_f
     movie_data = []
 
     # loop over script and parse files
-    for script_file, parse_file in zip(script_files, parse_files):
+    for script_file, parse_file in tqdm.tqdm(zip(script_files, parse_files), total=len(script_files), unit="script"):
 
         # read parse file
         with open(parse_file, "r") as fr:
